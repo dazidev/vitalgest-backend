@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import {config} from 'dotenv';
+import list from 'express-list-endpoints';
 
 
 // se importan las rutas
@@ -24,8 +25,8 @@ app.use(cors({
 }));
 
 // las rutas que estará escuchando el servidor
-app.use('/auth', authRoutes)
 app.use('/adm', admRoutes)
+app.use('/auth', authRoutes)
 
 // middlewares
 app.use(errorHandler)
@@ -35,6 +36,7 @@ config()
 
 const PORT = process.env.PORT
 
+console.log(list(app));
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`);
 })

@@ -1,9 +1,10 @@
 
 import { Request, Response, NextFunction } from "express";
+import { CreateUserDto } from "../../application";
 
 export interface AdmServiceInterface {
-  createUser (req: Request, res: Response, next: NextFunction): void;
-  editUser (req: Request, res: Response, next: NextFunction): void;
-  deleteUser (req: Request, res: Response, next: NextFunction): void;
-  getAllUsers (req: Request, res: Response, next: NextFunction): void;
+  createUser (createUserDto: CreateUserDto): Promise<object>;
+  editUser (req: Request, res: Response, next: NextFunction): Promise<object>;
+  deleteUser (req: Request, res: Response, next: NextFunction): Promise<object>;
+  getAllUsers (req: Request, res: Response, next: NextFunction): Promise<object>;
 };

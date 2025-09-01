@@ -8,10 +8,10 @@ export class AuthController implements AuthControllerInterface {
       public readonly authService: AuthService,
     ) {}
 
-  loginUser(req: Request, res: Response, next: NextFunction): void {
+  loginUser(_req: Request, _res: Response, _next: NextFunction): void {
     throw new Error("Method not implemented.");
   }
-  newAccessToken(req: Request, res: Response, next: NextFunction): void {
+  newAccessToken(_req: Request, _res: Response, _next: NextFunction): void {
     throw new Error("Method not implemented.");
   }
 }

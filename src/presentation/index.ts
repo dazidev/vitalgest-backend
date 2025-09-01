@@ -1,7 +1,7 @@
 
 // rutas
-export { default as authRoutes } from './routes/adm.routes';
-export { default as admRoutes } from './routes/auth.routes';
+export { default as authRoutes } from './routes/auth.routes';
+export { default as admRoutes } from './routes/adm.routes';
 
 // controladores
 export * from './controllers/adm.controller'

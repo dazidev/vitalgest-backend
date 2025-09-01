@@ -7,9 +7,9 @@ const admRoutes = express.Router();
 const admService = new AdmService();
 const controller = new AdmController(admService);
 
-admRoutes.post('/create/user', controller.createUser);
-admRoutes.post('/get-all/users', controller.getAllUsers);
-admRoutes.post('/edit/user', controller.editUser);
-admRoutes.post('/delete/user', controller.deleteUser);
+admRoutes.post('/create/user', controller.createUser.bind(controller));
+admRoutes.get('/get-all/users', controller.getAllUsers);
+admRoutes.put('/edit/user', controller.editUser);
+admRoutes.delete('/delete/user', controller.deleteUser);
 
 export default admRoutes;
