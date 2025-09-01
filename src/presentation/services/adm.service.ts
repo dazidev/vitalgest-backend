@@ -35,7 +35,8 @@ export class AdmService implements AdmServiceInterface {
         name,
         lastname,
         email,
-        rol
+        rol,
+        state: 1
       }
     };
   }

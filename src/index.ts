@@ -3,6 +3,10 @@ import cors from 'cors';
 import {config} from 'dotenv';
 import list from 'express-list-endpoints';
 
+// documentación
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './docs/swagger';
+
 
 // se importan las rutas
 import { authRoutes, admRoutes } from './presentation';
@@ -24,6 +28,10 @@ app.use(cors({
   origin: ACCEPTED_ORIGINS,
 }));
 
+// documentación
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/docs.json', (_req, res) => res.json(swaggerSpec));
+
 // las rutas que estará escuchando el servidor
 app.use('/adm', admRoutes)
 app.use('/auth', authRoutes)
@@ -38,5 +46,5 @@ const PORT = process.env.PORT
 
 console.log(list(app));
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/docs`);
 })

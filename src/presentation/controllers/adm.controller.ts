@@ -21,7 +21,7 @@ export class AdmController implements AdmControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.admService.createUser(createUserDto!)
-      .then((user) => res.json(user))
+      .then((user) => res.status(201).json(user))
       .catch((error) => next(this.handleError(error)))
   }
 
