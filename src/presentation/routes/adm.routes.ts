@@ -8,8 +8,8 @@ const admService = new AdmService();
 const controller = new AdmController(admService);
 
 admRoutes.post('/create/user', controller.createUser.bind(controller));
-admRoutes.put('/edit/user', controller.editUser);
-admRoutes.delete('/delete/user', controller.deleteUser);
-admRoutes.get('/get-all/users', controller.getAllUsers);
+admRoutes.put('/edit/user/:id', controller.editUser.bind(controller));
+admRoutes.delete('/delete/user/:id', controller.deleteUser.bind(controller));
+admRoutes.get('/get-all/users/:amount', controller.getAllUsers.bind(controller));
 
 export default admRoutes;

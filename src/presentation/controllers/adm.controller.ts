@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { AdmControllerInterface, ERROR_CODES } from "../../domain";
 import { AdmService } from "../services/adm.service";
-import { CreateUserDto, CustomError } from "../../application";
+import { CustomError, UserEntityDto } from "../../application";
+import { regularExp } from "../../infrastructure";
 
 
 export class AdmController implements AdmControllerInterface {
@@ -17,23 +18,47 @@ export class AdmController implements AdmControllerInterface {
   }
 
   createUser(req: Request, res: Response, next: NextFunction): void {
-    const [error, createUserDto] = CreateUserDto.create(req.body);
+    const [error, userEntityDto] = UserEntityDto.create(req.body);
     if (error) throw CustomError.badRequest(error);
 
-    this.admService.createUser(createUserDto!)
+    this.admService.createUser(userEntityDto!)
       .then((user) => res.status(201).json(user))
       .catch((error) => next(this.handleError(error)))
   }
 
-  editUser(_req: Request, _res: Response, _next: NextFunction): void {
-    throw new Error("Method not implemented.");
+  editUser(req: Request, res: Response, next: NextFunction): void {
+    const { id } = req.params;
+    const [error, userEntityDto] = UserEntityDto.edit({id, ...req.body});
+    if (error) throw CustomError.badRequest(error);
+
+    this.admService.editUser(userEntityDto!)
+      .then((user) => res.status(200).json(user))
+      .catch((error) => next(this.handleError(error)))
   }
 
-  deleteUser(_req: Request, _res: Response, _next: NextFunction): void {
-    throw new Error("Method not implemented.");
+  deleteUser(req: Request, res: Response, next: NextFunction): void {
+    const { id } = req.params;
+    if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_USER_ID)
+    if (!regularExp.uuid.test(id)) throw CustomError.badRequest(ERROR_CODES.INVALID_USER_ID);
+
+    this.admService.deleteUser(id!)
+      .then((user) => res.status(200).json(user))
+      .catch((error) => next(this.handleError(error)))
   }
 
-  getAllUsers(_req: Request, _res: Response, _next: NextFunction): void {
-    throw new Error("Method not implemented.");
+  getAllUsers(req: Request, res: Response, next: NextFunction): void {
+    const { amount } = req.params;
+    if (!amount) throw CustomError.badRequest(ERROR_CODES.MISSING_AMOUNT);
+
+    const n = Number(amount);
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
+      throw CustomError.badRequest(ERROR_CODES.AMOUNT_NOT_NUMBER);
+    }
+
+    const validateAmount = Math.min(n, 50);
+
+    this.admService.getAllUsers(validateAmount!)
+      .then((user) => res.status(200).json(user))
+      .catch((error) => next(this.handleError(error)))
   }
 }

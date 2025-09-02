@@ -32,7 +32,7 @@ export const swaggerSpec = swaggerJSDoc({
             lastname: { type: 'string' },
             email: { type: 'string', format: 'email' },
             rol: { type: 'string', example: 'admin' },
-            state: { type: 'number', example: '1' },
+            state: { type: 'number', example: '1 or 0' },
           },
           required: ['name', 'lastname', 'email', 'rol'],
         },
@@ -40,7 +40,7 @@ export const swaggerSpec = swaggerJSDoc({
           type: 'object',
           properties: {
             success: { type: 'boolean' , example: true },
-            user: { $ref: '#/components/schemas/User' }
+            data: { $ref: '#/components/schemas/User' }
           }
         },
       },
