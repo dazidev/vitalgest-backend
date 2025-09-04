@@ -6,4 +6,5 @@ export interface AdmServiceInterface {
   editUser (userEntityDto: UserEntityDto): Promise<object>;
   deleteUser (id: string): Promise<object>;
   getAllUsers (amount: number): Promise<object>;
+  changePasswordUser (id: string, password: string): Promise<object>;
 };

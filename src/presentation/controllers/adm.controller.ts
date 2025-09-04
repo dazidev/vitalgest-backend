@@ -61,4 +61,17 @@ export class AdmController implements AdmControllerInterface {
       .then((user) => res.status(200).json(user))
       .catch((error) => next(this.handleError(error)))
   }
+
+  changePasswordUser(req: Request, res: Response, next: NextFunction): void {
+    const { id } = req.params;
+    const { password } = req.body;
+    if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_USER_ID);
+    if (!password) throw CustomError.badRequest(ERROR_CODES.MISSING_PASSWORD);
+    if (!regularExp.uuid.test(id)) throw CustomError.badRequest(ERROR_CODES.INVALID_USER_ID);
+    if (!regularExp.password.test(password)) throw CustomError.badRequest(ERROR_CODES.INVALID_PASSWORD_FORMAT);
+
+    this.admService.changePasswordUser(id!, password!)
+      .then((user) => res.status(200).json(user))
+      .catch((error) => next(this.handleError(error)))
+  }
 }

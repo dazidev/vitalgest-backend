@@ -6,4 +6,5 @@ export interface AdmControllerInterface {
   editUser (req: Request, res: Response, next: NextFunction): void;
   deleteUser (req: Request, res: Response, next: NextFunction): void;
   getAllUsers (req: Request, res: Response, next: NextFunction): void;
+  changePasswordUser (req: Request, res: Response, next: NextFunction): void;
 };

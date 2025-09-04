@@ -1,20 +1,24 @@
+import './types/express-augment';
 import express from 'express';
 import cors from 'cors';
 import {config} from 'dotenv';
+import cookieParser from 'cookie-parser';
 //import list from 'express-list-endpoints';
 
 // documentación
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
 
-
 // se importan las rutas
 import { authRoutes, admRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
 
+// se llama a las varibles de entorno
+config();
 
 // se inicia la aplicación de express
 const app = express();
+app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json());
 app.disable('x-powered-by');
 
@@ -39,11 +43,7 @@ app.use('/api/auth', authRoutes);
 // middlewares
 app.use(errorHandler);
 
-// se llama a las varibles de entorno
-config();
-
 const PORT = process.env.PORT;
-
 
 app.listen(PORT, () => {
   console.log(`API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`);

@@ -1,7 +1,8 @@
 
-import { Request, Response, NextFunction } from "express";
+import { UserEntityDto } from "../../application";
+import { LoginServiceResponse, TokenServiceResponse } from "./services.interface";
 
 export interface AuthServiceInterface {
-  loginUser (req: Request, res: Response, next: NextFunction): void;
-  newAccessToken (req: Request, res: Response, next: NextFunction): void;
+  loginUser (userEntityDto: UserEntityDto): Promise<LoginServiceResponse>;
+  newAccessToken (refreshTokenReq: string): Promise<TokenServiceResponse>;
 };

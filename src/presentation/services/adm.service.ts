@@ -15,7 +15,7 @@ export class AdmService implements AdmServiceInterface {
   }
 
   public async createUser(userEntityDto: UserEntityDto): Promise<object> {
-    const { name, lastname, email, password, rol } = userEntityDto;
+    const { name, lastname, email, password, role, position } = userEntityDto;
   
     const existsUser = await this.admRepo.userExists(email, undefined);
     if (existsUser) throw { code: ERROR_CODES.EMAIL_ALREADY_REGISTERED };
@@ -23,7 +23,7 @@ export class AdmService implements AdmServiceInterface {
     const userId = uuidv4();
     const hashedPassword = await bcrypt.hash(password as string, 10);
 
-    const user = new UserEntity(userId, name, lastname, email, hashedPassword, rol);
+    const user = new UserEntity(userId, name, lastname, email, hashedPassword, role, position);
 
     const process: RepoResponse = await this.admRepo.createUser(user);
     if (!process.success) throw { code: process.code };
@@ -34,19 +34,20 @@ export class AdmService implements AdmServiceInterface {
         name,
         lastname,
         email,
-        rol,
-        state: 1
+        role,
+        position,
+        state: "true"
       }
     };
   }
 
   public async editUser(userEntityDto: UserEntityDto): Promise<object> {
-    const { id, name, lastname, email, rol } = userEntityDto;
+    const { id, name, lastname, email, role, position } = userEntityDto;
 
     const existsUser = await this.admRepo.userExists(undefined, id);
     if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
 
-    const user = new UserEntity(id as string, name, lastname, email, rol);
+    const user = new UserEntity(id as string, name, lastname, email, role, position);
 
     const process: RepoResponse = await this.admRepo.editUser(user);
     if (!process.success) throw { code: process.code };
@@ -57,10 +58,12 @@ export class AdmService implements AdmServiceInterface {
         name,
         lastname,
         email,
-        rol
+        role,
+        position
       }
     };
   }
+
   async deleteUser(id: string): Promise<object> {
     const existsUser = await this.admRepo.userExists(undefined, id);
     if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
@@ -70,6 +73,7 @@ export class AdmService implements AdmServiceInterface {
 
     return { success: true }
   }
+
   async getAllUsers(amount: number): Promise<object> {
     const process: RepoResponse = await this.admRepo.getAllUsers(amount);
     if (!process.success) throw { code: process.code };
@@ -78,5 +82,17 @@ export class AdmService implements AdmServiceInterface {
       success: true,
       data: process.data
     }
+  }
+
+  async changePasswordUser(id: string, password: string): Promise<object> {
+    const existsUser = await this.admRepo.userExists(undefined, id);
+    if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
+
+    const hashedPassword = await bcrypt.hash(password as string, 10);    
+    
+    const process: RepoResponse = await this.admRepo.changePasswordUser(id, hashedPassword);
+    if (!process.success) throw { code: process.code };
+
+    return { success: true }
   }
 }

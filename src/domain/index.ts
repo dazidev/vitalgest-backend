@@ -8,3 +8,7 @@ export * from './enums/error-codes.enum';
 
 export * from './repositories/repositorie.interface';
 export * from './repositories/adm.repositorie.interface';
+export * from './repositories/auth.repositorie.interface';
+
+
+export * from './services/services.interface';
