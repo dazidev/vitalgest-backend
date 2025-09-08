@@ -45,7 +45,7 @@ export class AdmRepositorie implements AdmRepositorieInterface {
     try {
       const connection = await mysql.createConnection(mysqlConfig)
       const { id, name, lastname, email, password, role, position } = userEntityDto
-      const query = 'INSERT INTO users (id, name, lastname, email, password, role, position, state, createdAt) VALUES (?, ?, ?, ?, ?, ?, "true", NOW())'
+      const query = 'INSERT INTO users (id, name, lastname, email, password, role, position, state, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, "true", NOW())'
       const values = [id, name, lastname, email, password, role, position]
       const [results] = await connection.query(query, values)
       await connection.end()

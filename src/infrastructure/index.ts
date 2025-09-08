@@ -7,3 +7,4 @@ export * from './repositories/adm.repositorie';
 export * from './repositories/auth.repositorie';
 export * from './config/jwt.adapter'
 export * from './http/cookies/refreshCookie'
+export * from './http/cookies/accessCookie'

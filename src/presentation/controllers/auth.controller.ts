@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AuthControllerInterface, ERROR_CODES } from "../../domain";
 import { AuthService } from "../services/auth.service";
 import { CustomError, UserEntityDto } from "../../application";
-import { REFRESH_COOKIE_NAME, setRefreshCookie } from "../../infrastructure";
+import { REFRESH_COOKIE_NAME, setAccessCookie, setRefreshCookie } from "../../infrastructure";
 
 export class AuthController implements AuthControllerInterface {
 
@@ -22,8 +22,9 @@ export class AuthController implements AuthControllerInterface {
 
     this.authService.loginUser(userEntityDto!)
       .then((response) => {
-        const { refreshToken, ...dataResponse } = response;
+        const { refreshToken, accessToken, ...dataResponse } = response;
         setRefreshCookie(res, refreshToken);
+        setAccessCookie(res, accessToken);
         res.json(dataResponse);
       })
       .catch((error) => next(this.handleError(error)))
@@ -31,15 +32,16 @@ export class AuthController implements AuthControllerInterface {
   
   newAccessToken(req: Request, res: Response, next: NextFunction): void {
     const refreshTokenReq = req.signedCookies?.[REFRESH_COOKIE_NAME];
+    console.log(refreshTokenReq)
     if (!refreshTokenReq) throw CustomError.badRequest(ERROR_CODES.NO_TOKEN_PROVIDED);
 
     this.authService.newAccessToken(refreshTokenReq!)
       .then((response) => {
         const { accessToken, refreshToken } = response;
         setRefreshCookie(res, refreshToken);
+        setAccessCookie(res, accessToken);
         res.json({
-          success: "true",
-          accessToken: accessToken
+          success: "true"
         });
       })
       .catch((error) => next(this.handleError(error)))
