@@ -132,4 +132,22 @@ export class AdmRepositorie implements AdmRepositorieInterface {
       return { success: false, code: error };
     };  
   };
+
+  async getUserById(id: string): Promise<RepoResponse> {
+    try {
+      const connection = await mysql.createConnection(mysqlConfig)
+      const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users WHERE id = ?'
+      const values = [id];
+      const [results] = await connection.query(query, values)
+      await connection.end()
+
+      return {
+        success: true,
+        data: results
+      }
+    
+    } catch (error: any) {
+      return { success: false, code: error }
+    }
+  }
 };

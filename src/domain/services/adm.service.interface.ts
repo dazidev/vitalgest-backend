@@ -7,4 +7,5 @@ export interface AdmServiceInterface {
   deleteUser (id: string): Promise<object>;
   getAllUsers (amount: number): Promise<object>;
   changePasswordUser (id: string, password: string): Promise<object>;
+  getUserById (id: string): Promise<object>;
 };

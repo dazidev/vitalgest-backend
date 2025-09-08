@@ -8,4 +8,5 @@ export interface AdmRepositorieInterface {
   deleteUser (id: string): Promise<RepoResponse>;
   getAllUsers (amount: number): Promise<RepoResponse>;
   changePasswordUser (id: string, password: string): Promise<RepoResponse>;
+  getUserById (id: string): Promise<RepoResponse>;
 }

@@ -38,4 +38,10 @@ admRoutes.put(
   controller.changePasswordUser.bind(controller)
 );
 
+admRoutes.get(
+  '/get/user/:id',
+  [AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  controller.getUserById.bind(controller)
+);
+
 export default admRoutes;

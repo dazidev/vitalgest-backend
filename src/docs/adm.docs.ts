@@ -86,6 +86,44 @@
 
 /**
  * @openapi
+ * /api/adm/get/user/:id:
+ *   get:
+ *     summary: Obtener usuario por id
+ *     tags: [ENDPOINTS Gestión de usuarios]
+ *     security: [{ bearerAuth: [] }]
+ *  
+ *     responses:
+ *       200:
+ *         description: Usuario obtenido
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+ *                     name: "Fernando"
+ *                     lastname: "Garcia"
+ *                     email: "garciafer@gmail.com"
+ *                     role: "admin"
+ *                     position: "cargo"
+ *                     state: "true"
+ *                     createdat: "2025-09-01T12:00:00Z"
+ *       400:
+ *         description: Usuario no encontrado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+
+/**
+ * @openapi
  * /api/adm/delete/user/:id:
  *   delete:
  *     summary: Eliminar usuario
@@ -224,7 +262,6 @@
  *                     email: "garciafer@gmail.com"
  *                     role: "admin"
  *                     position: "cargo"
- *                   accessToken: "token"
  *                     
  *       400:
  *         description: Usuario no encontrado

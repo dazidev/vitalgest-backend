@@ -95,4 +95,17 @@ export class AdmService implements AdmServiceInterface {
 
     return { success: true }
   }
+
+  async getUserById(id: string): Promise<object> {
+    const existsUser = await this.admRepo.userExists(undefined, id);
+    if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
+
+    const process: RepoResponse = await this.admRepo.getUserById(id);
+    if (!process.success) throw { code: process.code };
+
+    return { 
+      success: process.success,
+      data: process.data
+    }
+  }
 }
