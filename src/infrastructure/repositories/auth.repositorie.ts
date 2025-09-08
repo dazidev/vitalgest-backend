@@ -20,8 +20,8 @@ export class AuthRepositorie implements AuthRepositorieInterface {
       const connection = await mysql.createConnection(mysqlConfig)
       const query = 
         id === undefined
-          ? 'SELECT id, name, lastname, email, password, role, state FROM users WHERE email = ? LIMIT 1'
-          : 'SELECT id, name, lastname, email, password, role, state FROM users WHERE id = ? LIMIT 1'
+          ? 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE email = ? LIMIT 1'
+          : 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE id = ? LIMIT 1'
 
       const values = id === undefined ? [email] : [id]
 

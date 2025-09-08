@@ -13,6 +13,6 @@ export interface UserRepoResponse {
   lastname: string,
   email: string,
   password: string,
-  rol: Role,
+  role: Role,
   state: number, 
 }
