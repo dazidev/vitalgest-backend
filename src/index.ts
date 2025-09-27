@@ -48,3 +48,5 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`);
 });
+
+export default app;
