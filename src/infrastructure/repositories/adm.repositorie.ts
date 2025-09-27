@@ -1,21 +1,10 @@
 // TODO: https://sequelize.org/ REVISAR PARA MEJORAR LA EFICIENCIA DE LAS CONEXIONES
-import mysql from 'mysql2/promise';
 import { OkPacketParams } from 'mysql2';
 
-import { config } from 'dotenv';
 import { AdmRepositorieInterface, ERROR_CODES, RepoResponse } from '../../domain';
 import { UserEntity } from '../../domain/entities/user.entity';
+import { mysql, mysqlConfig } from '../config/msql.adapter';
 
-config()
-
-const mysqlConfig: mysql.ConnectionOptions = {
-  host: process.env.HOST,
-  port: process.env.PORT_DB as unknown as number,
-  user: process.env.USER_NAME,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE,
-  ssl: { minVersion: 'TLSv1.2' }, // conexion cifrada
-}
 
 export class AdmRepositorie implements AdmRepositorieInterface {
   async userExists(email: string | undefined, id: string | undefined): Promise<boolean> {

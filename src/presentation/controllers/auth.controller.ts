@@ -32,7 +32,6 @@ export class AuthController implements AuthControllerInterface {
   
   newAccessToken(req: Request, res: Response, next: NextFunction): void {
     const refreshTokenReq = req.signedCookies?.[REFRESH_COOKIE_NAME];
-    console.log(refreshTokenReq)
     if (!refreshTokenReq) throw CustomError.badRequest(ERROR_CODES.NO_TOKEN_PROVIDED);
 
     this.authService.newAccessToken(refreshTokenReq!)

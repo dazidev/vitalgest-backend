@@ -1,25 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthRepositorie = void 0;
 const domain_1 = require("../../domain");
-const promise_1 = __importDefault(require("mysql2/promise"));
-const dotenv_1 = require("dotenv");
-(0, dotenv_1.config)();
-const mysqlConfig = {
-    host: process.env.HOST,
-    port: process.env.PORT_DB,
-    user: process.env.USER_NAME,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-    ssl: { minVersion: 'TLSv1.2' }, // conexion cifrada
-};
+const msql_adapter_1 = require("../config/msql.adapter");
 class AuthRepositorie {
     async getUser(email, id) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = id === undefined
                 ? 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE email = ? LIMIT 1'
                 : 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE id = ? LIMIT 1';

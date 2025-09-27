@@ -84,6 +84,7 @@ app.get('/api/docs.debug', (_req, res) => {
 // las rutas que estará escuchando el servidor
 app.use('/api/adm', presentation_1.admRoutes);
 app.use('/api/auth', presentation_1.authRoutes);
+app.use('/api/delegations', presentation_1.delegationsRoutes);
 // middlewares
 app.use(infrastructure_1.errorHandler);
 exports.default = app;
