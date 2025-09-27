@@ -1,26 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdmRepositorie = void 0;
-// TODO: https://sequelize.org/ REVISAR PARA MEJORAR LA EFICIENCIA DE LAS CONEXIONES
-const promise_1 = __importDefault(require("mysql2/promise"));
-const dotenv_1 = require("dotenv");
 const domain_1 = require("../../domain");
-(0, dotenv_1.config)();
-const mysqlConfig = {
-    host: process.env.HOST,
-    port: process.env.PORT_DB,
-    user: process.env.USER_NAME,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-    ssl: { minVersion: 'TLSv1.2' }, // conexion cifrada
-};
+const msql_adapter_1 = require("../config/msql.adapter");
 class AdmRepositorie {
     async userExists(email, id) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = email === undefined
                 ? 'SELECT EXISTS (SELECT 1 FROM users WHERE id = ?) AS registered'
                 : 'SELECT EXISTS (SELECT 1 FROM users WHERE email = ?) AS registered';
@@ -39,7 +25,7 @@ class AdmRepositorie {
     }
     async createUser(userEntityDto) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const { id, name, lastname, email, password, role, position } = userEntityDto;
             const query = 'INSERT INTO users (id, name, lastname, email, password, role, position, state, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, "true", NOW())';
             const values = [id, name, lastname, email, password, role, position];
@@ -57,7 +43,7 @@ class AdmRepositorie {
     }
     async editUser(userEntityDto) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const { id, name, lastname, email, role, position } = userEntityDto;
             const query = 'UPDATE users SET name = ?, lastname = ?, email = ?, role = ?, position = ? WHERE id = ?';
             const values = [name, lastname, email, role, position, id];
@@ -75,7 +61,7 @@ class AdmRepositorie {
     }
     async deleteUser(id) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = 'UPDATE users SET state = "false" WHERE id = ?';
             const values = [id];
             const [results] = await connection.query(query, values);
@@ -92,7 +78,7 @@ class AdmRepositorie {
     }
     async getAllUsers(amount) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users ORDER BY createdat DESC LIMIT ?';
             const values = [amount];
             const [results] = await connection.query(query, values);
@@ -108,7 +94,7 @@ class AdmRepositorie {
     }
     async changePasswordUser(id, password) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = 'UPDATE users SET password = ? WHERE id = ?';
             const values = [password, id];
             const [results] = await connection.query(query, values);
@@ -127,7 +113,7 @@ class AdmRepositorie {
     ;
     async getUserById(id) {
         try {
-            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users WHERE id = ?';
             const values = [id];
             const [results] = await connection.query(query, values);
