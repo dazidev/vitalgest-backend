@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require("./types/express-augment");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = require("dotenv");
@@ -16,7 +15,9 @@ const swagger_1 = require("./docs/swagger");
 const presentation_1 = require("./presentation");
 const infrastructure_1 = require("./infrastructure");
 // se llama a las varibles de entorno
-(0, dotenv_1.config)();
+if (!process.env.VERCEL) {
+    (0, dotenv_1.config)();
+}
 // se inicia la aplicación de express
 const app = (0, express_1.default)();
 app.use((0, cookie_parser_1.default)(process.env.COOKIE_SECRET));
