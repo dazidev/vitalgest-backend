@@ -47,6 +47,8 @@ export class AuthService implements AuthServiceInterface {
 
     const {password: pass, state, createdAt, ...userEntity} = UserEntity.fromObject(user);
 
+    if (state === 'false') throw { code: ERROR_CODES.USER_NOT_ACTIVE }
+
     const payload = {
       ...userEntity
     }

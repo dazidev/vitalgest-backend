@@ -14,5 +14,5 @@ export interface UserRepoResponse {
   email: string,
   password: string,
   role: Role,
-  state: number, 
+  state: string, 
 }
