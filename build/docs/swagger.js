@@ -57,7 +57,6 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
         },
     },
     apis: [
-        path_1.default.resolve('build/docs/*.js'),
-        path_1.default.resolve('build/**/*.js'),
+        path_1.default.resolve('build/docs/adm.docs.js'),
     ],
 });

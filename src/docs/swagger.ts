@@ -52,7 +52,6 @@ export const swaggerSpec = swaggerJSDoc({
     },
   },
   apis: [
-    path.resolve('build/docs/*.js'),
-    path.resolve('build/**/*.js'),
+    path.resolve('build/docs/adm.docs.js'),
   ],
 });
