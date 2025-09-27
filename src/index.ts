@@ -1,4 +1,6 @@
 import './types/express-augment';
+import './docs/swagger'
+import './docs/adm.docs'
 import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
