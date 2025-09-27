@@ -36,19 +36,22 @@ app.use(cors({
 
 // documentación
 app.use('/api/docs', swaggerUi.serve);
-app.get(
-  '/api/docs',
-  swaggerUi.setup(undefined, {
-    explorer: true,
-    swaggerOptions: {
-      url: '/api/docs.json',
-    },
-    customSiteTitle: 'VitalGest API Docs',
-  })
-);
+app.get('/api/docs', swaggerUi.setup(undefined, {
+  explorer: true,
+  swaggerOptions: {
+    url: '/api/docs.json',    // <- la UI pide el spec aquí
+    validatorUrl: null,       // <- evita llamada al validador externo
+    docExpansion: 'list',
+    defaultModelsExpandDepth: -1
+  },
+  customSiteTitle: 'VitalGest API Docs'
+}));
 
 // Endpoint del JSON
-app.get('/api/docs.json', (_req, res) => res.json(swaggerSpec));
+app.get('/api/docs.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.json(swaggerSpec);
+});
 
 
 // las rutas que estará escuchando el servidor

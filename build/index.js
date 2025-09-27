@@ -37,12 +37,18 @@ app.use('/api/docs', swagger_ui_express_1.default.serve);
 app.get('/api/docs', swagger_ui_express_1.default.setup(undefined, {
     explorer: true,
     swaggerOptions: {
-        url: '/api/docs.json',
+        url: '/api/docs.json', // <- la UI pide el spec aquí
+        validatorUrl: null, // <- evita llamada al validador externo
+        docExpansion: 'list',
+        defaultModelsExpandDepth: -1
     },
-    customSiteTitle: 'VitalGest API Docs',
+    customSiteTitle: 'VitalGest API Docs'
 }));
 // Endpoint del JSON
-app.get('/api/docs.json', (_req, res) => res.json(swagger_1.swaggerSpec));
+app.get('/api/docs.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.json(swagger_1.swaggerSpec);
+});
 // las rutas que estará escuchando el servidor
 app.use('/api/adm', presentation_1.admRoutes);
 app.use('/api/auth', presentation_1.authRoutes);
