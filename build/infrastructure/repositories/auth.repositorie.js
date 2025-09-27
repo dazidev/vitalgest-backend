@@ -21,8 +21,8 @@ class AuthRepositorie {
         try {
             const connection = await promise_1.default.createConnection(mysqlConfig);
             const query = id === undefined
-                ? 'SELECT id, name, lastname, email, password, rol, state FROM users WHERE email = ? LIMIT 1'
-                : 'SELECT id, name, lastname, email, password, rol, state FROM users WHERE id = ? LIMIT 1';
+                ? 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE email = ? LIMIT 1'
+                : 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE id = ? LIMIT 1';
             const values = id === undefined ? [email] : [id];
             const [rows] = await connection.query(query, values);
             await connection.end();

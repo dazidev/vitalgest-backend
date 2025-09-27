@@ -14,13 +14,13 @@ class AdmService {
         this.admRepo = new infrastructure_1.AdmRepositorie();
     }
     async createUser(userEntityDto) {
-        const { name, lastname, email, password, rol } = userEntityDto;
+        const { name, lastname, email, password, role, position } = userEntityDto;
         const existsUser = await this.admRepo.userExists(email, undefined);
         if (existsUser)
             throw { code: domain_1.ERROR_CODES.EMAIL_ALREADY_REGISTERED };
         const userId = (0, uuid_1.v4)();
         const hashedPassword = await bcrypt_1.default.hash(password, 10);
-        const user = new domain_1.UserEntity(userId, name, lastname, email, hashedPassword, rol);
+        const user = new domain_1.UserEntity(userId, name, lastname, email, hashedPassword, role, position);
         const process = await this.admRepo.createUser(user);
         if (!process.success)
             throw { code: process.code };
@@ -31,17 +31,18 @@ class AdmService {
                 name,
                 lastname,
                 email,
-                rol,
-                state: 1
+                role,
+                position,
+                state: "true"
             }
         };
     }
     async editUser(userEntityDto) {
-        const { id, name, lastname, email, rol } = userEntityDto;
+        const { id, name, lastname, email, role, position } = userEntityDto;
         const existsUser = await this.admRepo.userExists(undefined, id);
         if (!existsUser)
             throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
-        const user = new domain_1.UserEntity(id, name, lastname, email, rol);
+        const user = new domain_1.UserEntity(id, name, lastname, email, role, position);
         const process = await this.admRepo.editUser(user);
         if (!process.success)
             throw { code: process.code };
@@ -52,7 +53,8 @@ class AdmService {
                 name,
                 lastname,
                 email,
-                rol
+                role,
+                position
             }
         };
     }
@@ -83,6 +85,18 @@ class AdmService {
         if (!process.success)
             throw { code: process.code };
         return { success: true };
+    }
+    async getUserById(id) {
+        const existsUser = await this.admRepo.userExists(undefined, id);
+        if (!existsUser)
+            throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+        const process = await this.admRepo.getUserById(id);
+        if (!process.success)
+            throw { code: process.code };
+        return {
+            success: process.success,
+            data: process.data
+        };
     }
 }
 exports.AdmService = AdmService;

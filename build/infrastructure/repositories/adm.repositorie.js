@@ -33,15 +33,16 @@ class AdmRepositorie {
             return !!row.registered;
         }
         catch (error) {
-            return false; // TODO: que errores pueden haber? crear archivo de log?
+            // TODO: que errores pueden haber? crear archivo de log?
+            return false;
         }
     }
     async createUser(userEntityDto) {
         try {
             const connection = await promise_1.default.createConnection(mysqlConfig);
-            const { id, name, lastname, email, password, rol } = userEntityDto;
-            const query = 'INSERT INTO users (id, name, lastname, email, password, rol, state, createdAt) VALUES (?, ?, ?, ?, ?, ?, 1, NOW())';
-            const values = [id, name, lastname, email, password, rol];
+            const { id, name, lastname, email, password, role, position } = userEntityDto;
+            const query = 'INSERT INTO users (id, name, lastname, email, password, role, position, state, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, "true", NOW())';
+            const values = [id, name, lastname, email, password, role, position];
             const [results] = await connection.query(query, values);
             await connection.end();
             const okResult = results;
@@ -57,9 +58,9 @@ class AdmRepositorie {
     async editUser(userEntityDto) {
         try {
             const connection = await promise_1.default.createConnection(mysqlConfig);
-            const { id, name, lastname, email, rol } = userEntityDto;
-            const query = 'UPDATE users SET name = ?, lastname = ?, email = ?, rol = ? WHERE id = ?';
-            const values = [name, lastname, email, rol, id];
+            const { id, name, lastname, email, role, position } = userEntityDto;
+            const query = 'UPDATE users SET name = ?, lastname = ?, email = ?, role = ?, position = ? WHERE id = ?';
+            const values = [name, lastname, email, role, position, id];
             const [results] = await connection.query(query, values);
             await connection.end();
             const okResult = results;
@@ -75,7 +76,7 @@ class AdmRepositorie {
     async deleteUser(id) {
         try {
             const connection = await promise_1.default.createConnection(mysqlConfig);
-            const query = 'UPDATE users SET state = 0 WHERE id = ?';
+            const query = 'UPDATE users SET state = "false" WHERE id = ?';
             const values = [id];
             const [results] = await connection.query(query, values);
             await connection.end();
@@ -92,7 +93,7 @@ class AdmRepositorie {
     async getAllUsers(amount) {
         try {
             const connection = await promise_1.default.createConnection(mysqlConfig);
-            const query = 'SELECT id, name, lastname, email, rol, state, createdat FROM users ORDER BY createdat DESC LIMIT ?';
+            const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users ORDER BY createdat DESC LIMIT ?';
             const values = [amount];
             const [results] = await connection.query(query, values);
             await connection.end();
@@ -124,6 +125,22 @@ class AdmRepositorie {
         ;
     }
     ;
+    async getUserById(id) {
+        try {
+            const connection = await promise_1.default.createConnection(mysqlConfig);
+            const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users WHERE id = ?';
+            const values = [id];
+            const [results] = await connection.query(query, values);
+            await connection.end();
+            return {
+                success: true,
+                data: results
+            };
+        }
+        catch (error) {
+            return { success: false, code: error };
+        }
+    }
 }
 exports.AdmRepositorie = AdmRepositorie;
 ;
