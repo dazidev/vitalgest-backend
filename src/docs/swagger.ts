@@ -1,4 +1,3 @@
-import path from 'node:path';
 import swaggerJSDoc from 'swagger-jsdoc';
 
 export const swaggerSpec = swaggerJSDoc({
@@ -48,8 +47,5 @@ export const swaggerSpec = swaggerJSDoc({
       },
     },
   },
-  apis: [
-    path.resolve('src/**/*.ts'),
-    path.resolve('build/**/*.js'),
-  ],
+  apis: ['build/**/*.js'],
 });
