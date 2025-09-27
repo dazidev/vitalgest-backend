@@ -4,7 +4,7 @@
  * /api/adm/create/user:
  *   post:
  *     summary: Crear usuario
- *     tags: [ENDPOINTS Gestión de usuarios]
+ *     tags: ['ENDPOINTS Gestión de usuarios']
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -17,7 +17,7 @@
  *                 lastname: "Garcia"
  *                 email: "garciafer@gmail.com"
  *                 password: "Secret123"
- *                 rol: "admin"
+ *                 role: "admin"
  *                 position: "cargo"
  *     responses:
  *       201:
@@ -39,10 +39,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @openapi
- * /api/adm/edit/user/:id:
+ * /api/adm/edit/user/{id}:
  *   put:
  *     summary: Editar usuario
- *     tags: [ENDPOINTS Gestión de usuarios]
+ *     tags: ['ENDPOINTS Gestión de usuarios']
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -54,7 +54,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *                 name: "Fernando"
  *                 lastname: "Garcia"
  *                 email: "garciafer@gmail.com"
- *                 rol: "admin"
+ *                 role: "admin"
  *                 state: "true or false"
  *                 position: "cargo"
  *     responses:
@@ -86,10 +86,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 /**
  * @openapi
- * /api/adm/get/user/:id:
+ * /api/adm/get/user/{id}:
  *   get:
  *     summary: Obtener usuario por id
- *     tags: [ENDPOINTS Gestión de usuarios]
+ *     tags: ['ENDPOINTS Gestión de usuarios']
  *     security: [{ bearerAuth: [] }]
  *
  *     responses:
@@ -123,10 +123,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 /**
  * @openapi
- * /api/adm/delete/user/:id:
+ * /api/adm/delete/user/{id}:
  *   delete:
  *     summary: Eliminar usuario
- *     tags: [ENDPOINTS Gestión de usuarios]
+ *     tags: ['ENDPOINTS Gestión de usuarios']
  *     security: [{ bearerAuth: [] }]
  *
  *     responses:
@@ -151,10 +151,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 /**
  * @openapi
- * /api/adm/get-all/users/:amount:
+ * /api/adm/get-all/users/{amount}:
  *   get:
  *     summary: Obtener usuarios
- *     tags: [ENDPOINTS Gestión de usuarios]
+ *     tags: ['ENDPOINTS Gestión de usuarios']
  *     security: [{ bearerAuth: [] }]
  *
  *     responses:
@@ -191,10 +191,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 /**
  * @openapi
- * /api/adm/change-password/user/:id:
+ * /api/adm/change-password/user/{id}:
  *   put:
  *     summary: Cambiar contraseña de usuario
- *     tags: [ENDPOINTS Gestión de usuarios]
+ *     tags: ['ENDPOINTS Gestión de usuarios']
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -230,7 +230,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * /api/auth/login/user:
  *   post:
  *     summary: Ingresar usuario
- *     tags: [ENDPOINTS Autenticación]
+ *     tags: ['ENDPOINTS Autenticación']
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -275,7 +275,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * /api/auth/refresh/token:
  *   post:
  *     summary: Ingresar usuario
- *     tags: [ENDPOINTS Autenticación]
+ *     tags: ['ENDPOINTS Autenticación']
  *     security: [{ bearerAuth: [] }]
  *
  *     responses:

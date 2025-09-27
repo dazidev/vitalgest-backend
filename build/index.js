@@ -4,10 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./types/express-augment");
+require("./docs/swagger");
+require("./docs/adm.docs");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = require("dotenv");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const path_1 = __importDefault(require("path"));
+const node_fs_1 = __importDefault(require("node:fs"));
 //import list from 'express-list-endpoints';
 // documentación
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
@@ -68,6 +72,14 @@ app.get('/api/docs', (_req, res) => {
 app.get('/api/docs.json', (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.json(swagger_1.swaggerSpec);
+});
+app.get('/api/docs.debug', (_req, res) => {
+    const f = path_1.default.resolve('build/docs/adm.docs.js');
+    res.json({
+        cwd: process.cwd(),
+        exists: node_fs_1.default.existsSync(f),
+        file: f
+    });
 });
 // las rutas que estará escuchando el servidor
 app.use('/api/adm', presentation_1.admRoutes);
