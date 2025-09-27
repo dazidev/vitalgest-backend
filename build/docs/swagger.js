@@ -44,7 +44,7 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
                         state: { type: 'string', example: 'true or false' },
                         position: { type: 'string', example: 'cargo' },
                     },
-                    required: ['name', 'lastname', 'email', 'rol'],
+                    required: ['name', 'lastname', 'email', 'role'],
                 },
                 ResponseCreateUser: {
                     type: 'object',

@@ -39,7 +39,7 @@ export const swaggerSpec = swaggerJSDoc({
             state: { type: 'string', example: 'true or false' },
             position: { type: 'string', example: 'cargo' },
           },
-          required: ['name', 'lastname', 'email', 'rol'],
+          required: ['name', 'lastname', 'email', 'role'],
         },
         ResponseCreateUser:{
           type: 'object',

@@ -5,6 +5,8 @@ import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import fs from 'node:fs';
 //import list from 'express-list-endpoints';
 
 // documentación
@@ -14,6 +16,7 @@ import { swaggerSpec } from './docs/swagger';
 // se importan las rutas
 import { authRoutes, admRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
+
 
 // se llama a las varibles de entorno
 config();
@@ -73,6 +76,15 @@ app.get('/api/docs', (_req, res) => {
 app.get('/api/docs.json', (_req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.json(swaggerSpec);
+});
+
+app.get('/api/docs.debug', (_req, res) => {
+  const f = path.resolve('build/docs/adm.docs.js');
+  res.json({
+    cwd: process.cwd(),
+    exists: fs.existsSync(f),
+    file: f
+  });
 });
 
 
