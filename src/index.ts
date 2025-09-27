@@ -1,3 +1,4 @@
+import './types/express-augment';
 import express from 'express';
 import cors from 'cors';
 import {config} from 'dotenv';
@@ -13,9 +14,7 @@ import { authRoutes, admRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
 
 // se llama a las varibles de entorno
-if (!process.env.VERCEL) {
-  config();
-}
+config();
 
 // se inicia la aplicación de express
 const app = express();
@@ -36,8 +35,21 @@ app.use(cors({
 }));
 
 // documentación
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/docs', swaggerUi.serve);
+app.get(
+  '/api/docs',
+  swaggerUi.setup(undefined, {
+    explorer: true,
+    swaggerOptions: {
+      url: '/api/docs.json',
+    },
+    customSiteTitle: 'VitalGest API Docs',
+  })
+);
+
+// Endpoint del JSON
 app.get('/api/docs.json', (_req, res) => res.json(swaggerSpec));
+
 
 // las rutas que estará escuchando el servidor
 app.use('/api/adm', admRoutes);
