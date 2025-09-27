@@ -1,4 +1,3 @@
-import './types/express-augment';
 import express from 'express';
 import cors from 'cors';
 import {config} from 'dotenv';
@@ -14,7 +13,9 @@ import { authRoutes, admRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
 
 // se llama a las varibles de entorno
-config();
+if (!process.env.VERCEL) {
+  config();
+}
 
 // se inicia la aplicación de express
 const app = express();
