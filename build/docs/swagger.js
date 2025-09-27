@@ -14,7 +14,7 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
             version: '1.0.0',
             description: 'Documentación mínima de endpoints (request y response).',
         },
-        servers: [{ url: 'http://localhost:3000' }],
+        servers: [{ url: 'https://vitalgest-backend.vercel.app' }],
         components: {
             securitySchemes: {
                 bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
@@ -53,9 +53,8 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
             },
         },
     },
-    // Archivos donde tendrás comentarios @openapi
     apis: [
-        node_path_1.default.resolve('./src/**/*.ts'),
-        node_path_1.default.resolve('./build/**/*.js'),
+        node_path_1.default.resolve('src/**/*.ts'),
+        node_path_1.default.resolve('build/**/*.js'),
     ],
 });
