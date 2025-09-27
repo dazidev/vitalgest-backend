@@ -26,6 +26,8 @@ app.disable('x-powered-by');
 const ACCEPTED_ORIGINS = [
   'http://127.0.0.1:5500',
   'http://localhost:5500',
+  /\.vercel\.app$/,             // cualquier subdominio de vercel.app
+  /\.vitalgest-backend\.vercel\.app$/,
 ];
 
 app.use(cors({
@@ -43,10 +45,11 @@ app.use('/api/auth', authRoutes);
 // middlewares
 app.use(errorHandler);
 
-const PORT = process.env.PORT;
-
-app.listen(PORT, () => {
-  console.log(`API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`);
-});
-
 export default app;
+
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT ?? 3000;
+  app.listen(PORT, () => {
+    console.log(`API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`);
+  });
+}

@@ -22,3 +22,4 @@ __exportStar(require("./enums/error-codes.enum"), exports);
 __exportStar(require("./repositories/repositorie.interface"), exports);
 __exportStar(require("./repositories/adm.repositorie.interface"), exports);
 __exportStar(require("./repositories/auth.repositorie.interface"), exports);
+__exportStar(require("./services/services.interface"), exports);

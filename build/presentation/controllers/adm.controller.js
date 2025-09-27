@@ -70,5 +70,15 @@ class AdmController {
             .then((user) => res.status(200).json(user))
             .catch((error) => next(this.handleError(error)));
     }
+    getUserById(req, res, next) {
+        const { id } = req.params;
+        if (!id)
+            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_USER_ID);
+        if (!infrastructure_1.regularExp.uuid.test(id))
+            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_USER_ID);
+        this.admService.getUserById(id)
+            .then((response) => res.status(200).json(response))
+            .catch((error) => next(this.handleError(error)));
+    }
 }
 exports.AdmController = AdmController;

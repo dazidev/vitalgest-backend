@@ -6,10 +6,10 @@ const domain_1 = require("../../domain");
 class RankMiddleware {
     static validate(rolRequired) {
         return (req, _res, next) => {
-            const userRol = req.user.rol;
-            if (!domain_1.ROLE_LIST.includes(userRol))
-                return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_ROL));
-            if (!(domain_1.ROLE_RANK[userRol] >= domain_1.ROLE_RANK[rolRequired]))
+            const userRole = req.user.role;
+            if (!domain_1.ROLE_LIST.includes(userRole))
+                return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_ROLE));
+            if (!(domain_1.ROLE_RANK[userRole] >= domain_1.ROLE_RANK[rolRequired]))
                 return next(application_1.CustomError.unauthorized(domain_1.ERROR_CODES.UNAUTHORIZED_RANK));
             next();
         };
