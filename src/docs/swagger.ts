@@ -1,3 +1,4 @@
+import path from 'node:path';
 import swaggerJSDoc from 'swagger-jsdoc';
 
 export const swaggerSpec = swaggerJSDoc({
@@ -48,5 +49,8 @@ export const swaggerSpec = swaggerJSDoc({
     },
   },
   // Archivos donde tendrás comentarios @openapi
-  apis: ['./src/**/*.ts'],
+  apis: [
+    path.resolve('./src/**/*.ts'),
+    path.resolve('./build/**/*.js'),
+  ],
 });
