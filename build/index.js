@@ -34,16 +34,36 @@ app.use((0, cors_1.default)({
 }));
 // documentación
 app.use('/api/docs', swagger_ui_express_1.default.serve);
-app.get('/api/docs', swagger_ui_express_1.default.setup(undefined, {
-    explorer: true,
-    swaggerOptions: {
-        url: '/api/docs.json', // <- la UI pide el spec aquí
-        validatorUrl: null, // <- evita llamada al validador externo
-        docExpansion: 'list',
-        defaultModelsExpandDepth: -1
-    },
-    customSiteTitle: 'VitalGest API Docs'
-}));
+app.get('/api/docs', (_req, res) => {
+    res.type('html').send(`<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>VitalGest API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
+  <script>
+  window.onload = () => {
+    const ui = SwaggerUIBundle({
+      url: '/api/docs.json',
+      dom_id: '#swagger-ui',
+      deepLinking: true,
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+      layout: 'StandaloneLayout',
+      validatorUrl: null,
+      docExpansion: 'list',
+      defaultModelsExpandDepth: -1
+    });
+    window.ui = ui;
+  }
+  </script>
+</body>
+</html>`);
+});
 // Endpoint del JSON
 app.get('/api/docs.json', (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
