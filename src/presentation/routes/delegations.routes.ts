@@ -20,5 +20,35 @@ delegationsRoutes.get(
   controller.getMunicipalities.bind(controller)
 );
 
+delegationsRoutes.post(
+  '/create',
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  controller.createDelegation.bind(controller)
+);
+
+delegationsRoutes.put(
+  '/edit/:id',
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  controller.editDelegation.bind(controller)
+);
+
+delegationsRoutes.delete(
+  '/delete/:id',
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  controller.deleteDelegation.bind(controller)
+);
+
+delegationsRoutes.get(
+  '/many/:amount',
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  controller.getDelegations.bind(controller)
+);
+
+delegationsRoutes.get(
+  '/one/:id',
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  controller.getDelegation.bind(controller)
+);
+
 
 export default delegationsRoutes;
