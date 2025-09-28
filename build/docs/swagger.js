@@ -53,6 +53,23 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
                         data: { $ref: '#/components/schemas/User' }
                     }
                 },
+                Delegation: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        name: { type: 'string' },
+                        stateId: { type: 'string' },
+                        municipalityId: { type: 'string' },
+                        pharmacyId: { type: 'string', format: 'uuid' },
+                    },
+                },
+                ResponseCreateDelegation: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean', example: true },
+                        data: { $ref: '#/components/schemas/Delegation' }
+                    }
+                },
             },
         },
     },

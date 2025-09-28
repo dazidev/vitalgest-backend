@@ -4,7 +4,8 @@ import { Role } from "../enums/user-roles.enum";
 export interface RepoResponse {
   success: boolean;
   code?: ERROR_CODES;
-  data?: object | UserRepoResponse;
+  data?: object | UserRepoResponse | DelegationRepoResponse;
+  pharmacyId?: string
 }
 
 export interface UserRepoResponse {
@@ -15,4 +16,12 @@ export interface UserRepoResponse {
   password: string,
   role: Role,
   state: string, 
+}
+
+export interface DelegationRepoResponse {
+  id: string
+  name: string
+  stateId: number
+  municipalityId: number
+  pharmacyId: string
 }
