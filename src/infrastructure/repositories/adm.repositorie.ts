@@ -4,6 +4,7 @@ import { OkPacketParams } from 'mysql2';
 import { AdmRepositorieInterface, ERROR_CODES, RepoResponse } from '../../domain';
 import { UserEntity } from '../../domain/entities/user.entity';
 import { mysql, mysqlConfig } from '../config/msql.adapter';
+import { toSafeInt } from '..';
 
 
 export class AdmRepositorie implements AdmRepositorieInterface {
@@ -86,12 +87,18 @@ export class AdmRepositorie implements AdmRepositorieInterface {
     }
   }
 
-  async getAllUsers(amount: number): Promise<RepoResponse> {
+  async getAllUsers(amount: number | string): Promise<RepoResponse> {
     try {
       const connection = await mysql.createConnection(mysqlConfig)
-      const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users ORDER BY createdat DESC LIMIT ?'
+
+      const plusQuery = 
+        amount === 'all' 
+          ? ''
+          : `LIMIT ${toSafeInt(amount)}`
+
+      const query = `SELECT id, name, lastname, email, role, position, state, createdat FROM users ORDER BY createdat DESC ${plusQuery}`
       const values = [amount];
-      const [results] = await connection.query(query, values)
+      const [results] = await connection.execute(query, values)
       await connection.end()
 
       return {

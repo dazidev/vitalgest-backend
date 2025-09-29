@@ -3,21 +3,30 @@ import { DelegationRepoResponse, DelegationsRepositorieInterface, ERROR_CODES, R
 import { DelegationEntity } from '../../domain/entities/delegation.entity';
 import { mysql, mysqlConfig } from '../config/msql.adapter';
 import { binToUuid, uuidToBin } from '../config/uuid.adapter';
+import { toSafeInt } from '..';
 
 
 type DelegationRow = RowDataPacket & {
-  id: Buffer;                 // BINARY(16)
-  name: string;               // VARCHAR
-  state_id: number;           // INT UNSIGNED
-  municipality_id: number;    // INT UNSIGNED
-  pharmacy_id: Buffer;        // BINARY(16) (según tu esquema actual)
+  id: Buffer
+  name: string
+  state_id: number
+  state_name: string
+  municipality_id: number
+  municipality_name: string
+  pharmacy_id: Buffer
 }
 
 const mapRow = (r: DelegationRow): DelegationRepoResponse => ({
   id: binToUuid(r.id),
   name: r.name,
-  stateId: r.state_id,
-  municipalityId: r.municipality_id,
+  state: {
+    stateId: r.state_id,
+    stateName: r.state_name,
+  },
+  municipality: {
+    municipalityId: r.municipality_id,
+    municipalityName: r.municipality_name,
+  },
   pharmacyId: binToUuid(r.pharmacy_id),
 })
 
@@ -75,7 +84,7 @@ export class DelegationsRepositorie implements DelegationsRepositorieInterface {
     let connection
     try {
       connection = await mysql.createConnection(mysqlConfig)
-      const { id, name, stateId, municipalityId, pharmacyId } = delegationEntity
+      const { id, name, stateId, stateName,  municipalityId, municipalityName,  pharmacyId } = delegationEntity
 
       const idDelegationToBin = uuidToBin(id!)
       const idPharmacyToBin = uuidToBin(pharmacyId!)
@@ -83,10 +92,18 @@ export class DelegationsRepositorie implements DelegationsRepositorieInterface {
       const query = 'INSERT INTO delegations (id, name, state_id, municipality_id, pharmacy_id) VALUES (?, ?, ?, ?, ?)'
       const values = [idDelegationToBin, name, stateId, municipalityId, idPharmacyToBin] 
       const [results] = await connection.execute(query, values)
-
+  
       const okResult = results as OkPacketParams
 
-      if (okResult.affectedRows && okResult.affectedRows > 0) return { success: true, data: delegationEntity }
+      const newDelegationEntity = {
+        id,
+        name,
+        state: { stateId, stateName },
+        municipality: { municipalityId, municipalityName },
+        pharmacyId
+      }
+      
+      if (okResult.affectedRows && okResult.affectedRows > 0) return { success: true, data: newDelegationEntity }
       else return { success: false, code: ERROR_CODES.INSERT_FAILED }
       
     } catch (error: any) {
@@ -170,12 +187,27 @@ export class DelegationsRepositorie implements DelegationsRepositorieInterface {
     let connection
     try {
       connection = await mysql.createConnection(mysqlConfig)
-      const query = 
+
+      const plusQuery = 
         amount === 'all' 
-          ? 'SELECT * FROM delegations'
-          : 'SELECT * FROM delegations LIMIT 1'
-      const values = amount === 'all' ? [] : [Math.floor(Number(amount))]
-      const [results] = await connection.execute<DelegationRow[]>(query, values)
+          ? ''
+          : `LIMIT ${toSafeInt(amount)}`
+
+      const query = `
+        SELECT
+          d.id,
+          d.name,
+          d.state_id,
+          s.name AS state_name,
+          d.municipality_id,
+          m.name AS municipality_name,
+          d.pharmacy_id
+        FROM delegations d
+        INNER JOIN states s ON s.id = d.state_id
+        INNER JOIN municipalities m ON m.id = d.municipality_id
+        ${plusQuery}`
+
+      const [results] = await connection.execute<DelegationRow[]>(query)
 
       const data = results.map(mapRow);
 
@@ -194,12 +226,26 @@ export class DelegationsRepositorie implements DelegationsRepositorieInterface {
 
       const idToBin = uuidToBin(delegationId)
       
-      const query = 'SELECT * FROM delegations WHERE id = ? LIMIT 1'
+      const query = `
+        SELECT
+          d.id,
+          d.name,
+          d.state_id,
+          s.name AS state_name,
+          d.municipality_id,
+          m.name AS municipality_name,
+          d.pharmacy_id
+        FROM delegations d
+        INNER JOIN states s ON s.id = d.state_id
+        INNER JOIN municipalities m ON m.id = d.municipality_id
+        WHERE d.id = ? 
+        LIMIT 1`
+
       const values = [idToBin] 
       const [results] = await connection.execute<DelegationRow[]>(query, values)
 
       const data = results.map(mapRow);
-      
+
       return { success: true, data: data[0] }
     } catch (error: any) {
       return { success: false, code: error}
@@ -207,5 +253,4 @@ export class DelegationsRepositorie implements DelegationsRepositorieInterface {
       if (connection) await connection.end()
     }
   }
-  
 }

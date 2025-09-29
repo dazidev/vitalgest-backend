@@ -4,11 +4,18 @@ exports.DelegationsRepositorie = void 0;
 const domain_1 = require("../../domain");
 const msql_adapter_1 = require("../config/msql.adapter");
 const uuid_adapter_1 = require("../config/uuid.adapter");
+const __1 = require("..");
 const mapRow = (r) => ({
     id: (0, uuid_adapter_1.binToUuid)(r.id),
     name: r.name,
-    stateId: r.state_id,
-    municipalityId: r.municipality_id,
+    state: {
+        stateId: r.state_id,
+        stateName: r.state_name,
+    },
+    municipality: {
+        municipalityId: r.municipality_id,
+        municipalityName: r.municipality_name,
+    },
     pharmacyId: (0, uuid_adapter_1.binToUuid)(r.pharmacy_id),
 });
 class DelegationsRepositorie {
@@ -67,15 +74,22 @@ class DelegationsRepositorie {
         let connection;
         try {
             connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
-            const { id, name, stateId, municipalityId, pharmacyId } = delegationEntity;
+            const { id, name, stateId, stateName, municipalityId, municipalityName, pharmacyId } = delegationEntity;
             const idDelegationToBin = (0, uuid_adapter_1.uuidToBin)(id);
             const idPharmacyToBin = (0, uuid_adapter_1.uuidToBin)(pharmacyId);
             const query = 'INSERT INTO delegations (id, name, state_id, municipality_id, pharmacy_id) VALUES (?, ?, ?, ?, ?)';
             const values = [idDelegationToBin, name, stateId, municipalityId, idPharmacyToBin];
             const [results] = await connection.execute(query, values);
             const okResult = results;
+            const newDelegationEntity = {
+                id,
+                name,
+                state: { stateId, stateName },
+                municipality: { municipalityId, municipalityName },
+                pharmacyId
+            };
             if (okResult.affectedRows && okResult.affectedRows > 0)
-                return { success: true, data: delegationEntity };
+                return { success: true, data: newDelegationEntity };
             else
                 return { success: false, code: domain_1.ERROR_CODES.INSERT_FAILED };
         }
@@ -158,11 +172,23 @@ class DelegationsRepositorie {
         let connection;
         try {
             connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
-            const query = amount === 'all'
-                ? 'SELECT * FROM delegations'
-                : 'SELECT * FROM delegations LIMIT 1';
-            const values = amount === 'all' ? [] : [Math.floor(Number(amount))];
-            const [results] = await connection.execute(query, values);
+            const plusQuery = amount === 'all'
+                ? ''
+                : `LIMIT ${(0, __1.toSafeInt)(amount)}`;
+            const query = `
+        SELECT
+          d.id,
+          d.name,
+          d.state_id,
+          s.name AS state_name,
+          d.municipality_id,
+          m.name AS municipality_name,
+          d.pharmacy_id
+        FROM delegations d
+        INNER JOIN states s ON s.id = d.state_id
+        INNER JOIN municipalities m ON m.id = d.municipality_id
+        ${plusQuery}`;
+            const [results] = await connection.execute(query);
             const data = results.map(mapRow);
             return { success: true, data };
         }
@@ -179,7 +205,20 @@ class DelegationsRepositorie {
         try {
             connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const idToBin = (0, uuid_adapter_1.uuidToBin)(delegationId);
-            const query = 'SELECT * FROM delegations WHERE id = ? LIMIT 1';
+            const query = `
+        SELECT
+          d.id,
+          d.name,
+          d.state_id,
+          s.name AS state_name,
+          d.municipality_id,
+          m.name AS municipality_name,
+          d.pharmacy_id
+        FROM delegations d
+        INNER JOIN states s ON s.id = d.state_id
+        INNER JOIN municipalities m ON m.id = d.municipality_id
+        WHERE d.id = ? 
+        LIMIT 1`;
             const values = [idToBin];
             const [results] = await connection.execute(query, values);
             const data = results.map(mapRow);

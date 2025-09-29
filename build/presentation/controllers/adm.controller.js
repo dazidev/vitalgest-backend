@@ -46,12 +46,12 @@ class AdmController {
         const { amount } = req.params;
         if (!amount)
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_AMOUNT);
-        const n = Number(amount);
+        /*const n = Number(amount);
         if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
-            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.AMOUNT_NOT_NUMBER);
+          throw CustomError.badRequest(ERROR_CODES.AMOUNT_NOT_NUMBER);
         }
-        const validateAmount = Math.min(n, 50);
-        this.admService.getAllUsers(validateAmount)
+        const validateAmount = Math.min(n, 50)*/
+        this.admService.getAllUsers(amount)
             .then((user) => res.status(200).json(user))
             .catch((error) => next(this.handleError(error)));
     }

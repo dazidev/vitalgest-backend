@@ -6,7 +6,7 @@ export interface AdmRepositorieInterface {
   createUser (userEntityDto: UserEntity): Promise<RepoResponse>;
   editUser (userEntityDto: UserEntity): Promise<RepoResponse>;
   deleteUser (id: string): Promise<RepoResponse>;
-  getAllUsers (amount: number): Promise<RepoResponse>;
+  getAllUsers (amount: number | string): Promise<RepoResponse>;
   changePasswordUser (id: string, password: string): Promise<RepoResponse>;
   getUserById (id: string): Promise<RepoResponse>;
 }

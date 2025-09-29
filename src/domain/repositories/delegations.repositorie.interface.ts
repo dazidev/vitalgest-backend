@@ -12,5 +12,4 @@ export interface DelegationsRepositorieInterface {
   createPharmacy(pharmacyId: string): Promise<RepoResponse>
   getDelegations(amount: number | string): Promise<RepoResponse>
   getDelegation(delegationId: string): Promise<RepoResponse>
-
 }

@@ -21,7 +21,13 @@ export interface UserRepoResponse {
 export interface DelegationRepoResponse {
   id: string
   name: string
-  stateId: number
-  municipalityId: number
+  state: {
+    stateId: number
+    stateName: string
+  }
+  municipality: {
+    municipalityId: number
+    municipalityName: string 
+  }
   pharmacyId: string
 }

@@ -74,14 +74,16 @@ export class AdmService implements AdmServiceInterface {
     return { success: true }
   }
 
-  async getAllUsers(amount: number): Promise<object> {
-    const process: RepoResponse = await this.admRepo.getAllUsers(amount);
+  async getAllUsers(amount: string): Promise<object> {
+    let newAmount
+    if (amount !== 'all') newAmount = parseInt(amount)
+    else newAmount = amount
+
+
+    const process: RepoResponse = await this.admRepo.getAllUsers(newAmount);
     if (!process.success) throw { code: process.code };
 
-    return { 
-      success: true,
-      data: process.data
-    }
+    return process
   }
 
   async changePasswordUser(id: string, password: string): Promise<object> {
@@ -103,9 +105,6 @@ export class AdmService implements AdmServiceInterface {
     const process: RepoResponse = await this.admRepo.getUserById(id);
     if (!process.success) throw { code: process.code };
 
-    return { 
-      success: process.success,
-      data: process.data
-    }
+    return process
   }
 }
