@@ -24,3 +24,4 @@ __exportStar(require("./repositories/adm.repositorie"), exports);
 __exportStar(require("./repositories/auth.repositorie"), exports);
 __exportStar(require("./http/cookies/refreshCookie"), exports);
 __exportStar(require("./http/cookies/accessCookie"), exports);
+__exportStar(require("./helpers/validators.helper"), exports);

@@ -9,16 +9,19 @@ class DelegationEntityDto {
         Object.assign(this, props);
     }
     static create(object) {
-        const { name, stateId, municipalityId } = object;
+        const { stateId, stateName, municipalityId, municipalityName } = object;
         // todo: hace falta verificar el formato de lo que viene
-        if (!name)
-            return [domain_1.ERROR_CODES.MISSING_DELEGATION_NAME];
         if (!stateId)
             return [domain_1.ERROR_CODES.MISSING_STATE_ID];
+        if (!stateName)
+            return [domain_1.ERROR_CODES.MISSING_STATE_NAME];
         if (!municipalityId)
             return [domain_1.ERROR_CODES.MISSING_MUNICIPALITY];
+        if (!municipalityName)
+            return [domain_1.ERROR_CODES.MISSING_MUNICIPALITY_NAME];
         const id = (0, uuid_1.v4)();
-        return [undefined, new DelegationEntityDto({ id, name, stateId, municipalityId })];
+        const name = `Delegación ${municipalityName}, ${stateName}`;
+        return [undefined, new DelegationEntityDto({ id, name, stateId, stateName, municipalityId, municipalityName })];
     }
     static edit(object) {
         const { id, name, stateId, municipalityId } = object;

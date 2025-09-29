@@ -68,13 +68,15 @@ class AdmService {
         return { success: true };
     }
     async getAllUsers(amount) {
-        const process = await this.admRepo.getAllUsers(amount);
+        let newAmount;
+        if (amount !== 'all')
+            newAmount = parseInt(amount);
+        else
+            newAmount = amount;
+        const process = await this.admRepo.getAllUsers(newAmount);
         if (!process.success)
             throw { code: process.code };
-        return {
-            success: true,
-            data: process.data
-        };
+        return process;
     }
     async changePasswordUser(id, password) {
         const existsUser = await this.admRepo.userExists(undefined, id);
@@ -93,10 +95,7 @@ class AdmService {
         const process = await this.admRepo.getUserById(id);
         if (!process.success)
             throw { code: process.code };
-        return {
-            success: process.success,
-            data: process.data
-        };
+        return process;
     }
 }
 exports.AdmService = AdmService;

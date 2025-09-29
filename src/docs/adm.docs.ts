@@ -153,7 +153,7 @@
 
 /**
  * @openapi
- * /api/adm/get-all/users/{amount}:
+ * /api/adm/get-all/users/{amount} | all:
  *   get:
  *     summary: Obtener usuarios
  *     tags: ['ENDPOINTS Gestión de usuarios']

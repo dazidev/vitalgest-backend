@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdmRepositorie = void 0;
 const domain_1 = require("../../domain");
 const msql_adapter_1 = require("../config/msql.adapter");
+const __1 = require("..");
 class AdmRepositorie {
     async userExists(email, id) {
         try {
@@ -79,9 +80,12 @@ class AdmRepositorie {
     async getAllUsers(amount) {
         try {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
-            const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users ORDER BY createdat DESC LIMIT ?';
+            const plusQuery = amount === 'all'
+                ? ''
+                : `LIMIT ${(0, __1.toSafeInt)(amount)}`;
+            const query = `SELECT id, name, lastname, email, role, position, state, createdat FROM users ORDER BY createdat DESC ${plusQuery}`;
             const values = [amount];
-            const [results] = await connection.query(query, values);
+            const [results] = await connection.execute(query, values);
             await connection.end();
             return {
                 success: true,

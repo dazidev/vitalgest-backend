@@ -77,15 +77,29 @@
  *           examples:
  *             request:
  *               value:
- *                 name: "Delegación Ameca, Jalisco"
  *                 stateId: 1
+ *                 stateName: "Jalisco"
  *                 municipalityId: 1
+ *                 municipalityName: "Ameca"
  *     responses:
  *       201:
  *         description: Delegación creada
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/ResponseCreateDelegation' }
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *                   data: 
+ *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
+ *                     name: "Delegación Ameca, Jalisco"
+ *                     state:
+ *                       stateId: 1
+ *                       stateName: "Jalisco"   
+ *                     municipality:
+ *                       municipalityId: 1
+ *                       municipalityName: "Ameca"
+ *                     pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -166,7 +180,7 @@
 
 /**
  * @openapi
- * /api/delegations/many/{amount} o all:
+ * /api/delegations/many/{amount} | all:
  *   get:
  *     summary: Obtener delegación/es
  *     tags: ['ENDPOINTS Gestión de delegaciones']
@@ -183,8 +197,12 @@
  *                   data: 
  *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                       name: "Delegación Ameca, Jalisco"
- *                       stateId: 1
- *                       municipalityId: 1
+ *                       state:
+ *                         stateId: 1
+ *                         stateName: "Jalisco"   
+ *                       municipality:
+ *                         municipalityId: 1
+ *                         municipalityName: "Ameca"
  *                       pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
  *       400:
  *         description: Datos inválidos
@@ -217,8 +235,12 @@
  *                   data: 
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Delegación Ameca, Jalisco"
- *                     stateId: 1
- *                     municipalityId: 1
+ *                     state:
+ *                       stateId: 1
+ *                       stateName: "Jalisco"   
+ *                     municipality:
+ *                       municipalityId: 1
+ *                       municipalityName: "Ameca"
  *                     pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
  *       400:
  *         description: Datos inválidos

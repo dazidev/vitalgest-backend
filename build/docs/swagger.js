@@ -58,8 +58,14 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
                     properties: {
                         id: { type: 'string', format: 'uuid' },
                         name: { type: 'string' },
-                        stateId: { type: 'string' },
-                        municipalityId: { type: 'string' },
+                        state: {
+                            stateId: { type: 'string' },
+                            stateName: { type: 'string' },
+                        },
+                        municipality: {
+                            municipalityId: { type: 'string' },
+                            municipalityName: { type: 'string' },
+                        },
                         pharmacyId: { type: 'string', format: 'uuid' },
                     },
                 },
