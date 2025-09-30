@@ -94,11 +94,11 @@
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Delegación Ameca, Jalisco"
  *                     state:
- *                       stateId: 1
- *                       stateName: "Jalisco"   
+ *                       id: 1
+ *                       name: "Jalisco"   
  *                     municipality:
- *                       municipalityId: 1
- *                       municipalityName: "Ameca"
+ *                       id: 1
+ *                       name: "Ameca"
  *                     pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
  *       400:
  *         description: Datos inválidos
@@ -198,11 +198,11 @@
  *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                       name: "Delegación Ameca, Jalisco"
  *                       state:
- *                         stateId: 1
- *                         stateName: "Jalisco"   
+ *                         id: 1
+ *                         name: "Jalisco"   
  *                       municipality:
- *                         municipalityId: 1
- *                         municipalityName: "Ameca"
+ *                         id: 1
+ *                         name: "Ameca"
  *                       pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
  *       400:
  *         description: Datos inválidos
@@ -236,11 +236,11 @@
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Delegación Ameca, Jalisco"
  *                     state:
- *                       stateId: 1
- *                       stateName: "Jalisco"   
+ *                       id: 1
+ *                       name: "Jalisco"   
  *                     municipality:
- *                       municipalityId: 1
- *                       municipalityName: "Ameca"
+ *                       id: 1
+ *                       name: "Ameca"
  *                     pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
  *       400:
  *         description: Datos inválidos
