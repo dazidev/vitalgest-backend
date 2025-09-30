@@ -9,12 +9,12 @@ const mapRow = (r) => ({
     id: (0, uuid_adapter_1.binToUuid)(r.id),
     name: r.name,
     state: {
-        stateId: r.state_id,
-        stateName: r.state_name,
+        id: r.state_id,
+        name: r.state_name,
     },
     municipality: {
-        municipalityId: r.municipality_id,
-        municipalityName: r.municipality_name,
+        id: r.municipality_id,
+        name: r.municipality_name,
     },
     pharmacyId: (0, uuid_adapter_1.binToUuid)(r.pharmacy_id),
 });
@@ -84,8 +84,8 @@ class DelegationsRepositorie {
             const newDelegationEntity = {
                 id,
                 name,
-                state: { stateId, stateName },
-                municipality: { municipalityId, municipalityName },
+                state: { id: stateId, name: stateName },
+                municipality: { id: municipalityId, name: municipalityName },
                 pharmacyId
             };
             if (okResult.affectedRows && okResult.affectedRows > 0)
