@@ -22,12 +22,12 @@ export interface DelegationRepoResponse {
   id: string
   name: string
   state: {
-    stateId: number
-    stateName: string
+    id: number
+    name: string
   }
   municipality: {
-    municipalityId: number
-    municipalityName: string 
+    id: number
+    name: string 
   }
   pharmacyId: string
 }
