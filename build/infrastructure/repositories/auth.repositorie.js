@@ -4,6 +4,16 @@ exports.AuthRepositorie = void 0;
 const domain_1 = require("../../domain");
 const msql_adapter_1 = require("../config/msql.adapter");
 const uuid_adapter_1 = require("../config/uuid.adapter");
+const mapUserRow = (r) => ({
+    id: (0, uuid_adapter_1.binToUuid)(r.id),
+    name: r.name,
+    lastname: r.lastname,
+    email: r.email,
+    password: r.password,
+    role: r.role,
+    position: r.position,
+    state: r.state
+});
 class AuthRepositorie {
     async getUser(email, id) {
         try {
@@ -14,8 +24,9 @@ class AuthRepositorie {
             const values = id === undefined ? [email] : [(0, uuid_adapter_1.uuidToBin)(id)];
             const [rows] = await connection.query(query, values);
             await connection.end();
-            if (rows[0]) {
-                return { success: true, data: rows[0] };
+            const data = rows.map(mapUserRow);
+            if (data[0]) {
+                return { success: true, data: data[0] };
             }
             return { success: false, code: domain_1.ERROR_CODES.USER_NOT_FOUND };
         }

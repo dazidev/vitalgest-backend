@@ -16,7 +16,7 @@ export class AuthMiddleware {
       if (!result.success) {
         if (result.reason === 'expired') return next(CustomError.unauthorized(ERROR_CODES.TOKEN_EXPIRED))
         return next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN))
-      } 
+      }
 
       const authRepo = new AuthRepositorie()
 
