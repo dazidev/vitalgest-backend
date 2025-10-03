@@ -42,7 +42,7 @@ export class AuthService implements AuthServiceInterface {
 
     const user: UserRepoResponse = response.data as UserRepoResponse;
     
-    const isMatching = await bcrypt.compare(password!, user.password);
+    const isMatching = await bcrypt.compare(password!, user.password!);
     if (!isMatching) throw { code: ERROR_CODES.CREDENTIALS_NOT_MATCH };
 
     const {password: pass, state, createdAt, ...userEntity} = UserEntity.fromObject(user);

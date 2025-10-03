@@ -41,7 +41,17 @@ class DelegationsRepositorie {
         let connection;
         try {
             connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
-            const query = 'SELECT * FROM states';
+            const query = `
+        SELECT
+          s.id,
+          s.name,
+          JSON_ARRAYAGG(
+            JSON_OBJECT('id', m.id, 'name', m.name)
+          ) AS municipalities
+        FROM states s
+        LEFT JOIN municipalities m ON m.state_id = s.id
+        GROUP BY s.id, s.name
+        ORDER BY s.name`;
             const [results] = await connection.execute(query);
             return { success: true, data: results };
         }

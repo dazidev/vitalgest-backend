@@ -22,6 +22,7 @@ __exportStar(require("./middlewares/auth.middleware"), exports);
 __exportStar(require("./middlewares/rank.middleware"), exports);
 __exportStar(require("./repositories/adm.repositorie"), exports);
 __exportStar(require("./repositories/auth.repositorie"), exports);
+__exportStar(require("./repositories/guards.repositorie"), exports);
 __exportStar(require("./http/cookies/refreshCookie"), exports);
 __exportStar(require("./http/cookies/accessCookie"), exports);
 __exportStar(require("./helpers/validators.helper"), exports);

@@ -13,9 +13,7 @@ const controller = new adm_controller_1.AdmController(admService);
 admRoutes.post('/create/user', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.createUser.bind(controller));
 admRoutes.put('/edit/user/:id', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.editUser.bind(controller));
 admRoutes.delete('/delete/user/:id', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.deleteUser.bind(controller));
-admRoutes.get('/get-all/users/:amount', 
-//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-controller.getAllUsers.bind(controller));
+admRoutes.get('/get-all/users/:amount', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.getAllUsers.bind(controller));
 admRoutes.put('/change-password/user/:id', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.changePasswordUser.bind(controller));
 admRoutes.get('/get/user/:id', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.getUserById.bind(controller));
 exports.default = admRoutes;

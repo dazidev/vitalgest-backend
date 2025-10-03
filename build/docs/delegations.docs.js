@@ -18,7 +18,16 @@
  *                   data:
  *                     - id: 1
  *                       name: "Jalisco"
- *
+ *                       municipalities:
+ *                         - id: 1
+ *                           name: "Ameca"
+ *                         - id: 2
+ *                           name: "Tala"
+ *                     - id: 2
+ *                       name: "San Luis Potosí"
+ *                       municipalities:
+ *                         - id: null
+ *                           name: null
  *       404:
  *         description: No se encontraron estados
  *         content:
