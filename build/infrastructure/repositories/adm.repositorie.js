@@ -4,6 +4,16 @@ exports.AdmRepositorie = void 0;
 const domain_1 = require("../../domain");
 const msql_adapter_1 = require("../config/msql.adapter");
 const __1 = require("..");
+const mapUserRow = (r) => ({
+    id: (0, __1.binToUuid)(r.id),
+    name: r.name,
+    lastname: r.lastname,
+    email: r.email,
+    role: r.role,
+    position: r.position,
+    state: r.state,
+    createdAt: r.createdat,
+});
 class AdmRepositorie {
     async userExists(email, id) {
         try {
@@ -12,7 +22,7 @@ class AdmRepositorie {
                 ? 'SELECT EXISTS (SELECT 1 FROM users WHERE id = ?) AS registered'
                 : 'SELECT EXISTS (SELECT 1 FROM users WHERE email = ?) AS registered';
             const arg = email === undefined
-                ? id
+                ? (0, __1.uuidToBin)(id)
                 : email;
             const [rows] = await connection.query(query, [arg]);
             const row = Array.isArray(rows) ? rows[0] : rows;
@@ -29,7 +39,7 @@ class AdmRepositorie {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const { id, name, lastname, email, password, role, position } = userEntityDto;
             const query = 'INSERT INTO users (id, name, lastname, email, password, role, position, state, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, "true", NOW())';
-            const values = [id, name, lastname, email, password, role, position];
+            const values = [(0, __1.uuidToBin)(id), name, lastname, email, password, role, position];
             const [results] = await connection.query(query, values);
             await connection.end();
             const okResult = results;
@@ -47,7 +57,7 @@ class AdmRepositorie {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const { id, name, lastname, email, role, position } = userEntityDto;
             const query = 'UPDATE users SET name = ?, lastname = ?, email = ?, role = ?, position = ? WHERE id = ?';
-            const values = [name, lastname, email, role, position, id];
+            const values = [name, lastname, email, role, position, (0, __1.uuidToBin)(id)];
             const [results] = await connection.query(query, values);
             await connection.end();
             const okResult = results;
@@ -64,7 +74,7 @@ class AdmRepositorie {
         try {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = 'UPDATE users SET state = "false" WHERE id = ?';
-            const values = [id];
+            const values = [(0, __1.uuidToBin)(id)];
             const [results] = await connection.query(query, values);
             await connection.end();
             const okResult = results;
@@ -86,10 +96,11 @@ class AdmRepositorie {
             const query = `SELECT id, name, lastname, email, role, position, state, createdat FROM users ORDER BY createdat DESC ${plusQuery}`;
             const values = [amount];
             const [results] = await connection.execute(query, values);
+            const data = results.map(mapUserRow);
             await connection.end();
             return {
                 success: true,
-                data: results
+                data: data
             };
         }
         catch (error) {
@@ -100,7 +111,7 @@ class AdmRepositorie {
         try {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = 'UPDATE users SET password = ? WHERE id = ?';
-            const values = [password, id];
+            const values = [password, (0, __1.uuidToBin)(id)];
             const [results] = await connection.query(query, values);
             await connection.end();
             const okResult = results;
@@ -119,12 +130,13 @@ class AdmRepositorie {
         try {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
             const query = 'SELECT id, name, lastname, email, role, position, state, createdat FROM users WHERE id = ?';
-            const values = [id];
-            const [results] = await connection.query(query, values);
+            const values = [(0, __1.uuidToBin)(id)];
+            const [results] = await connection.execute(query, values);
+            const data = results.map(mapUserRow);
             await connection.end();
             return {
                 success: true,
-                data: results
+                data: data[0]
             };
         }
         catch (error) {

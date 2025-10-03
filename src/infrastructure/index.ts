@@ -9,6 +9,7 @@ export * from './middlewares/rank.middleware';
 
 export * from './repositories/adm.repositorie';
 export * from './repositories/auth.repositorie';
+export * from './repositories/guards.repositorie';
 
 export * from './http/cookies/refreshCookie'
 export * from './http/cookies/accessCookie'

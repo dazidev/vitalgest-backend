@@ -14,7 +14,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
 
 // se importan las rutas
-import { authRoutes, admRoutes, delegationsRoutes } from './presentation';
+import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
 
 
@@ -91,7 +91,8 @@ app.get('/api/docs.debug', (_req, res) => {
 // las rutas que estará escuchando el servidor
 app.use('/api/adm', admRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/delegations', delegationsRoutes)
+app.use('/api/delegations', delegationsRoutes);
+app.use('/api/guards', guardsRoutes);
 
 // middlewares
 app.use(errorHandler);

@@ -4,7 +4,7 @@ import { Role } from "../enums/user-roles.enum";
 export interface RepoResponse {
   success: boolean;
   code?: ERROR_CODES;
-  data?: object | UserRepoResponse | DelegationRepoResponse;
+  data?: object | UserRepoResponse | DelegationRepoResponse | GuardRepoResponse;
   pharmacyId?: string
 }
 
@@ -13,9 +13,11 @@ export interface UserRepoResponse {
   name: string,
   lastname: string,
   email: string,
-  password: string,
+  password?: string,
   role: Role,
-  state: string, 
+  position?: string,
+  state: string,
+  createdAt?: string
 }
 
 export interface DelegationRepoResponse {
@@ -30,4 +32,20 @@ export interface DelegationRepoResponse {
     name: string 
   }
   pharmacyId: string
+}
+
+export interface GuardRepoResponse {
+  id: string
+  date: string
+  state: 'En curso' | 'Nueva' | 'Cerrada'
+  guardChief: {
+    id: string
+    name: string
+    lastname: string
+    email: string
+  }
+  delegation: {
+    id: string
+    name: string
+  }
 }

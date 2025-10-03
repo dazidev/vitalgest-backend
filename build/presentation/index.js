@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.delegationsRoutes = exports.admRoutes = exports.authRoutes = void 0;
+exports.guardsRoutes = exports.delegationsRoutes = exports.admRoutes = exports.authRoutes = void 0;
 // rutas
 var auth_routes_1 = require("./routes/auth.routes");
 Object.defineProperty(exports, "authRoutes", { enumerable: true, get: function () { return __importDefault(auth_routes_1).default; } });
@@ -25,6 +25,8 @@ var adm_routes_1 = require("./routes/adm.routes");
 Object.defineProperty(exports, "admRoutes", { enumerable: true, get: function () { return __importDefault(adm_routes_1).default; } });
 var delegations_routes_1 = require("./routes/delegations.routes");
 Object.defineProperty(exports, "delegationsRoutes", { enumerable: true, get: function () { return __importDefault(delegations_routes_1).default; } });
+var guards_routes_1 = require("./routes/guards.routes");
+Object.defineProperty(exports, "guardsRoutes", { enumerable: true, get: function () { return __importDefault(guards_routes_1).default; } });
 // controladores
 __exportStar(require("./controllers/adm.controller"), exports);
 __exportStar(require("./controllers/auth.controller"), exports);

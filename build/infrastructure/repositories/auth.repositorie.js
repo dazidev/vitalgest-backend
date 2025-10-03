@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthRepositorie = void 0;
 const domain_1 = require("../../domain");
 const msql_adapter_1 = require("../config/msql.adapter");
+const uuid_adapter_1 = require("../config/uuid.adapter");
 class AuthRepositorie {
     async getUser(email, id) {
         try {
@@ -10,7 +11,7 @@ class AuthRepositorie {
             const query = id === undefined
                 ? 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE email = ? LIMIT 1'
                 : 'SELECT id, name, lastname, email, password, role, position, state FROM users WHERE id = ? LIMIT 1';
-            const values = id === undefined ? [email] : [id];
+            const values = id === undefined ? [email] : [(0, uuid_adapter_1.uuidToBin)(id)];
             const [rows] = await connection.query(query, values);
             await connection.end();
             if (rows[0]) {

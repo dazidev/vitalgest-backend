@@ -82,5 +82,6 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
     apis: [
         path_1.default.resolve('build/docs/adm.docs.js'),
         path_1.default.resolve('build/docs/delegations.docs.js'),
+        path_1.default.resolve('build/docs/guards.docs.js'),
     ],
 });
