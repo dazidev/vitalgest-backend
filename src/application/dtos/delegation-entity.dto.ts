@@ -1,5 +1,4 @@
 import { ERROR_CODES } from "../../domain"
-import { v4 as uuidv4 } from 'uuid'
 import { regularExp } from "../../infrastructure"
 
 
@@ -36,11 +35,10 @@ export class DelegationEntityDto {
     if (!municipalityId) return [ERROR_CODES.MISSING_MUNICIPALITY]
     if (!municipalityName) return [ERROR_CODES.MISSING_MUNICIPALITY_NAME]
 
-    const id = uuidv4()
     const name = `Delegación ${municipalityName}, ${stateName}`
 
     
-    return [undefined, new DelegationEntityDto({id, name, stateId, stateName, municipalityId, municipalityName})]
+    return [undefined, new DelegationEntityDto({name, stateId, stateName, municipalityId, municipalityName})]
   }
 
   static edit(object: {[key: string]: any}): [string?, DelegationEntityDto?] {

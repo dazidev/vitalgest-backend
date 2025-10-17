@@ -4,7 +4,7 @@ exports.AuthMiddleware = void 0;
 const application_1 = require("../../application");
 const jwt_adapter_1 = require("../config/jwt.adapter");
 const domain_1 = require("../../domain");
-const auth_repositorie_1 = require("../repositories/auth.repositorie");
+const models_1 = require("../models");
 class AuthMiddleware {
     static async validateJWT(req, _res, next) {
         const authorization = req.header('Authorization');
@@ -20,13 +20,12 @@ class AuthMiddleware {
                     return next(application_1.CustomError.unauthorized(domain_1.ERROR_CODES.TOKEN_EXPIRED));
                 return next(application_1.CustomError.unauthorized(domain_1.ERROR_CODES.INVALID_TOKEN));
             }
-            const authRepo = new auth_repositorie_1.AuthRepositorie();
-            const response = await authRepo.getUser(undefined, result.payload.id);
-            if (!response.success)
-                return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_TOKEN_USER)); // NOTE: manejar despues este error
-            // TODO: VALIDAR SI EL USUARIO ESTA ACTIVO
-            const user = response.data;
-            const { password, createdAt, ...userEntity } = domain_1.UserEntity.fromObject(user);
+            const user = await models_1.User.findOne({ where: { id: result.payload.id }, attributes: { exclude: ['password'] } });
+            if (!user)
+                return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_TOKEN_USER));
+            if (user.status === false)
+                return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.USER_NOT_ACTIVE));
+            const userEntity = domain_1.UserEntity.payloadToken(user);
             if (Object.prototype.hasOwnProperty.call(req, 'user')) {
                 Reflect.deleteProperty(req, 'user');
             }

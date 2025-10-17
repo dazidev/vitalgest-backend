@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DelegationEntityDto = void 0;
 const domain_1 = require("../../domain");
-const uuid_1 = require("uuid");
 const infrastructure_1 = require("../../infrastructure");
 class DelegationEntityDto {
     constructor(props) {
@@ -19,9 +18,8 @@ class DelegationEntityDto {
             return [domain_1.ERROR_CODES.MISSING_MUNICIPALITY];
         if (!municipalityName)
             return [domain_1.ERROR_CODES.MISSING_MUNICIPALITY_NAME];
-        const id = (0, uuid_1.v4)();
         const name = `Delegación ${municipalityName}, ${stateName}`;
-        return [undefined, new DelegationEntityDto({ id, name, stateId, stateName, municipalityId, municipalityName })];
+        return [undefined, new DelegationEntityDto({ name, stateId, stateName, municipalityId, municipalityName })];
     }
     static edit(object) {
         const { id, name, stateId, municipalityId } = object;

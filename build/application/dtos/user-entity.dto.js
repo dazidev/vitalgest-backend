@@ -9,19 +9,19 @@ class UserEntityDto {
     }
     ;
     static create(object) {
-        const { name, lastname, email, password, role, position } = object;
+        const { name, lastname, email, password, role, position, delegationId } = object;
         const validate = this.validateData(object, 'create');
         if (validate !== null)
             return validate;
-        return [undefined, new UserEntityDto({ name, lastname, email: email.toLowerCase(), password, role, position })];
+        return [undefined, new UserEntityDto({ name, lastname, email: email.toLowerCase(), password, role, position, delegationId })];
     }
     ;
     static edit(object) {
-        const { id, name, lastname, email, role, position } = object;
+        const { id, name, lastname, email, role, position, delegationId } = object;
         const validate = this.validateData(object, 'edit');
         if (validate !== null)
             return validate;
-        return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position })];
+        return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position, delegationId })];
     }
     ;
     static login(object) {
@@ -35,7 +35,7 @@ class UserEntityDto {
 }
 exports.UserEntityDto = UserEntityDto;
 UserEntityDto.validateData = (object, type) => {
-    const { id, name, lastname, email, password, role, position } = object;
+    const { id, name, lastname, email, password, role, position, delegationId } = object;
     if (type === 'password') {
         if (!email)
             return [domain_1.ERROR_CODES.MISSING_EMAIL];
@@ -70,6 +70,8 @@ UserEntityDto.validateData = (object, type) => {
         return [domain_1.ERROR_CODES.MISSING_POSITION];
     if (!domain_1.ROLE_LIST.includes(role))
         return [domain_1.ERROR_CODES.INVALID_ROLE];
+    if (!delegationId)
+        return [domain_1.ERROR_CODES.MISSING_DELEGATION_ID];
     return null;
 };
 ;

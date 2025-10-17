@@ -1,23 +1,21 @@
 import { AuthServiceInterface } from "../../domain/services/auth.service.interface";
 import { UserEntityDto } from "../../application";
-import { ERROR_CODES, LoginServiceResponse, RepoResponse, TokenServiceResponse, UserEntity, UserRepoResponse } from "../../domain";
-import { AuthRepositorie, JwtAdapter } from "../../infrastructure";
+import { ERROR_CODES, LoginServiceResponse, TokenServiceResponse, UserEntity } from "../../domain";
+import { JwtAdapter, User } from "../../infrastructure";
 
 import bcrypt from 'bcrypt'
 
 export class AuthService implements AuthServiceInterface {
-  private readonly authRepo: AuthRepositorie;
-  
-  constructor () {
-    this.authRepo = new AuthRepositorie();
-  }
 
-  async handleTokensByUser (id?: string): Promise<TokenServiceResponse> {
-    const response: RepoResponse = await this.authRepo.getUser(undefined, id);
-    if (!response.success) throw { code: response.code };
 
-    const user: UserRepoResponse = response.data as UserRepoResponse;
-    const {password: pass, state, createdAt, ...userEntity} = UserEntity.fromObject(user);
+  async handleTokensByUser(id?: string): Promise<TokenServiceResponse> {
+
+    const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } })
+      .catch(() => {throw {code: ERROR_CODES.UNKNOWN_DB_ERROR}} )
+      
+    if (!user) throw { code: ERROR_CODES.USER_NOT_FOUND }
+
+    const { ...userEntity } = UserEntity.payloadToken(user);
 
     const payload = {
       ...userEntity
@@ -34,39 +32,40 @@ export class AuthService implements AuthServiceInterface {
   }
 
   async loginUser(userEntityDto: UserEntityDto): Promise<LoginServiceResponse> {
+    
     const { email, password } = userEntityDto
 
-    const response: RepoResponse = await this.authRepo.getUser(email!);
+    const user = await User.findOne({ where: { email } })
+      .catch(() => {throw {code: ERROR_CODES.UNKNOWN_DB_ERROR}} )
 
-    if (!response.success) throw { code: response.code };
+    if (!user) throw { code: ERROR_CODES.USER_NOT_FOUND }
 
-    const user: UserRepoResponse = response.data as UserRepoResponse;
-    
-    const isMatching = await bcrypt.compare(password!, user.password!);
-    if (!isMatching) throw { code: ERROR_CODES.CREDENTIALS_NOT_MATCH };
+    const isMatching = await bcrypt.compare(password!, user.password)
+    if (!isMatching) throw { code: ERROR_CODES.CREDENTIALS_NOT_MATCH }
 
-    const {password: pass, state, createdAt, ...userEntity} = UserEntity.fromObject(user);
+    const { delegation_id: delegationId, ...userEntity } = UserEntity.login(user);
 
-    if (state === 'false') throw { code: ERROR_CODES.USER_NOT_ACTIVE }
+    if (user.status === false) throw { code: ERROR_CODES.USER_NOT_ACTIVE }
 
     const payload = {
       ...userEntity
     }
 
-    const tokenAccess = await JwtAdapter.generateToken(payload, '2h', 'ACCESS');
-    const tokenRefresh = await JwtAdapter.generateToken(payload, '7d', 'REFRESH');
+    const tokenAccess = await JwtAdapter.generateToken(payload, '8h', 'ACCESS')
+    const tokenRefresh = await JwtAdapter.generateToken(payload, '7d', 'REFRESH')
     if (!tokenAccess && !tokenRefresh) throw { code: ERROR_CODES.TOKENS_NOT_GENERATED }
+
 
     return {
       success: true,
-      data: userEntity,
+      data: {...userEntity, delegationId},
       accessToken: tokenAccess!,
       refreshToken: tokenRefresh!
     }
   }
 
   async newAccessToken(refreshTokenReq: string): Promise<TokenServiceResponse> {
-    const result = await JwtAdapter.validateRefreshToken<{id: string}>(refreshTokenReq)
+    const result = await JwtAdapter.validateRefreshToken<{ id: string }>(refreshTokenReq)
     if (!result.success) {
       if (result.reason === 'expired') throw { code: ERROR_CODES.TOKEN_EXPIRED };
       throw { code: ERROR_CODES.INVALID_TOKEN }
@@ -74,5 +73,5 @@ export class AuthService implements AuthServiceInterface {
     
     return this.handleTokensByUser(result.payload.id)
   }
-    
+
 }

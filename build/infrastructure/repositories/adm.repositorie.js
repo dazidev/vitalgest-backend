@@ -37,7 +37,8 @@ class AdmRepositorie {
     async createUser(userEntityDto) {
         try {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
-            const { id, name, lastname, email, password, role, position } = userEntityDto;
+            const id = '';
+            const { name, lastname, email, password, role, position } = userEntityDto;
             const query = 'INSERT INTO users (id, name, lastname, email, password, role, position, state, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, "true", NOW())';
             const values = [(0, __1.uuidToBin)(id), name, lastname, email, password, role, position];
             const [results] = await connection.query(query, values);
@@ -55,7 +56,8 @@ class AdmRepositorie {
     async editUser(userEntityDto) {
         try {
             const connection = await msql_adapter_1.mysql.createConnection(msql_adapter_1.mysqlConfig);
-            const { id, name, lastname, email, role, position } = userEntityDto;
+            const id = '';
+            const { name, lastname, email, role, position } = userEntityDto;
             const query = 'UPDATE users SET name = ?, lastname = ?, email = ?, role = ?, position = ? WHERE id = ?';
             const values = [name, lastname, email, role, position, (0, __1.uuidToBin)(id)];
             const [results] = await connection.query(query, values);

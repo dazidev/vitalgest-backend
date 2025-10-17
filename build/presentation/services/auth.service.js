@@ -8,15 +8,12 @@ const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 class AuthService {
-    constructor() {
-        this.authRepo = new infrastructure_1.AuthRepositorie();
-    }
     async handleTokensByUser(id) {
-        const response = await this.authRepo.getUser(undefined, id);
-        if (!response.success)
-            throw { code: response.code };
-        const user = response.data;
-        const { password: pass, state, createdAt, ...userEntity } = domain_1.UserEntity.fromObject(user);
+        const user = await infrastructure_1.User.findOne({ where: { id }, attributes: { exclude: ['password'] } })
+            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+        if (!user)
+            throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+        const { ...userEntity } = domain_1.UserEntity.payloadToken(user);
         const payload = {
             ...userEntity
         };
@@ -31,26 +28,26 @@ class AuthService {
     }
     async loginUser(userEntityDto) {
         const { email, password } = userEntityDto;
-        const response = await this.authRepo.getUser(email);
-        if (!response.success)
-            throw { code: response.code };
-        const user = response.data;
+        const user = await infrastructure_1.User.findOne({ where: { email } })
+            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+        if (!user)
+            throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
         const isMatching = await bcrypt_1.default.compare(password, user.password);
         if (!isMatching)
             throw { code: domain_1.ERROR_CODES.CREDENTIALS_NOT_MATCH };
-        const { password: pass, state, createdAt, ...userEntity } = domain_1.UserEntity.fromObject(user);
-        if (state === 'false')
+        const { delegation_id: delegationId, ...userEntity } = domain_1.UserEntity.login(user);
+        if (user.status === false)
             throw { code: domain_1.ERROR_CODES.USER_NOT_ACTIVE };
         const payload = {
             ...userEntity
         };
-        const tokenAccess = await infrastructure_1.JwtAdapter.generateToken(payload, '2h', 'ACCESS');
+        const tokenAccess = await infrastructure_1.JwtAdapter.generateToken(payload, '8h', 'ACCESS');
         const tokenRefresh = await infrastructure_1.JwtAdapter.generateToken(payload, '7d', 'REFRESH');
         if (!tokenAccess && !tokenRefresh)
             throw { code: domain_1.ERROR_CODES.TOKENS_NOT_GENERATED };
         return {
             success: true,
-            data: userEntity,
+            data: { ...userEntity, delegationId },
             accessToken: tokenAccess,
             refreshToken: tokenRefresh
         };
