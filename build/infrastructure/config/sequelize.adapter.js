@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sequelize = void 0;
 const dotenv_1 = require("dotenv");
 const sequelize_1 = require("sequelize");
+require("mariadb");
 (0, dotenv_1.config)();
 exports.sequelize = new sequelize_1.Sequelize({
     dialect: 'mariadb',
