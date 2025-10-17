@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express"
 import { CustomError } from "../../application"
 import { JwtAdapter } from "../config/jwt.adapter"
-import { ERROR_CODES, UserEntity, UserRepoResponse } from "../../domain"
-import { AuthRepositorie } from "../repositories/auth.repositorie"
+import { ERROR_CODES, UserEntity } from "../../domain"
+import { User } from "../models"
 
 export class AuthMiddleware {
   static async validateJWT (req: Request, _res: Response, next: NextFunction) {
@@ -18,17 +18,11 @@ export class AuthMiddleware {
         return next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN))
       }
 
-      const authRepo = new AuthRepositorie()
+      const user = await User.findOne({ where: { id: result.payload.id }, attributes: { exclude: ['password'] } })
+      if (!user) return next(CustomError.badRequest(ERROR_CODES.INVALID_TOKEN_USER))
+      if (user.status === false) return next(CustomError.badRequest(ERROR_CODES.USER_NOT_ACTIVE))
 
-      const response = await authRepo.getUser(undefined, result.payload.id)
-
-      if (!response.success) return next(CustomError.badRequest(ERROR_CODES.INVALID_TOKEN_USER)) // NOTE: manejar despues este error
-
-      // TODO: VALIDAR SI EL USUARIO ESTA ACTIVO
-
-      const user: UserRepoResponse = response.data as UserRepoResponse;
-
-      const {password, createdAt, ...userEntity} = UserEntity.fromObject(user);
+      const userEntity = UserEntity.payloadToken(user);
 
       if (Object.prototype.hasOwnProperty.call(req, 'user')) {
         Reflect.deleteProperty(req as any, 'user');

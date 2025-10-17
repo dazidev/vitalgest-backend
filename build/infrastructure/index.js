@@ -26,3 +26,7 @@ __exportStar(require("./repositories/guards.repositorie"), exports);
 __exportStar(require("./http/cookies/refreshCookie"), exports);
 __exportStar(require("./http/cookies/accessCookie"), exports);
 __exportStar(require("./helpers/validators.helper"), exports);
+// Adaptadores
+__exportStar(require("./config/sequelize.adapter"), exports);
+// modelos de sequelize
+__exportStar(require("./models/index"), exports);

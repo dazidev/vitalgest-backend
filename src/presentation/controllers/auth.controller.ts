@@ -12,6 +12,7 @@ export class AuthController implements AuthControllerInterface {
 
   private handleError = (error: {code: string}) => {
     if (error.code === ERROR_CODES.UNKNOWN_ERROR) return CustomError.internalServer(error.code)
+    if (error.code === ERROR_CODES.UNKNOWN_DB_ERROR) return CustomError.internalServer(error.code)
     if (error.code === ERROR_CODES.TOO_MANY_REQUESTS) return CustomError.tooManyRequests(error.code)
     return CustomError.badRequest(error.code)
   }  

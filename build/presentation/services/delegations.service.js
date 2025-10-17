@@ -1,60 +1,80 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DelegationsService = void 0;
-const delegations_repositorie_1 = require("../../infrastructure/repositories/delegations.repositorie");
 const error_codes_enum_1 = require("../../domain/enums/error-codes.enum");
-const uuid_1 = require("uuid");
+const infrastructure_1 = require("../../infrastructure");
+const pharmacy_model_store_1 = __importDefault(require("../../infrastructure/models/store/sequelize/pharmacy-model.store"));
+const delegation_model_store_1 = __importDefault(require("../../infrastructure/models/store/sequelize/delegation-model.store"));
 class DelegationsService {
-    constructor() {
-        this.delegationsRepo = new delegations_repositorie_1.DelegationsRepositorie();
-    }
     async getStates() {
-        const states = await this.delegationsRepo.getStates();
-        if (!states.success)
-            throw { code: states.code };
-        if (Array.isArray(states.data)) {
-            if (states.data.length === 0)
-                throw { code: error_codes_enum_1.ERROR_CODES.STATES_NOT_FOUND };
-        }
+        const states = await infrastructure_1.State.findAll()
+            .catch(() => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+        if (states.length === 0)
+            throw { code: error_codes_enum_1.ERROR_CODES.STATES_NOT_FOUND };
         return states;
     }
     async getMunicipalities(state) {
-        const exists = await this.delegationsRepo.stateExists(state);
+        const exists = await infrastructure_1.State.findOne({ where: { id: state } })
+            .catch(() => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
         if (!exists)
             throw { code: error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND };
-        const municipalities = await this.delegationsRepo.getMunicipalities(state);
-        if (!municipalities.success)
-            throw { code: municipalities.code };
-        if (Array.isArray(municipalities.data)) {
-            if (municipalities.data.length === 0)
-                throw { code: error_codes_enum_1.ERROR_CODES.MUNICIPALITIES_NOT_FOUND };
-        }
+        const municipalities = await infrastructure_1.Municipality.findAll({ where: { state_id: state } })
+            .catch(() => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+        if (municipalities.length === 0)
+            throw { code: error_codes_enum_1.ERROR_CODES.MUNICIPALITIES_NOT_FOUND };
         return municipalities;
     }
     async createDelegation(delegationEntity) {
-        const id = (0, uuid_1.v4)();
-        const pharmacy = await this.delegationsRepo.createPharmacy(id);
-        if (!pharmacy.success)
-            throw { code: pharmacy.code };
-        const pharmacyId = pharmacy.pharmacyId;
-        const delegation = await this.delegationsRepo.createDelegation({ ...delegationEntity, pharmacyId });
-        if (!delegation.success)
-            throw { code: delegation.code };
-        // todo: eliminar la farmacia si hay algun problema al crear la delegación
-        return delegation;
+        const { name, stateId, municipalityId } = delegationEntity;
+        let tx;
+        try {
+            tx = await infrastructure_1.sequelize.transaction();
+            const pharmacy = await pharmacy_model_store_1.default.create();
+            const delegation = await delegation_model_store_1.default.create({
+                name: name,
+                state_id: stateId,
+                municipality_id: municipalityId,
+                pharmacy_id: pharmacy.id
+            });
+            await tx.commit();
+            return delegation;
+        }
+        catch (error) {
+            await tx?.rollback();
+            throw { code: error_codes_enum_1.ERROR_CODES.INSERT_FAILED };
+        }
     }
     async editDelegation(delegationEntity) {
-        const delegation = await this.delegationsRepo.editDelegation(delegationEntity);
-        if (!delegation.success)
-            throw { code: delegation.code };
-        return delegation;
+        const { id, name, stateId, municipalityId } = delegationEntity;
+        const exists = await delegation_model_store_1.default.findOne({ where: { id } })
+            .catch(() => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+        if (!exists)
+            throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+        let tx;
+        try {
+            tx = await infrastructure_1.sequelize.transaction();
+            const delegation = await delegation_model_store_1.default.update({
+                name: name,
+                state_id: stateId,
+                municipality_id: municipalityId
+            }, { where: { id } });
+            await tx.commit();
+            return delegation;
+        }
+        catch (error) {
+            await tx?.rollback();
+            throw { code: error_codes_enum_1.ERROR_CODES.UPDATE_FAILED };
+        }
     }
-    async deleteDelegation(delegationId) {
-        // todo: eliminar farmacia también, luego todo lo vinculado con la farmacia y delegación.
-        const delegation = await this.delegationsRepo.deleteDelegation(delegationId);
-        if (!delegation.success)
-            throw { code: delegation.code };
-        return delegation;
+    async deleteDelegation(id) {
+        // todo: eliminar luego todo lo vinculado con la farmacia y delegación.
+        const count = await delegation_model_store_1.default.destroy({ where: { id } });
+        if (count === 0)
+            throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+        return { success: true };
     }
     async getDelegations(amount) {
         let newAmount;
@@ -62,15 +82,19 @@ class DelegationsService {
             newAmount = parseInt(amount);
         else
             newAmount = amount;
-        const delegation = await this.delegationsRepo.getDelegations(newAmount);
-        if (!delegation.success)
-            throw { code: delegation.code };
-        return delegation;
+        let delegations;
+        newAmount === 'all'
+            ? delegations = await delegation_model_store_1.default.findAll()
+            : delegations = await delegation_model_store_1.default.findAll({ limit: newAmount });
+        if (delegations.length === 0)
+            throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+        return delegations;
     }
-    async getDelegation(delegationId) {
-        const delegation = await this.delegationsRepo.getDelegation(delegationId);
-        if (!delegation.success)
-            throw { code: delegation.code };
+    async getDelegation(id) {
+        const delegation = await delegation_model_store_1.default.findOne({ where: { id } })
+            .catch(() => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+        if (!delegation)
+            throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
         return delegation;
     }
 }

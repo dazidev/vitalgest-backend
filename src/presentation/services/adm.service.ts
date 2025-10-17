@@ -1,77 +1,113 @@
 import { AdmServiceInterface } from "../../domain/services/adm.service.interface";
-import { AdmRepositorie } from "../../infrastructure";
+import { sequelize, User } from "../../infrastructure";
 import { UserEntityDto } from "../../application";
-import { ERROR_CODES, RepoResponse, UserEntity } from "../../domain";
+import { ERROR_CODES, UserEntity } from "../../domain";
 
 // librerias externas
 import bcrypt from 'bcrypt'
-import { v4 as uuidv4 } from 'uuid'
+import { Transaction } from "sequelize";
+
 
 export class AdmService implements AdmServiceInterface {
-  private readonly admRepo: AdmRepositorie;
-
-  constructor () {
-    this.admRepo = new AdmRepositorie();
-  }
 
   public async createUser(userEntityDto: UserEntityDto): Promise<object> {
-    const { name, lastname, email, password, role, position } = userEntityDto;
-  
-    const existsUser = await this.admRepo.userExists(email, undefined);
-    if (existsUser) throw { code: ERROR_CODES.EMAIL_ALREADY_REGISTERED };
+    let tx: Transaction | undefined;
+    const { name, lastname, email, password, role, position, delegationId: delegation_id } = userEntityDto;
 
-    const userId = uuidv4();
-    const hashedPassword = await bcrypt.hash(password as string, 10);
+    try {
+      tx = await sequelize.transaction();
+      const exists = await User.findOne({ where: { email: email }, transaction: tx })
+      if (exists) throw { code: ERROR_CODES.EMAIL_ALREADY_REGISTERED }
 
-    const user = new UserEntity(userId, name, lastname, email, hashedPassword, role, position);
+      const hashedPassword = await bcrypt.hash(password as string, 10);
 
-    const process: RepoResponse = await this.admRepo.createUser(user);
-    if (!process.success) throw { code: process.code };
-    return { 
-      success: true,
-      data: {
-        id: userId,
+      const UserHashed = { name, lastname, email, hashedPassword, role, position, delegation_id }
+
+      const userEntity = UserEntity.create(UserHashed);
+
+      const user = await User.create({
+        name: userEntity.name!,
+        lastname: userEntity.lastname!,
+        email: userEntity.email!,
+        password: userEntity.password!,
+        status: true,
+        role: userEntity.role!,
+        position: userEntity.position!,
+        delegation_id: userEntity.delegation_id!,
+      }, { transaction: tx })
+
+      await tx.commit()
+      
+      const userSafe = await User.findByPk(user.id, {
+        attributes: { exclude: ['password'] }
+      })
+
+      return {
+        success: true,
+        data: userSafe
+      }
+      
+    } catch (error) {
+      await tx?.rollback()
+      throw { code: ERROR_CODES.INSERT_FAILED }
+    }
+  }
+
+  public async editUser(userEntityDto: UserEntityDto): Promise<object> {
+    const { id, name, lastname, email, role, position, delegationId } = userEntityDto;
+    let tx: Transaction | undefined
+
+    try {
+      tx = await sequelize.transaction()
+
+      const exists = await User.findOne({ where: { id }, transaction: tx })
+      if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
+
+      await User.update({
         name,
         lastname,
         email,
         role,
         position,
-        state: "true"
+        delegation_id: delegationId
+      }, { where: { id }, transaction: tx })
+
+      await tx.commit()
+
+      const userSafe = await User.findByPk(id, {
+        attributes: { exclude: ['password'] }
+      })
+
+      return {
+        success: true,
+        data: userSafe
       }
-    };
-  }
 
-  public async editUser(userEntityDto: UserEntityDto): Promise<object> {
-    const { id, name, lastname, email, role, position } = userEntityDto;
-
-    const existsUser = await this.admRepo.userExists(undefined, id);
-    if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
-
-    const user = new UserEntity(id as string, name, lastname, email, role, position);
-
-    const process: RepoResponse = await this.admRepo.editUser(user);
-    if (!process.success) throw { code: process.code };
-    return { 
-      success: true,
-      data: {
-        id,
-        name,
-        lastname,
-        email,
-        role,
-        position
-      }
-    };
+    } catch (error) {
+      await tx?.rollback()
+      throw { code: ERROR_CODES.UPDATE_FAILED }
+    }
   }
 
   async deleteUser(id: string): Promise<object> {
-    const existsUser = await this.admRepo.userExists(undefined, id);
-    if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
+    let tx: Transaction | undefined
 
-    const process: RepoResponse = await this.admRepo.deleteUser(id);
-    if (!process.success) throw { code: process.code };
+    try {
+      tx = await sequelize.transaction()
 
-    return { success: true }
+      const exists = await User.findOne({ where: { id }, transaction: tx })
+      if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
+
+      await User.update({ status: false }, { where: { id }, transaction: tx })
+
+      await tx.commit()
+
+      return { success: true }
+
+    } catch (error) {
+      await tx?.rollback()
+      throw { code: ERROR_CODES.DELETE_FAILED }
+    }
   }
 
   async getAllUsers(amount: string): Promise<object> {
@@ -79,32 +115,60 @@ export class AdmService implements AdmServiceInterface {
     if (amount !== 'all') newAmount = parseInt(amount)
     else newAmount = amount
 
+    try {
+      let users
 
-    const process: RepoResponse = await this.admRepo.getAllUsers(newAmount);
-    if (!process.success) throw { code: process.code };
+      newAmount === 'all'
+        ? users = await User.findAll({ attributes: { exclude: ['password'] } })
+        : users = await User.findAll({ limit: newAmount as number, attributes: { exclude: ['password'] } })
 
-    return process
+      return { 
+        success: true,
+        data: users 
+      }
+
+    } catch (error) {
+      throw { code: ERROR_CODES.USER_NOT_FOUND }
+    }
   }
 
   async changePasswordUser(id: string, password: string): Promise<object> {
-    const existsUser = await this.admRepo.userExists(undefined, id);
-    if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
+    let tx: Transaction | undefined
 
-    const hashedPassword = await bcrypt.hash(password as string, 10);    
-    
-    const process: RepoResponse = await this.admRepo.changePasswordUser(id, hashedPassword);
-    if (!process.success) throw { code: process.code };
+    try {
+      tx = await sequelize.transaction()
 
-    return { success: true }
+      const exists = await User.findOne({ where: { id }, transaction: tx })
+      if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
+
+      const hashedPassword = await bcrypt.hash(password as string, 10); 
+
+      await User.update({ password: hashedPassword }, { where: { id }, transaction: tx })
+
+      await tx.commit()
+
+      return {
+        success: true
+      }
+
+    } catch (error) {
+      await tx?.rollback()
+      throw { code: ERROR_CODES.UPDATE_FAILED }
+    }
   }
 
   async getUserById(id: string): Promise<object> {
-    const existsUser = await this.admRepo.userExists(undefined, id);
-    if (!existsUser) throw { code: ERROR_CODES.USER_NOT_FOUND };
 
-    const process: RepoResponse = await this.admRepo.getUserById(id);
-    if (!process.success) throw { code: process.code };
+    try {
+      const user = await User.findOne({ where: { id }, attributes: { exclude: ['password']} })
+      if (!user) throw { code: ERROR_CODES.USER_NOT_FOUND }
 
-    return process
+      return {
+        success: true,
+        data: user
+      }
+    } catch (error) {
+      throw { code: ERROR_CODES.USER_NOT_FOUND } // todo: cambiar a error en la busqueda 
+    }
   }
 }
