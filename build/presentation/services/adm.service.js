@@ -17,6 +17,9 @@ class AdmService {
             const exists = await infrastructure_1.User.findOne({ where: { email: email }, transaction: tx });
             if (exists)
                 throw { code: domain_1.ERROR_CODES.EMAIL_ALREADY_REGISTERED };
+            const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegation_id } });
+            if (!existsDelegation)
+                throw { code: domain_1.ERROR_CODES.INVALID_DELEGATION_ID };
             const hashedPassword = await bcrypt_1.default.hash(password, 10);
             const UserHashed = { name, lastname, email, hashedPassword, role, position, delegation_id };
             const userEntity = domain_1.UserEntity.create(UserHashed);
@@ -52,6 +55,9 @@ class AdmService {
             const exists = await infrastructure_1.User.findOne({ where: { id }, transaction: tx });
             if (!exists)
                 throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+            const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } });
+            if (!existsDelegation)
+                throw { code: domain_1.ERROR_CODES.INVALID_DELEGATION_ID };
             await infrastructure_1.User.update({
                 name,
                 lastname,

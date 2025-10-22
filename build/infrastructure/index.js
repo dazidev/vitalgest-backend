@@ -28,5 +28,5 @@ __exportStar(require("./http/cookies/accessCookie"), exports);
 __exportStar(require("./helpers/validators.helper"), exports);
 // Adaptadores
 __exportStar(require("./config/sequelize.adapter"), exports);
-// modelos de sequelize
+// modelos de sequelize y seeds
 __exportStar(require("./models/index"), exports);
