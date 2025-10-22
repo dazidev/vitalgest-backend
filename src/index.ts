@@ -96,7 +96,7 @@ app.use('/api/guards', guardsRoutes);
 
 // rutas que funcionan solo en desarrollo
 if (process.env.NODE_ENV === 'development'){
-  app.use('/api/dev', devRoutes); // semilla de estados y municipios
+  app.use('/api/dev', devRoutes);
 }
 
 // middlewares

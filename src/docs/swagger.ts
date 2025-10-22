@@ -36,8 +36,9 @@ export const swaggerSpec = swaggerJSDoc({
             lastname: { type: 'string' },
             email: { type: 'string', format: 'email' },
             role: { type: 'string', example: 'admin' },
-            state: { type: 'string', example: 'true or false' },
+            state: { type: 'boolen', example: 'true' },
             position: { type: 'string', example: 'cargo' },
+            DelegationId: { type: 'number', example: 1 }
           },
           required: ['name', 'lastname', 'email', 'role'],
         },
