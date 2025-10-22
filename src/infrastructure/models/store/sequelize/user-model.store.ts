@@ -15,7 +15,6 @@ class User extends Model<
   declare role: string;
   declare position: string;
   declare delegation_id: string;
-
 }
 
 User.init(
