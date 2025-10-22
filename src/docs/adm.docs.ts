@@ -17,7 +17,9 @@
  *                 email: "garciafer@gmail.com"
  *                 password: "Secret123"
  *                 role: "admin"
+ *                 status: true
  *                 position: "cargo"
+ *                 delegationId: 1
  *     responses:
  *       201:
  *         description: Usuario creado
@@ -54,8 +56,9 @@
  *                 lastname: "Garcia"
  *                 email: "garciafer@gmail.com"
  *                 role: "admin"
- *                 state: "true or false"
+ *                 status: true
  *                 position: "cargo"
+ *                 delegationId: 1
  *     responses:
  *       200:
  *         description: Usuario actualizado
@@ -71,7 +74,9 @@
  *                     lastname: "Garcia"
  *                     email: "garciafer@gmail.com"
  *                     role: "admin"
+ *                     status: true
  *                     position: "cargo"
+ *                     delegationId: 1
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -106,10 +111,12 @@
  *                     name: "Fernando"
  *                     lastname: "Garcia"
  *                     email: "garciafer@gmail.com"
+ *                     status: true
  *                     role: "admin"
  *                     position: "cargo"
- *                     state: "true"
- *                     createdat: "2025-09-01T12:00:00Z"
+ *                     delegationId: 1
+ *                     createdAt: "2025-09-01T12:00:00Z"
+ *                     updateAt: "2025-09-01T12:00:00Z"
  *       400:
  *         description: Usuario no encontrado
  *         content:
@@ -175,16 +182,20 @@
  *                       email: "garciafer@gmail.com"
  *                       role: "admin"
  *                       position: "cargo"
- *                       state: "true"
- *                       createdat: "2025-09-01T12:00:00Z"
+ *                       status: true
+ *                       delegationId: 1
+ *                       createdAt: "2025-09-01T12:00:00Z"
+ *                       updateAt: "2025-09-01T12:00:00Z"
  *                     - id: "c1c9c5b2-9e9c-4a4e-9d77-0b9b7e8a1a23"
  *                       name: "Lucia"
  *                       lastname: "Perez"
  *                       email: "lucia.perez@example.com"
  *                       role: "user"
  *                       position: "cargo"
- *                       state: "true"
- *                       createdat: "2025-08-20T08:30:00Z"
+ *                       status: true
+ *                       delegationId: 1
+ *                       createdAt: "2025-08-20T08:30:00Z"
+ *                       updateAt: "2025-09-01T12:00:00Z"
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -261,7 +272,9 @@
  *                     lastname: "Garcia"
  *                     email: "garciafer@gmail.com"
  *                     role: "admin"
+ *                     status: true
  *                     position: "cargo"
+ *                     delegationId: 1
  *                     
  *       400:
  *         description: Usuario no encontrado

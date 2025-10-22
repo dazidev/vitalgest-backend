@@ -58,7 +58,8 @@
  *                   data:
  *                     - id: 1
  *                       name: "Ameca"
- *                       state_id: 1
+ *                       state: 
+ *                         id: 1
  *              
  *       404:
  *         description: No se encontraron municipios
@@ -212,7 +213,8 @@
  *                       municipality:
  *                         id: 1
  *                         name: "Ameca"
- *                       pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
+ *                       pharmacy:
+ *                         id: 1
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -250,7 +252,8 @@
  *                     municipality:
  *                       id: 1
  *                       name: "Ameca"
- *                     pharmacyId: "669ba7e8-1817-4536-b860-0a9440e970e2"
+ *                     pharmacy:
+ *                       id: 1
  *       400:
  *         description: Datos inválidos
  *         content:

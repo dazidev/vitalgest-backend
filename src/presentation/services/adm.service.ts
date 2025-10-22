@@ -1,5 +1,5 @@
 import { AdmServiceInterface } from "../../domain/services/adm.service.interface";
-import { sequelize, User } from "../../infrastructure";
+import { Delegation, sequelize, User } from "../../infrastructure";
 import { UserEntityDto } from "../../application";
 import { ERROR_CODES, UserEntity } from "../../domain";
 
@@ -18,6 +18,9 @@ export class AdmService implements AdmServiceInterface {
       tx = await sequelize.transaction();
       const exists = await User.findOne({ where: { email: email }, transaction: tx })
       if (exists) throw { code: ERROR_CODES.EMAIL_ALREADY_REGISTERED }
+
+      const existsDelegation = await Delegation.findOne({ where: { id: delegation_id } })
+      if (!existsDelegation) throw { code: ERROR_CODES.INVALID_DELEGATION_ID }
 
       const hashedPassword = await bcrypt.hash(password as string, 10);
 
@@ -62,6 +65,9 @@ export class AdmService implements AdmServiceInterface {
 
       const exists = await User.findOne({ where: { id }, transaction: tx })
       if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
+
+      const existsDelegation = await Delegation.findOne({ where: { id: delegationId } })
+      if (!existsDelegation) throw { code: ERROR_CODES.INVALID_DELEGATION_ID }
 
       await User.update({
         name,

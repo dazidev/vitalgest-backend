@@ -41,8 +41,9 @@ exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
                         lastname: { type: 'string' },
                         email: { type: 'string', format: 'email' },
                         role: { type: 'string', example: 'admin' },
-                        state: { type: 'string', example: 'true or false' },
+                        state: { type: 'boolen', example: 'true' },
                         position: { type: 'string', example: 'cargo' },
+                        DelegationId: { type: 'number', example: 1 }
                     },
                     required: ['name', 'lastname', 'email', 'role'],
                 },

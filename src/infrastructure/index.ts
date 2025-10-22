@@ -19,5 +19,5 @@ export * from './helpers/validators.helper'
 // Adaptadores
 export * from './config/sequelize.adapter'
 
-// modelos de sequelize
+// modelos de sequelize y seeds
 export * from './models/index'
