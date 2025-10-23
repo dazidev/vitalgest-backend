@@ -79,5 +79,6 @@ export const swaggerSpec = swaggerJSDoc({
     path.resolve('build/docs/adm.docs.js'),
     path.resolve('build/docs/delegations.docs.js'),
     path.resolve('build/docs/guards.docs.js'),
+    path.resolve('build/docs/ambulances.docs.js'),
   ],
 });

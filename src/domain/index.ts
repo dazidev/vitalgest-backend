@@ -1,10 +1,12 @@
 export * from './entities/user.entity'
+export * from './entities/ambulance.entity'
 
 // controladores
 export * from './controllers/adm.controller.interface';
 export * from './controllers/auth.controller.interface';
 export * from './controllers/delegations.controller.interface';
 export * from './controllers/guards.controller.interface';
+export * from './controllers/ambulances.controller.interface';
 
 export * from './enums/user-roles.enum';
 export * from './enums/error-codes.enum';
@@ -21,3 +23,4 @@ export * from './repositories/guards.repositorie.interface';
 export * from './services/services.interface';
 export * from './services/delegations.service.interface';
 export * from './services/guards.service.interface';
+export * from './services/ambulances.service.interface';
