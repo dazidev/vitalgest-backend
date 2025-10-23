@@ -5,7 +5,6 @@ const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
 class GuardsService {
     async existsGuard(date, delegationId) {
-        // ! todo: lo mas probable es que haya un error con la fecha
         const exists = await infrastructure_1.Guard.findOne({ where: { delegation_id: delegationId, date } });
         if (exists)
             return true;
@@ -28,12 +27,26 @@ class GuardsService {
         try {
             tx = await infrastructure_1.sequelize.transaction();
             const guard = await infrastructure_1.Guard.create({
-                date: new Date(date), // ! todo: verificar nuevamente el uso de las fechas
+                date: new Date(date),
                 guard_chief: guardChief,
+                state: 'Nueva',
                 delegation_id: delegationId,
             });
             await tx.commit();
-            return guard;
+            const formatGuard = {
+                id: guard.id,
+                guardChief: {
+                    id: guard.guard_chief,
+                },
+                date: guard.date,
+                delegation: {
+                    id: guard.delegation_id
+                }
+            };
+            return {
+                success: true,
+                data: formatGuard
+            };
         }
         catch (error) {
             tx?.rollback();
@@ -53,12 +66,12 @@ class GuardsService {
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const guard = await infrastructure_1.Guard.update({
+            await infrastructure_1.Guard.update({
                 guard_chief: guardChief,
                 delegation_id: delegationId
             }, { where: { id } });
             await tx.commit();
-            return guard;
+            return { success: true };
         }
         catch (error) {
             tx?.rollback();
@@ -79,18 +92,71 @@ class GuardsService {
             formatAmount = amount;
         let guards;
         formatAmount === 'all'
-            ? guards = await infrastructure_1.Guard.findAll()
-            : guards = await infrastructure_1.Guard.findAll({ limit: formatAmount });
+            ? guards = await infrastructure_1.Guard.findAll({
+                include: [
+                    { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
+                    { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                ],
+            })
+            : guards = await infrastructure_1.Guard.findAll({
+                include: [
+                    { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
+                    { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                ],
+                limit: formatAmount
+            });
         if (guards.length === 0)
             throw { code: domain_1.ERROR_CODES.GUARD_NOT_FOUND };
-        return guards;
+        const formatGuards = guards.map((guard) => ({
+            id: guard.id,
+            date: guard.date,
+            state: guard.state,
+            guardChief: {
+                id: guard.guardChief?.id,
+                name: guard.guardChief?.name,
+                lastname: guard.guardChief?.lastname,
+                email: guard.guardChief?.email,
+            },
+            delegation: {
+                id: guard.delegation?.id,
+                name: guard.delegation?.name,
+            }
+        }));
+        return {
+            success: true,
+            data: formatGuards
+        };
     }
     async getOneGuard(id) {
-        const guard = await infrastructure_1.Guard.findOne({ where: { id } })
+        const guard = await infrastructure_1.Guard.findOne({
+            where: { id },
+            include: [
+                { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
+                { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+            ],
+        })
             .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
         if (!guard)
             throw { code: domain_1.ERROR_CODES.GUARD_NOT_FOUND };
-        return guard;
+        const formatGuard = {
+            id: guard.id,
+            date: guard.date,
+            state: guard.state,
+            guardChief: {
+                id: guard.guardChief?.id,
+                name: guard.guardChief?.name,
+                lastname: guard.guardChief?.lastname,
+                email: guard.guardChief?.email,
+            },
+            delegation: {
+                id: guard.delegation?.id,
+                name: guard.delegation?.name,
+            }
+        };
+        return {
+            success: true,
+            data: formatGuard
+        };
     }
 }
 exports.GuardsService = GuardsService;

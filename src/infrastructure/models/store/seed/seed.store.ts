@@ -1,11 +1,13 @@
 import { Transaction } from "sequelize"
 import { sequelize } from "../../../config/sequelize.adapter"
-import { Municipality, State } from "../models.store"
+import { Delegation, Municipality, Pharmacy, State, User } from "../models.store"
+import { config } from "dotenv"
+import bcrypt from 'bcrypt';
+
+config()
 
 
-
-
-export const createSMSeed = async () => {
+export const createSeed = async () => {
   let tx: Transaction | undefined
 
   try {
@@ -42,6 +44,36 @@ export const createSMSeed = async () => {
         ])
       }
     })
+
+    const municipality = await Municipality.findOne({
+      where: { name: 'Ameca' },
+      include: { model: State, as: 'state', attributes: ['name'] }
+    })
+
+    //* Delegacion
+    const pharmacy = await Pharmacy.create()
+
+    const delegation = await Delegation.create({
+      state_id: municipality?.state_id,
+      name: `Delegación ${municipality?.name}, ${municipality?.state?.name}`,
+      municipality_id: municipality?.id,
+      pharmacy_id: pharmacy.id,
+    })
+
+    //* Usuario semilla
+    const password = await bcrypt.hash(process.env.USER_PASSWORD_SEED as string, 10);
+
+    await User.create({
+      name: 'Adim',
+      lastname: 'Seed',
+      email: 'adminseed@vitalgest.mx',
+      password: password,
+      status: true,
+      role: 'general_admin',
+      position: 'developer',
+      delegation_id: delegation.id,
+    }, { transaction: tx })
+
 
     await tx.commit()
 
