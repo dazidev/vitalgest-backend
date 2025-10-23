@@ -5,7 +5,8 @@ require("../infrastructure/models/index"); // importa todos tus modelos
 // o un index que importe todos
 async function run() {
     await infrastructure_1.sequelize.authenticate();
-    await infrastructure_1.sequelize.sync({ alter: true }); // en dev; en prod evita alter
+    //await sequelize.sync({ alter: true }); // en dev; en prod evita alter
+    await infrastructure_1.sequelize.sync({ force: true });
     console.log('Sync OK');
     await infrastructure_1.sequelize.close();
 }

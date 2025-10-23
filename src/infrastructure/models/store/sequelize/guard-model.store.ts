@@ -10,6 +10,7 @@ class Guard extends Model<
 > {
   declare id: CreationOptional<string>;
   declare date: Date;
+  declare state: String;
 
   declare guard_chief: ForeignKey<User['id']>;
   declare delegation_id: ForeignKey<Delegation['id']>;
@@ -26,6 +27,7 @@ Guard.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    state: { type: DataTypes.STRING, allowNull: false },
     guard_chief: {
       type: DataTypes.UUID,
       allowNull: false,

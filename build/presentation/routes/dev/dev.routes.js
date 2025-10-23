@@ -8,9 +8,11 @@ const infrastructure_1 = require("../../../infrastructure");
 const application_1 = require("../../../application");
 const domain_1 = require("../../../domain");
 const devRoutes = express_1.default.Router();
-devRoutes.post('/seed/sm', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], async (_req, res, next) => {
+devRoutes.post('/seed', 
+//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')], 
+async (_req, res, next) => {
     try {
-        const seed = await (0, infrastructure_1.createSMSeed)();
+        const seed = await (0, infrastructure_1.createSeed)();
         if (!seed)
             return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.INSERT_FAILED));
         return res.status(201).json(seed);

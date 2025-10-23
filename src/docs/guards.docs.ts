@@ -27,9 +27,11 @@
  *                   success: true
  *                   data: 
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
- *                     guardChief: "e732b0e9-d9cf-4c6a-974f-8ca92937a132"
+ *                     guardChief:
+ *                       id: "e732b0e9-d9cf-4c6a-974f-8ca92937a132"
  *                     date: "2025-10-03"  
- *                     delegationId: "d0b0090f-0dd9-4337-8695-29de58535d25"
+ *                     delegation:
+ *                       id: "d0b0090f-0dd9-4337-8695-29de58535d25"
  *       400:
  *         description: Datos inválidos
  *         content:

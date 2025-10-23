@@ -10,6 +10,7 @@ Guard.init({
         type: sequelize_1.DataTypes.DATE,
         allowNull: false,
     },
+    state: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     guard_chief: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,

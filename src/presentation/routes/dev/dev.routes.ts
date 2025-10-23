@@ -1,15 +1,15 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { AuthMiddleware, createSMSeed, RankMiddleware } from '../../../infrastructure';
+import { /*AuthMiddleware,*/ createSeed, /*RankMiddleware*/ } from '../../../infrastructure';
 import { CustomError } from '../../../application';
 import { ERROR_CODES } from '../../../domain';
 
 const devRoutes = express.Router();
 
-devRoutes.post('/seed/sm',
-  [AuthMiddleware.validateJWT, RankMiddleware.validate('admin')], 
+devRoutes.post('/seed',
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')], 
   async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const seed = await createSMSeed()
+      const seed = await createSeed()
       if (!seed) return next(CustomError.badRequest(ERROR_CODES.INSERT_FAILED))
   
       return res.status(201).json(seed)

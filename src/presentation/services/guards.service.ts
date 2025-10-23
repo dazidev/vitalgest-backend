@@ -6,10 +6,8 @@ import { Delegation, Guard, sequelize, User } from "../../infrastructure";
 
 export class GuardsService implements GuardsServiceInterface {
 
-  private async existsGuard (date: string, delegationId: string): Promise<boolean> {
-    // ! todo: lo mas probable es que haya un error con la fecha
-    const exists = await Guard.findOne({ where: { delegation_id: delegationId, date } }) 
-
+  private async existsGuard(date: string, delegationId: string): Promise<boolean> {
+    const exists = await Guard.findOne({ where: { delegation_id: delegationId, date } })
     if (exists) return true
     
     return false
@@ -37,15 +35,30 @@ export class GuardsService implements GuardsServiceInterface {
       tx = await sequelize.transaction()
 
       const guard = await Guard.create({
-        date: new Date(date!), // ! todo: verificar nuevamente el uso de las fechas
+        date: new Date(date!),
         guard_chief: guardChief,
+        state: 'Nueva',
         delegation_id: delegationId,
       })
-  
+
       await tx.commit()
-  
-      return guard
-      
+
+      const formatGuard = {
+        id: guard.id,
+        guardChief: {
+          id: guard.guard_chief,
+        },
+        date: guard.date,
+        delegation: {
+          id: guard.delegation_id
+        }
+      }
+
+      return {
+        success: true,
+        data: formatGuard
+      }
+
     } catch (error) {
       tx?.rollback()
       throw { code: ERROR_CODES.INSERT_FAILED }
@@ -71,15 +84,15 @@ export class GuardsService implements GuardsServiceInterface {
     try {
       tx = await sequelize.transaction()
 
-      const guard = await Guard.update({
+      await Guard.update({
         guard_chief: guardChief,
         delegation_id: delegationId
       }, { where: { id } })
-  
+
       await tx.commit()
-  
-      return guard
-      
+
+      return { success: true }
+
     } catch (error) {
       tx?.rollback()
       throw { code: ERROR_CODES.UPDATE_FAILED }
@@ -94,7 +107,7 @@ export class GuardsService implements GuardsServiceInterface {
 
     return { success: true }
   }
-  
+
   async getGuards(amount: string): Promise<object> {
     let formatAmount
     if (!(amount === 'all')) formatAmount = parseInt(amount)
@@ -104,20 +117,75 @@ export class GuardsService implements GuardsServiceInterface {
     let guards
 
     formatAmount === 'all'
-      ? guards = await Guard.findAll()
-      : guards = await Guard.findAll({ limit: formatAmount as number })
+      ? guards = await Guard.findAll({
+        include: [
+          { model: User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
+          { model: Delegation, as: 'delegation', attributes: ['id', 'name'] },
+        ],
+      })
+      : guards = await Guard.findAll({
+        include: [
+          { model: User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
+          { model: Delegation, as: 'delegation', attributes: ['id', 'name'] },
+        ],
+        limit: formatAmount as number
+      })
 
     if (guards.length === 0) throw { code: ERROR_CODES.GUARD_NOT_FOUND }
 
-    return guards
+    const formatGuards = guards.map((guard) => ({
+      id: guard.id,
+      date: guard.date,
+      state: guard.state,
+      guardChief: {
+        id: guard.guardChief?.id,
+        name: guard.guardChief?.name,
+        lastname: guard.guardChief?.lastname,
+        email: guard.guardChief?.email,
+      },
+      delegation: {
+        id: guard.delegation?.id,
+        name: guard.delegation?.name,
+      }
+    }))
+
+    return { 
+      success: true,
+      data: formatGuards
+    }
   }
 
   async getOneGuard(id: string): Promise<object> {
-    const guard = await Guard.findOne({ where: { id } })
+    const guard = await Guard.findOne({
+      where: { id },
+      include: [
+        { model: User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
+        { model: Delegation, as: 'delegation', attributes: ['id', 'name'] },
+      ],
+    })
       .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
 
     if (!guard) throw { code: ERROR_CODES.GUARD_NOT_FOUND }
 
-    return guard
+    const formatGuard = {
+      id: guard.id,
+      date: guard.date,
+      state: guard.state,
+      guardChief: {
+        id: guard.guardChief?.id,
+        name: guard.guardChief?.name,
+        lastname: guard.guardChief?.lastname,
+        email: guard.guardChief?.email,
+      },
+      delegation: {
+        id: guard.delegation?.id,
+        name: guard.delegation?.name,
+      }
+    }
+
+    return {
+      success: true,
+      data: formatGuard
+    }
   }
 }

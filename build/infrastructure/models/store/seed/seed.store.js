@@ -1,9 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSMSeed = void 0;
+exports.createSeed = void 0;
 const sequelize_adapter_1 = require("../../../config/sequelize.adapter");
 const models_store_1 = require("../models.store");
-const createSMSeed = async () => {
+const dotenv_1 = require("dotenv");
+const bcrypt_1 = __importDefault(require("bcrypt"));
+(0, dotenv_1.config)();
+const createSeed = async () => {
     let tx;
     try {
         tx = await sequelize_adapter_1.sequelize.transaction();
@@ -37,6 +43,30 @@ const createSMSeed = async () => {
                 ]);
             }
         });
+        const municipality = await models_store_1.Municipality.findOne({
+            where: { name: 'Ameca' },
+            include: { model: models_store_1.State, as: 'state', attributes: ['name'] }
+        });
+        //* Delegacion
+        const pharmacy = await models_store_1.Pharmacy.create();
+        const delegation = await models_store_1.Delegation.create({
+            state_id: municipality?.state_id,
+            name: `Delegación ${municipality?.name}, ${municipality?.state?.name}`,
+            municipality_id: municipality?.id,
+            pharmacy_id: pharmacy.id,
+        });
+        //* Usuario semilla
+        const password = await bcrypt_1.default.hash(process.env.USER_PASSWORD_SEED, 10);
+        await models_store_1.User.create({
+            name: 'Adim',
+            lastname: 'Seed',
+            email: 'adminseed@vitalgest.mx',
+            password: password,
+            status: true,
+            role: 'general_admin',
+            position: 'developer',
+            delegation_id: delegation.id,
+        }, { transaction: tx });
         await tx.commit();
         return { success: true };
     }
@@ -45,4 +75,4 @@ const createSMSeed = async () => {
         return { success: false };
     }
 };
-exports.createSMSeed = createSMSeed;
+exports.createSeed = createSeed;
