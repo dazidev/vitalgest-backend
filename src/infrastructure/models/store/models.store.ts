@@ -5,6 +5,7 @@ import Municipality from "./sequelize/municipality-model.store";
 import Pharmacy from "./sequelize/pharmacy-model.store";
 import State from "./sequelize/state-model.store";
 import User from './sequelize/user-model.store';
+import Ambulance from './sequelize/ambulance-model.store';
 
 
 // Definicion de asociaciones 
@@ -25,7 +26,9 @@ User.hasMany(Guard,   { foreignKey: 'guard_chief', as: 'guardsAsChief' });
 Guard.belongsTo(Delegation, { foreignKey: 'delegation_id', as: 'delegation' });
 Delegation.hasMany(Guard,   { foreignKey: 'delegation_id', as: 'guards' });
 
-
+// ambulancias
+Ambulance.belongsTo(Delegation, { foreignKey: 'delegation_id', as: 'delegation' })
+Delegation.hasMany(Ambulance, { foreignKey: 'delegation_id', as: 'ambulances' })
 
 // desde aca se debe hacer las importaciones
-export { State, Municipality, Pharmacy, Delegation, User, Guard };
+export { State, Municipality, Pharmacy, Delegation, User, Guard, Ambulance };

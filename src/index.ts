@@ -14,7 +14,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
 
 // se importan las rutas
-import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes, devRoutes } from './presentation';
+import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes, devRoutes, ambulancesRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
 
 
@@ -93,6 +93,8 @@ app.use('/api/adm', admRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/delegations', delegationsRoutes);
 app.use('/api/guards', guardsRoutes);
+app.use('/api/ambulances', ambulancesRoutes);
+
 
 // rutas que funcionan solo en desarrollo
 if (process.env.NODE_ENV === 'development'){

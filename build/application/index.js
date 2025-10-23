@@ -17,4 +17,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./dtos/user-entity.dto"), exports);
 __exportStar(require("./dtos/delegation-entity.dto"), exports);
 __exportStar(require("./dtos/guard-entity.dto"), exports);
+__exportStar(require("./dtos/ambulance-entity.dto"), exports);
 __exportStar(require("./errors/custom.error"), exports);

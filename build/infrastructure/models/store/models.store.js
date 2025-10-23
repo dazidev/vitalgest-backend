@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Guard = exports.User = exports.Delegation = exports.Pharmacy = exports.Municipality = exports.State = void 0;
+exports.Ambulance = exports.Guard = exports.User = exports.Delegation = exports.Pharmacy = exports.Municipality = exports.State = void 0;
 // modelos sequelize
 const delegation_model_store_1 = __importDefault(require("./sequelize/delegation-model.store"));
 exports.Delegation = delegation_model_store_1.default;
@@ -17,6 +17,8 @@ const state_model_store_1 = __importDefault(require("./sequelize/state-model.sto
 exports.State = state_model_store_1.default;
 const user_model_store_1 = __importDefault(require("./sequelize/user-model.store"));
 exports.User = user_model_store_1.default;
+const ambulance_model_store_1 = __importDefault(require("./sequelize/ambulance-model.store"));
+exports.Ambulance = ambulance_model_store_1.default;
 // Definicion de asociaciones 
 state_model_store_1.default.hasMany(municipality_model_store_1.default, { foreignKey: 'state_id', as: 'municipalities' });
 municipality_model_store_1.default.belongsTo(state_model_store_1.default, { foreignKey: 'state_id', as: 'state' });
@@ -30,3 +32,6 @@ guard_model_store_1.default.belongsTo(user_model_store_1.default, { foreignKey: 
 user_model_store_1.default.hasMany(guard_model_store_1.default, { foreignKey: 'guard_chief', as: 'guardsAsChief' });
 guard_model_store_1.default.belongsTo(delegation_model_store_1.default, { foreignKey: 'delegation_id', as: 'delegation' });
 delegation_model_store_1.default.hasMany(guard_model_store_1.default, { foreignKey: 'delegation_id', as: 'guards' });
+// ambulancias
+ambulance_model_store_1.default.belongsTo(delegation_model_store_1.default, { foreignKey: 'delegation_id', as: 'delegation' });
+delegation_model_store_1.default.hasMany(ambulance_model_store_1.default, { foreignKey: 'delegation_id', as: 'ambulances' });
