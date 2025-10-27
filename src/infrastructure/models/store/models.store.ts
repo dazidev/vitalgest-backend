@@ -9,6 +9,7 @@ import Ambulance from './sequelize/ambulance-model.store';
 import Shift from "./sequelize/shift-model.store";
 import ChecklistSupply from "./sequelize/checklist/checklist-supply-model.store";
 import ChecklistAmbulance from "./sequelize/checklist/checklist-ambulance-model.store";
+import Question from './sequelize/checklist/question-model.store';
 
 
 // Definicion de asociaciones 
@@ -54,4 +55,4 @@ ChecklistAmbulance.hasOne(Shift,    { foreignKey: 'checklist_ambulance_id', as: 
 
 
 // desde aca se debe hacer las importaciones
-export { State, Municipality, Pharmacy, Delegation, User, Guard, Ambulance, Shift };
+export { State, Municipality, Pharmacy, Delegation, User, Guard, Ambulance, Shift, Question };
