@@ -11,11 +11,12 @@ class Question extends Model<
   declare question: string
   declare name_category: string
   declare order_category: number
-  declare name_subcategory: string
-  declare order_subcategory: number
-  declare boolean_response: boolean
-  declare emun_response: boolean
-  declare free_response: boolean
+  declare order_question_category: number
+  declare name_subcategory?: string
+  declare order_subcategory?: number
+  declare boolean_response?: boolean
+  declare enum_response?: boolean
+  declare free_response?: boolean
 }
 
 Question.init(
@@ -24,11 +25,12 @@ Question.init(
     question: { type: DataTypes.STRING, allowNull: false },
     name_category : { type: DataTypes.STRING, allowNull: false },
     order_category : { type: DataTypes.NUMBER, allowNull: false },
-    name_subcategory : { type: DataTypes.STRING, allowNull: false },
-    order_subcategory : { type: DataTypes.NUMBER, allowNull: false },
-    boolean_response : { type: DataTypes.BOOLEAN, defaultValue: false  },
-    emun_response : { type: DataTypes.BOOLEAN, defaultValue: false },
-    free_response : { type: DataTypes.BOOLEAN, defaultValue: false },
+    order_question_category: { type: DataTypes.NUMBER, allowNull: false },
+    name_subcategory : { type: DataTypes.STRING, allowNull: true },
+    order_subcategory : { type: DataTypes.NUMBER, allowNull: true },
+    boolean_response : { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
+    enum_response : { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
+    free_response : { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
   },
   {
     sequelize,
