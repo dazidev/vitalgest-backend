@@ -7,12 +7,17 @@ import { Ambulance, Delegation, sequelize } from "../../infrastructure";
 export class AmbulancesService implements AmbulancesServiceInterface {
 
   async createAmbulance(ambulanceEntityDto: AmbulanceEntityDto): Promise<object> {
-    const { delegationId } = ambulanceEntityDto
+    const { delegationId, number } = ambulanceEntityDto
 
     const existsDelegation = await Delegation.findOne({ where: { id: delegationId } })
       .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
 
     if (!existsDelegation) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+
+    const exists = await Ambulance.findOne({ where: { number: number } })
+      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+
+    if (exists) throw { code: 'AMBULANCE_EXISTS' }
 
     const ambulanceEntity = AmbulanceEntity.create(ambulanceEntityDto)
     if (!ambulanceEntity) throw { code: ERROR_CODES.INSERT_FAILED }

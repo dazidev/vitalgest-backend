@@ -39,7 +39,7 @@ export class GuardsService implements GuardsServiceInterface {
         guard_chief: guardChief,
         state: 'Nueva',
         delegation_id: delegationId,
-      })
+      }, { transaction: tx } )
 
       await tx.commit()
 
@@ -87,7 +87,7 @@ export class GuardsService implements GuardsServiceInterface {
       await Guard.update({
         guard_chief: guardChief,
         delegation_id: delegationId
-      }, { where: { id } })
+      }, { where: { id }, transaction: tx })
 
       await tx.commit()
 
