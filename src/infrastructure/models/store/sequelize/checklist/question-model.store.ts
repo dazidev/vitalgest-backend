@@ -1,7 +1,8 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, UUIDV4 } from 'sequelize';
 import { sequelize } from '../../../../config/sequelize.adapter';
 
-//* type ResponseState = 'BUENO' | 'REGULAR' | 'MALO'
+// const RESPONSE_STATES = ['BUENO','REGULAR','MALO'] as const;
+
 
 class Question extends Model<
   InferAttributes<Question>,
@@ -12,25 +13,25 @@ class Question extends Model<
   declare name_category: string
   declare order_category: number
   declare order_question_category: number
-  declare name_subcategory?: string
-  declare order_subcategory?: number
-  declare boolean_response?: boolean
-  declare enum_response?: boolean
-  declare free_response?: boolean
+  declare name_subcategory: CreationOptional<string | null>
+  declare order_subcategory: CreationOptional<number | null>
+  declare boolean_response: CreationOptional<boolean>
+  declare enum_response: CreationOptional<boolean>
+  declare free_response: CreationOptional<boolean>
 }
 
 Question.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
     question: { type: DataTypes.STRING, allowNull: false },
-    name_category : { type: DataTypes.STRING, allowNull: false },
-    order_category : { type: DataTypes.NUMBER, allowNull: false },
-    order_question_category: { type: DataTypes.NUMBER, allowNull: false },
-    name_subcategory : { type: DataTypes.STRING, allowNull: true },
-    order_subcategory : { type: DataTypes.NUMBER, allowNull: true },
-    boolean_response : { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
-    enum_response : { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
-    free_response : { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
+    name_category: { type: DataTypes.STRING, allowNull: false },
+    order_category: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    order_question_category: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    name_subcategory: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+    order_subcategory: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true, defaultValue: null },
+    boolean_response: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    enum_response: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    free_response: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   },
   {
     sequelize,
@@ -38,10 +39,6 @@ Question.init(
     tableName: 'questions',
     timestamps: true,
     underscored: true,
-    /*indexes: [
-      { fields: ['shift_id'] },
-    ],*/
-    // paranoid: true //* activa borrado lógico
   },
 );
 
