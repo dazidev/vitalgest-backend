@@ -6,7 +6,7 @@ class Ambulance extends sequelize_1.Model {
 }
 Ambulance.init({
     id: { type: sequelize_1.DataTypes.UUID, primaryKey: true, defaultValue: sequelize_1.UUIDV4, allowNull: false },
-    number: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
+    number: { type: sequelize_1.DataTypes.STRING(100), allowNull: false, unique: true },
     brand: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
     model: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
     delegation_id: {

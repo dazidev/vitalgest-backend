@@ -19,7 +19,7 @@ class Ambulance extends Model<
 Ambulance.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
-    number: { type: DataTypes.STRING(100), allowNull: false },
+    number: { type: DataTypes.STRING(100), allowNull: false, unique: true },
     brand: { type: DataTypes.STRING(100), allowNull: false },
     model: { type: DataTypes.STRING(100), allowNull: false },
     delegation_id: {

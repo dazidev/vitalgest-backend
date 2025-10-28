@@ -49,7 +49,10 @@ export class AdmController implements AdmControllerInterface {
 
   getAllUsers(req: Request, res: Response, next: NextFunction): void {
     const { amount } = req.params;
+    const { role } = req.query
     if (!amount) throw CustomError.badRequest(ERROR_CODES.MISSING_AMOUNT);
+
+    const filter = role ? role as string : ''
 
     /*const n = Number(amount);
     if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
@@ -57,7 +60,7 @@ export class AdmController implements AdmControllerInterface {
     }
     const validateAmount = Math.min(n, 50)*/
 
-    this.admService.getAllUsers(amount)
+    this.admService.getAllUsers(amount, filter)
       .then((user) => res.status(200).json(user))
       .catch((error) => next(this.handleError(error)))
   }

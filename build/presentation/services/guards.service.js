@@ -31,7 +31,7 @@ class GuardsService {
                 guard_chief: guardChief,
                 state: 'Nueva',
                 delegation_id: delegationId,
-            });
+            }, { transaction: tx });
             await tx.commit();
             const formatGuard = {
                 id: guard.id,
@@ -69,7 +69,7 @@ class GuardsService {
             await infrastructure_1.Guard.update({
                 guard_chief: guardChief,
                 delegation_id: delegationId
-            }, { where: { id } });
+            }, { where: { id }, transaction: tx });
             await tx.commit();
             return { success: true };
         }

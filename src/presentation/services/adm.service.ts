@@ -40,7 +40,7 @@ export class AdmService implements AdmServiceInterface {
       }, { transaction: tx })
 
       await tx.commit()
-      
+
       const userSafe = await User.findByPk(user.id, {
         attributes: { exclude: ['password'] }
       })
@@ -49,7 +49,7 @@ export class AdmService implements AdmServiceInterface {
         success: true,
         data: userSafe
       }
-      
+
     } catch (error) {
       await tx?.rollback()
       throw { code: ERROR_CODES.INSERT_FAILED }
@@ -116,21 +116,24 @@ export class AdmService implements AdmServiceInterface {
     }
   }
 
-  async getAllUsers(amount: string): Promise<object> {
+  async getAllUsers(amount: string, role?: string): Promise<object> {
     let newAmount
     if (amount !== 'all') newAmount = parseInt(amount)
     else newAmount = amount
 
     try {
-      let users
+      const options: any = {
+        attributes: { exclude: ['password'] },
+      };
 
-      newAmount === 'all'
-        ? users = await User.findAll({ attributes: { exclude: ['password'] } })
-        : users = await User.findAll({ limit: newAmount as number, attributes: { exclude: ['password'] } })
+      if (role) options.where = { role }
+      if (newAmount !== 'all') options.limit = Number(newAmount)
 
-      return { 
+      const users = await User.findAll(options)
+
+      return {
         success: true,
-        data: users 
+        data: users
       }
 
     } catch (error) {
@@ -147,7 +150,7 @@ export class AdmService implements AdmServiceInterface {
       const exists = await User.findOne({ where: { id }, transaction: tx })
       if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
 
-      const hashedPassword = await bcrypt.hash(password as string, 10); 
+      const hashedPassword = await bcrypt.hash(password as string, 10);
 
       await User.update({ password: hashedPassword }, { where: { id }, transaction: tx })
 
@@ -166,7 +169,7 @@ export class AdmService implements AdmServiceInterface {
   async getUserById(id: string): Promise<object> {
 
     try {
-      const user = await User.findOne({ where: { id }, attributes: { exclude: ['password']} })
+      const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } })
       if (!user) throw { code: ERROR_CODES.USER_NOT_FOUND }
 
       return {

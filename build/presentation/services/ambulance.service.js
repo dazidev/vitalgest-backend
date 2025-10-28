@@ -5,11 +5,15 @@ const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
 class AmbulancesService {
     async createAmbulance(ambulanceEntityDto) {
-        const { delegationId } = ambulanceEntityDto;
+        const { delegationId, number } = ambulanceEntityDto;
         const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
             .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
         if (!existsDelegation)
             throw { code: domain_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+        const exists = await infrastructure_1.Ambulance.findOne({ where: { number: number } })
+            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+        if (exists)
+            throw { code: 'AMBULANCE_EXISTS' };
         const ambulanceEntity = domain_1.AmbulanceEntity.create(ambulanceEntityDto);
         if (!ambulanceEntity)
             throw { code: domain_1.ERROR_CODES.INSERT_FAILED };

@@ -74,7 +74,7 @@ export class DelegationsService implements DelegationsServiceInterface {
         state_id: stateId!,
         municipality_id: municipalityId!,
         pharmacy_id: pharmacy.id
-      })
+      }, { transaction: tx })
 
       await tx.commit()
 
@@ -134,7 +134,7 @@ export class DelegationsService implements DelegationsServiceInterface {
         name: name,
         state_id: stateId,
         municipality_id: municipalityId
-      }, { where: { id } })
+      }, { where: { id }, transaction: tx })
 
       await tx.commit()
 
