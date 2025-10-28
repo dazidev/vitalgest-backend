@@ -16,12 +16,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./entities/user.entity"), exports);
 __exportStar(require("./entities/ambulance.entity"), exports);
+__exportStar(require("./entities/shift.entity"), exports);
 // controladores
 __exportStar(require("./controllers/adm.controller.interface"), exports);
 __exportStar(require("./controllers/auth.controller.interface"), exports);
 __exportStar(require("./controllers/delegations.controller.interface"), exports);
 __exportStar(require("./controllers/guards.controller.interface"), exports);
 __exportStar(require("./controllers/ambulances.controller.interface"), exports);
+__exportStar(require("./controllers/shifts.controller.interface"), exports);
+__exportStar(require("./controllers/checklists.controller.interface"), exports);
 __exportStar(require("./enums/user-roles.enum"), exports);
 __exportStar(require("./enums/error-codes.enum"), exports);
 // repositorios
@@ -35,3 +38,5 @@ __exportStar(require("./services/services.interface"), exports);
 __exportStar(require("./services/delegations.service.interface"), exports);
 __exportStar(require("./services/guards.service.interface"), exports);
 __exportStar(require("./services/ambulances.service.interface"), exports);
+__exportStar(require("./services/shifts.service.interface"), exports);
+__exportStar(require("./services/checklists.service.interface"), exports);

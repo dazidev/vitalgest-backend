@@ -1,4 +1,4 @@
-
+"use strict";
 /**
  * @openapi
  * /api/shifts/create:
@@ -26,7 +26,7 @@
  *               response:
  *                 value:
  *                   success: true
- *                   data: 
+ *                   data:
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Turno DF434F7"
  *                     ambulance:
@@ -50,7 +50,7 @@
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @openapi
  * /api/shifts/edit/{id}:
@@ -89,7 +89,6 @@
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-
 /**
  * @openapi
  * /api/shifts/delete/{id}:
@@ -117,7 +116,6 @@
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-
 /**
  * @openapi
  * /api/shifts/guard/{id}:
@@ -134,7 +132,7 @@
  *               response:
  *                 value:
  *                   success: true
- *                   data: 
+ *                   data:
  *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                       name: "Turno DF434F6"
  *                       ambulance:
@@ -159,7 +157,7 @@
  *                         id: "e70eeb99-09f1-4a86-9359-9902ab98b2b6"
  *                       createdAt: "2025-10-27T14:31:00.467Z"
  *                       updatedAt: "2025-10-27T14:31:00.467Z"
- *    
+ *
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -171,7 +169,6 @@
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-
 /**
  * @openapi
  * /api/shifts/one/{id}:
@@ -188,7 +185,7 @@
  *               response:
  *                 value:
  *                   success: true
- *                   data: 
+ *                   data:
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Turno DF434F7"
  *                     ambulance:
@@ -201,7 +198,7 @@
  *                       id: "e70eeb99-09f1-4a86-9359-9902ab98b2b6"
  *                     createdAt: "2025-10-27T14:31:00.467Z"
  *                     updatedAt: "2025-10-27T14:31:00.467Z"
- * 
+ *
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -212,4 +209,4 @@
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
- */
+ */ 

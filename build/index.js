@@ -87,6 +87,8 @@ app.use('/api/auth', presentation_1.authRoutes);
 app.use('/api/delegations', presentation_1.delegationsRoutes);
 app.use('/api/guards', presentation_1.guardsRoutes);
 app.use('/api/ambulances', presentation_1.ambulancesRoutes);
+app.use('/api/shifts', presentation_1.shiftRoutes);
+app.use('/api/checklists', presentation_1.checklistsRoutes);
 // rutas que funcionan solo en desarrollo
 if (process.env.NODE_ENV === 'development') {
     app.use('/api/dev', presentation_1.devRoutes);

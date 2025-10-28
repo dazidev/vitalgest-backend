@@ -55,7 +55,7 @@ class DelegationsService {
                 state_id: stateId,
                 municipality_id: municipalityId,
                 pharmacy_id: pharmacy.id
-            });
+            }, { transaction: tx });
             await tx.commit();
             const formatDelegation = {
                 id: delegation.id,
@@ -105,7 +105,7 @@ class DelegationsService {
                 name: name,
                 state_id: stateId,
                 municipality_id: municipalityId
-            }, { where: { id } });
+            }, { where: { id }, transaction: tx });
             await tx.commit();
             if (!delegation)
                 throw { code: error_codes_enum_1.ERROR_CODES.UPDATE_FAILED };

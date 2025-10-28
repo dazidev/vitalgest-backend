@@ -96,17 +96,21 @@ class AdmService {
             throw { code: domain_1.ERROR_CODES.DELETE_FAILED };
         }
     }
-    async getAllUsers(amount) {
+    async getAllUsers(amount, role) {
         let newAmount;
         if (amount !== 'all')
             newAmount = parseInt(amount);
         else
             newAmount = amount;
         try {
-            let users;
-            newAmount === 'all'
-                ? users = await infrastructure_1.User.findAll({ attributes: { exclude: ['password'] } })
-                : users = await infrastructure_1.User.findAll({ limit: newAmount, attributes: { exclude: ['password'] } });
+            const options = {
+                attributes: { exclude: ['password'] },
+            };
+            if (role)
+                options.where = { role };
+            if (newAmount !== 'all')
+                options.limit = Number(newAmount);
+            const users = await infrastructure_1.User.findAll(options);
             return {
                 success: true,
                 data: users

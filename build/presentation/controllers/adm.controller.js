@@ -46,14 +46,16 @@ class AdmController {
     }
     getAllUsers(req, res, next) {
         const { amount } = req.params;
+        const { role } = req.query;
         if (!amount)
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_AMOUNT);
+        const filter = role ? role : '';
         /*const n = Number(amount);
         if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
           throw CustomError.badRequest(ERROR_CODES.AMOUNT_NOT_NUMBER);
         }
         const validateAmount = Math.min(n, 50)*/
-        this.admService.getAllUsers(amount)
+        this.admService.getAllUsers(amount, filter)
             .then((user) => res.status(200).json(user))
             .catch((error) => next(this.handleError(error)));
     }
