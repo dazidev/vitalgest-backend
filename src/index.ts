@@ -14,7 +14,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
 
 // se importan las rutas
-import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes, devRoutes, ambulancesRoutes, shiftRoutes } from './presentation';
+import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes, devRoutes, ambulancesRoutes, shiftRoutes, checklistsRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
 
 
@@ -95,6 +95,7 @@ app.use('/api/delegations', delegationsRoutes);
 app.use('/api/guards', guardsRoutes);
 app.use('/api/ambulances', ambulancesRoutes);
 app.use('/api/shifts', shiftRoutes);
+app.use('/api/checklists', checklistsRoutes);
 
 
 
