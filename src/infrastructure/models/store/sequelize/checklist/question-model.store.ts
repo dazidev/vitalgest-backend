@@ -3,6 +3,16 @@ import { sequelize } from '../../../../config/sequelize.adapter';
 
 // const RESPONSE_STATES = ['BUENO','REGULAR','MALO'] as const;
 
+const TYPE_RESPONSES = [
+  'bool',
+  'option',
+  'text',
+  'bool_option',
+  'bool_text',
+  'option_text',
+  'bool_option_text'] as const
+
+type TypeResponse = typeof TYPE_RESPONSES[number]
 
 class Question extends Model<
   InferAttributes<Question>,
@@ -15,9 +25,7 @@ class Question extends Model<
   declare order_question_category: number
   declare name_subcategory: CreationOptional<string | null>
   declare order_subcategory: CreationOptional<number | null>
-  declare boolean_response: CreationOptional<boolean>
-  declare enum_response: CreationOptional<boolean>
-  declare free_response: CreationOptional<boolean>
+  declare type_response: TypeResponse
 }
 
 Question.init(
@@ -29,9 +37,7 @@ Question.init(
     order_question_category: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     name_subcategory: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
     order_subcategory: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true, defaultValue: null },
-    boolean_response: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    enum_response: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    free_response: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    type_response: { type: DataTypes.ENUM(...TYPE_RESPONSES), allowNull: false },
   },
   {
     sequelize,
