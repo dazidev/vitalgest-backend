@@ -10,6 +10,8 @@ import Shift from "./sequelize/shift-model.store";
 import ChecklistSupply from "./sequelize/checklist/checklist-supply-model.store";
 import ChecklistAmbulance from "./sequelize/checklist/checklist-ambulance-model.store";
 import Question from './sequelize/checklist/question-model.store';
+import Answer from "./sequelize/checklist/answer-model.store";
+import AnswerComponent from "./sequelize/checklist/answer-component-model.store";
 
 
 // Definicion de asociaciones 
@@ -53,6 +55,29 @@ ChecklistSupply.hasOne(Shift,    { foreignKey: 'checklist_supply_id', as: 'shift
 Shift.belongsTo(ChecklistAmbulance, { foreignKey: 'checklist_ambulance_id', as: 'checklistAmbulance' });
 ChecklistAmbulance.hasOne(Shift,    { foreignKey: 'checklist_ambulance_id', as: 'shift' });
 
+// checklists
+Answer.belongsTo(Question, { foreignKey: 'question_id', as: 'question' })
+Question.hasMany(Answer, { foreignKey: 'question_id', as: 'answers' })
+
+Answer.belongsTo(ChecklistAmbulance, { foreignKey: 'checklist_ambulance_id', as: 'checklistAmbulance' })
+ChecklistAmbulance.hasMany(Answer, { foreignKey: 'checklist_ambulance_id', as: 'answers' })
+
+AnswerComponent.belongsTo(Answer, { foreignKey: 'answer_id', as: 'answer' })
+Answer.hasMany(AnswerComponent, { foreignKey: 'answer_id', as: 'components' })
+
 
 // desde aca se debe hacer las importaciones
-export { State, Municipality, Pharmacy, Delegation, User, Guard, Ambulance, Shift, Question };
+export { 
+  State,
+  Municipality,
+  Pharmacy,
+  Delegation,
+  User,
+  Guard,
+  Ambulance,
+  Shift,
+  ChecklistAmbulance,
+  Question,
+  Answer,
+  AnswerComponent
+};
