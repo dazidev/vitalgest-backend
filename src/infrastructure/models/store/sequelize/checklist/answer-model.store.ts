@@ -41,9 +41,9 @@ Answer.init(
     timestamps: true,
     underscored: true,
     indexes: [
-      { fields: ['checklist_id'] },
+      { fields: ['checklist_ambulance_id'] },
       { fields: ['question_id'] },
-      { unique: true, fields: ['checklist_id', 'question_id'], name: 'uq_question_response' },
+      { unique: true, fields: ['checklist_ambulance_id', 'question_id'], name: 'uq_question_response' },
     ],
   },
 );
