@@ -28,9 +28,7 @@
  *                       order_question_category: 1
  *                       name_subcategory: null
  *                       order_subcategory: null
- *                       boolean_response: true
- *                       enum_response: false
- *                       free_response: false
+ *                       type_response: ['bool', 'option', 'text', 'bool_option', 'bool_text', 'option_text', 'bool_option_text']
  *                       createdAt: "2025-10-27T23:49:38.000Z"
  *                       updatedAt: "2025-10-27T23:49:38.000Z"
  *                     - id: "43a06473-2862-4d1a-90af-6051f20d8509"
@@ -40,9 +38,7 @@
  *                       order_question_category: 1
  *                       name_subcategory: null
  *                       order_subcategory: null
- *                       boolean_response: true
- *                       enum_response: false
- *                       free_response: false
+ *                       type_response: ['bool', 'option', 'text', 'bool_option', 'bool_text', 'option_text', 'bool_option_text']
  *                       createdAt: "2025-10-27T23:49:38.000Z"
  *                       updatedAt: "2025-10-27T23:49:38.000Z"
  *       400:
