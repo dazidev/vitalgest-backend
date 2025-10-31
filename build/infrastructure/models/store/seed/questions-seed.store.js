@@ -18,6 +18,16 @@ var CATEGORIES;
     CATEGORIES["C8"] = "Recorrido exterior posterior";
     CATEGORIES["C9"] = "Herramienta y aditamentos";
 })(CATEGORIES || (CATEGORIES = {}));
+var TYPE_RESPONSES;
+(function (TYPE_RESPONSES) {
+    TYPE_RESPONSES["BOOL"] = "bool";
+    TYPE_RESPONSES["OPTION"] = "option";
+    TYPE_RESPONSES["TEXT"] = "text";
+    TYPE_RESPONSES["BOOL_OPTION"] = "bool_option";
+    TYPE_RESPONSES["BOOL_TEXT"] = "bool_text";
+    TYPE_RESPONSES["OPTION_TEXT"] = "option_text";
+    TYPE_RESPONSES["BOOL_OPTION_TEXT"] = "bool_option_text";
+})(TYPE_RESPONSES || (TYPE_RESPONSES = {}));
 const createQuestionsSeed = async () => {
     let tx;
     try {
@@ -29,21 +39,21 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C1,
                 order_category: 1,
                 order_question_category: 1,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Fuga de niveles',
                 name_category: CATEGORIES.C1,
                 order_category: 1,
                 order_question_category: 2,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Daños a la carroceria',
                 name_category: CATEGORIES.C1,
                 order_category: 1,
                 order_question_category: 3,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
         ], { transaction: tx });
         //* Compartimiento del operador (2)
@@ -53,35 +63,35 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C2,
                 order_category: 2,
                 order_question_category: 1,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Objetos no asegurados',
                 name_category: CATEGORIES.C2,
                 order_category: 2,
                 order_question_category: 2,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Ajuste de asiento',
                 name_category: CATEGORIES.C2,
                 order_category: 2,
                 order_question_category: 3,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Cinturón de seguridad',
                 name_category: CATEGORIES.C2,
                 order_category: 2,
                 order_question_category: 4,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Ajuste de espejos',
                 name_category: CATEGORIES.C2,
                 order_category: 2,
                 order_question_category: 5,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Licencia de conducir',
@@ -90,7 +100,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 6,
                 name_subcategory: CATEGORIES.C2_S1,
                 order_subcategory: 1,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Poliza de seguro',
@@ -99,7 +109,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 7,
                 name_subcategory: CATEGORIES.C2_S1,
                 order_subcategory: 1,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'FRAPS',
@@ -108,7 +118,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 8,
                 name_subcategory: CATEGORIES.C2_S1,
                 order_subcategory: 1,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Manual de vehículo',
@@ -117,7 +127,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 9,
                 name_subcategory: CATEGORIES.C2_S1,
                 order_subcategory: 1,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Lámpara de mano',
@@ -126,7 +136,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 10,
                 name_subcategory: CATEGORIES.C2_S2,
                 order_subcategory: 2,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
             {
                 question: 'Guiaroji y/o GPS',
@@ -135,7 +145,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 11,
                 name_subcategory: CATEGORIES.C2_S2,
                 order_subcategory: 2,
-                boolean_response: true
+                type_response: TYPE_RESPONSES.BOOL,
             },
         ], { transaction: tx });
         //* Comportamiento del motor (3)
@@ -145,16 +155,14 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C3,
                 order_category: 3,
                 order_question_category: 1,
-                boolean_response: true,
-                enum_response: true,
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Cables sueltos',
                 name_category: CATEGORIES.C3,
                 order_category: 3,
                 order_question_category: 2,
-                boolean_response: true,
-                enum_response: true,
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Acumulador',
@@ -163,7 +171,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 3,
                 name_subcategory: CATEGORIES.C3_S1,
                 order_subcategory: 1,
-                enum_response: true
+                type_response: TYPE_RESPONSES.OPTION,
             },
             {
                 question: 'Aceite de motor',
@@ -172,7 +180,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 4,
                 name_subcategory: CATEGORIES.C3_S1,
                 order_subcategory: 1,
-                enum_response: true
+                type_response: TYPE_RESPONSES.OPTION,
             },
             {
                 question: 'Aceite de transmisión',
@@ -181,7 +189,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 5,
                 name_subcategory: CATEGORIES.C3_S1,
                 order_subcategory: 1,
-                enum_response: true
+                type_response: TYPE_RESPONSES.OPTION,
             },
             {
                 question: 'Aceite de dirección',
@@ -190,7 +198,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 6,
                 name_subcategory: CATEGORIES.C3_S1,
                 order_subcategory: 1,
-                enum_response: true
+                type_response: TYPE_RESPONSES.OPTION,
             },
             {
                 question: 'Líquido de frenos',
@@ -199,7 +207,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 7,
                 name_subcategory: CATEGORIES.C3_S1,
                 order_subcategory: 1,
-                enum_response: true
+                type_response: TYPE_RESPONSES.OPTION,
             },
             {
                 question: 'Anticongelante',
@@ -208,7 +216,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 8,
                 name_subcategory: CATEGORIES.C3_S1,
                 order_subcategory: 1,
-                enum_response: true
+                type_response: TYPE_RESPONSES.OPTION,
             },
             {
                 question: 'Liquido de limpiabrisas',
@@ -217,7 +225,7 @@ const createQuestionsSeed = async () => {
                 order_question_category: 9,
                 name_subcategory: CATEGORIES.C3_S1,
                 order_subcategory: 1,
-                enum_response: true
+                type_response: TYPE_RESPONSES.OPTION,
             },
         ], { transaction: tx });
         //* Recorrido exterior lado del aperador (4)
@@ -227,56 +235,49 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C4,
                 order_category: 4,
                 order_question_category: 1,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Base del espejo lateral',
                 name_category: CATEGORIES.C4,
                 order_category: 4,
                 order_question_category: 2,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Ventana del operador',
                 name_category: CATEGORIES.C4,
                 order_category: 4,
                 order_question_category: 3,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Goma de la pluma del limpiaparabrisas',
                 name_category: CATEGORIES.C4,
                 order_category: 4,
                 order_question_category: 4,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luz de navegación',
                 name_category: CATEGORIES.C4,
                 order_category: 4,
                 order_question_category: 5,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Llanta (inflado y apariencia)',
                 name_category: CATEGORIES.C4,
                 order_category: 4,
                 order_question_category: 6,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Defensa lateral',
                 name_category: CATEGORIES.C4,
                 order_category: 4,
                 order_question_category: 7,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
         ], { transaction: tx });
         //* Recorrido exterior frente (5)
@@ -286,80 +287,70 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 1,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luces frontales de emergencia',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 2,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Parabrisas',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 3,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Busca ruidos o anomalias',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 4,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luces generales, alta y baja',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 5,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Intermitentes',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 6,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Direccionales',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 7,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Parrilla de la unidad',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 8,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luces frontales de navegación',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 9,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Defensa delantera',
                 name_category: CATEGORIES.C5,
                 order_category: 5,
                 order_question_category: 10,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
         ], { transaction: tx });
         //* Recorrido exterior lado del copiloto (6)
@@ -369,56 +360,49 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C6,
                 order_category: 6,
                 order_question_category: 1,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Base del espejo lateral',
                 name_category: CATEGORIES.C6,
                 order_category: 6,
                 order_question_category: 2,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Ventana del operador',
                 name_category: CATEGORIES.C6,
                 order_category: 6,
                 order_question_category: 3,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Goma de la pluma del limpiaparabrisas',
                 name_category: CATEGORIES.C6,
                 order_category: 6,
                 order_question_category: 4,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luz de navegación',
                 name_category: CATEGORIES.C6,
                 order_category: 6,
                 order_question_category: 5,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'LLanta (inflado y apariencia)',
                 name_category: CATEGORIES.C6,
                 order_category: 6,
                 order_question_category: 6,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Defensa lateral',
                 name_category: CATEGORIES.C6,
                 order_category: 6,
                 order_question_category: 7,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
         ], { transaction: tx });
         //* Compartimiento del paciente (7)
@@ -428,80 +412,70 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 1,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luz módulo de atención',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 2,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Aspirador Amb.',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 3,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Gavetas',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 4,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Camilla marina',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 5,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Camilla rigida',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 6,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Carro camilla',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 7,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Spiders',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 8,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Sujetadores',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 9,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Oxígeno central',
                 name_category: CATEGORIES.C7,
                 order_category: 7,
                 order_question_category: 10,
-                boolean_response: true,
-                free_response: true
+                type_response: TYPE_RESPONSES.BOOL_TEXT
             },
         ], { transaction: tx });
         //* Recorrido exterior posterior (8)
@@ -511,80 +485,70 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 1,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luces de emergencia',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 2,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luces de reversa',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 3,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Luces de alto',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 4,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Direccional',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 5,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Intermitentes',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 6,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Ventanas',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 7,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Defensa trasera',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 8,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Llanta de refacción',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 9,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'LLanta izquierda (inflado y apariencia)',
                 name_category: CATEGORIES.C8,
                 order_category: 8,
                 order_question_category: 10,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
         ], { transaction: tx });
         //* Herramienta y aditamentos (9)
@@ -594,56 +558,49 @@ const createQuestionsSeed = async () => {
                 name_category: CATEGORIES.C9,
                 order_category: 9,
                 order_question_category: 1,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Llave de cruz',
                 name_category: CATEGORIES.C9,
                 order_category: 9,
                 order_question_category: 2,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Extintor',
                 name_category: CATEGORIES.C9,
                 order_category: 9,
                 order_question_category: 3,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Triangulos reflejantes',
                 name_category: CATEGORIES.C9,
                 order_category: 9,
                 order_question_category: 4,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Conos (5)',
                 name_category: CATEGORIES.C9,
                 order_category: 9,
                 order_question_category: 5,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Cables pasa corriente',
                 name_category: CATEGORIES.C9,
                 order_category: 9,
                 order_question_category: 6,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
             {
                 question: 'Kit de herramientas',
                 name_category: CATEGORIES.C9,
                 order_category: 9,
                 order_question_category: 7,
-                boolean_response: true,
-                enum_response: true
+                type_response: TYPE_RESPONSES.BOOL_OPTION,
             },
         ], { transaction: tx });
         await tx.commit();
