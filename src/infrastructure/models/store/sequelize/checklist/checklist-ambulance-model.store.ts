@@ -16,7 +16,7 @@ class ChecklistAmbulance extends Model<
   declare gas_path: string
   declare sign_operator_path: string
   declare sign_recipient_path: string
-  declare notes: string
+  declare notes?: string
 
   declare ambulance?: NonAttribute<Ambulance>
   declare shift?: NonAttribute<Shift>
@@ -45,7 +45,7 @@ ChecklistAmbulance.init(
     gas_path: { type: DataTypes.STRING, allowNull: false },
     sign_operator_path: { type: DataTypes.STRING, allowNull: false },
     sign_recipient_path: { type: DataTypes.STRING, allowNull: false },
-    notes: { type: DataTypes.TEXT, allowNull: false }
+    notes: { type: DataTypes.TEXT, allowNull: true }
   },
   {
     sequelize,
