@@ -76,7 +76,7 @@ export {
   Guard,
   Ambulance,
   Shift,
-  ChecklistAmbulance,
+  ChecklistAmbulance, //! todo: hace falta las relaciones de los checklist
   Question,
   Answer,
   AnswerComponent
