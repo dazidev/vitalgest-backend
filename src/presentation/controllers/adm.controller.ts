@@ -11,11 +11,11 @@ export class AdmController implements AdmControllerInterface {
     public readonly admService: AdmService,
   ) {}
 
-  private handleError = (error: {code: string}) => {
-    if (error.code === ERROR_CODES.UNKNOWN_ERROR) return CustomError.internalServer(error.code)
-    if (error.code === ERROR_CODES.UNKNOWN_DB_ERROR) return CustomError.internalServer(error.code)
-    if (error.code === ERROR_CODES.TOO_MANY_REQUESTS) return CustomError.tooManyRequests(error.code)
-    return CustomError.badRequest(error.code)
+  private handleError = (error: string) => {
+    if (error === ERROR_CODES.UNKNOWN_ERROR) return CustomError.internalServer(error)
+    if (error === ERROR_CODES.UNKNOWN_DB_ERROR) return CustomError.internalServer(error)
+    if (error === ERROR_CODES.TOO_MANY_REQUESTS) return CustomError.tooManyRequests(error)
+    return CustomError.badRequest(error)
   }
 
   createUser(req: Request, res: Response, next: NextFunction): void {

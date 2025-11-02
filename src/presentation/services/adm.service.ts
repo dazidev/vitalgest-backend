@@ -17,10 +17,10 @@ export class AdmService implements AdmServiceInterface {
     try {
       tx = await sequelize.transaction();
       const exists = await User.findOne({ where: { email: email }, transaction: tx })
-      if (exists) throw { code: ERROR_CODES.EMAIL_ALREADY_REGISTERED }
+      if (exists) throw ERROR_CODES.EMAIL_ALREADY_REGISTERED
 
       const existsDelegation = await Delegation.findOne({ where: { id: delegation_id } })
-      if (!existsDelegation) throw { code: ERROR_CODES.INVALID_DELEGATION_ID }
+      if (!existsDelegation) throw ERROR_CODES.INVALID_DELEGATION_ID
 
       const hashedPassword = await bcrypt.hash(password as string, 10);
 
@@ -52,7 +52,7 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
-      throw { code: ERROR_CODES.INSERT_FAILED }
+      throw ERROR_CODES.INSERT_FAILED
     }
   }
 
@@ -64,10 +64,10 @@ export class AdmService implements AdmServiceInterface {
       tx = await sequelize.transaction()
 
       const exists = await User.findOne({ where: { id }, transaction: tx })
-      if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
+      if (!exists) throw ERROR_CODES.USER_NOT_FOUND
 
       const existsDelegation = await Delegation.findOne({ where: { id: delegationId } })
-      if (!existsDelegation) throw { code: ERROR_CODES.INVALID_DELEGATION_ID }
+      if (!existsDelegation) throw ERROR_CODES.INVALID_DELEGATION_ID
 
       await User.update({
         name,
@@ -91,7 +91,7 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
-      throw { code: ERROR_CODES.UPDATE_FAILED }
+      throw ERROR_CODES.UPDATE_FAILED
     }
   }
 
@@ -102,7 +102,7 @@ export class AdmService implements AdmServiceInterface {
       tx = await sequelize.transaction()
 
       const exists = await User.findOne({ where: { id }, transaction: tx })
-      if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
+      if (!exists) throw ERROR_CODES.USER_NOT_FOUND
 
       await User.update({ status: false }, { where: { id }, transaction: tx })
 
@@ -112,7 +112,7 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
-      throw { code: ERROR_CODES.DELETE_FAILED }
+      throw ERROR_CODES.DELETE_FAILED
     }
   }
 
@@ -137,7 +137,7 @@ export class AdmService implements AdmServiceInterface {
       }
 
     } catch (error) {
-      throw { code: ERROR_CODES.USER_NOT_FOUND }
+      throw ERROR_CODES.USER_NOT_FOUND
     }
   }
 
@@ -148,7 +148,7 @@ export class AdmService implements AdmServiceInterface {
       tx = await sequelize.transaction()
 
       const exists = await User.findOne({ where: { id }, transaction: tx })
-      if (!exists) throw { code: ERROR_CODES.USER_NOT_FOUND }
+      if (!exists) throw ERROR_CODES.USER_NOT_FOUND
 
       const hashedPassword = await bcrypt.hash(password as string, 10);
 
@@ -162,7 +162,7 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
-      throw { code: ERROR_CODES.UPDATE_FAILED }
+      throw ERROR_CODES.UPDATE_FAILED
     }
   }
 
@@ -170,14 +170,14 @@ export class AdmService implements AdmServiceInterface {
 
     try {
       const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } })
-      if (!user) throw { code: ERROR_CODES.USER_NOT_FOUND }
+      if (!user) throw ERROR_CODES.USER_NOT_FOUND
 
       return {
         success: true,
         data: user
       }
     } catch (error) {
-      throw { code: ERROR_CODES.USER_NOT_FOUND } // todo: cambiar a error en la busqueda 
+      throw ERROR_CODES.USER_NOT_FOUND // todo: cambiar a error en la busqueda 
     }
   }
 }

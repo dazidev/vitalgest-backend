@@ -17,17 +17,17 @@ export class GuardsService implements GuardsServiceInterface {
     const { guardChief, delegationId, date } = guardEntityDto
 
     const existsGuardChief = await User.findOne({ where: { id: guardChief, role: 'head_guard' } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsGuardChief) throw { code: ERROR_CODES.USER_NOT_GUARD_CHIEF }
+    if (!existsGuardChief) throw ERROR_CODES.USER_NOT_GUARD_CHIEF
 
     const existsDelegation = await Delegation.findOne({ where: { id: delegationId } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsDelegation) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+    if (!existsDelegation) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
     const exists = await this.existsGuard(date!, delegationId!)
-    if (exists) throw { code: ERROR_CODES.GUARD_ALREADY_EXISTS }
+    if (exists) throw ERROR_CODES.GUARD_ALREADY_EXISTS
 
     let tx: Transaction | undefined
 
@@ -70,14 +70,14 @@ export class GuardsService implements GuardsServiceInterface {
     const { id, guardChief, delegationId } = guardEntityDto
 
     const existsGuardChief = await User.findOne({ where: { id: guardChief, role: 'head_guard' } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsGuardChief) throw { code: ERROR_CODES.USER_NOT_GUARD_CHIEF }
+    if (!existsGuardChief) throw ERROR_CODES.USER_NOT_GUARD_CHIEF
 
     const existsDelegation = await Delegation.findOne({ where: { id: delegationId } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsDelegation) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+    if (!existsDelegation) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
     let tx: Transaction | undefined
 
@@ -95,7 +95,7 @@ export class GuardsService implements GuardsServiceInterface {
 
     } catch (error) {
       tx?.rollback()
-      throw { code: ERROR_CODES.UPDATE_FAILED }
+      throw ERROR_CODES.UPDATE_FAILED
     }
 
   }
@@ -103,7 +103,7 @@ export class GuardsService implements GuardsServiceInterface {
   async deleteGuard(id: string): Promise<object> {
     const guard = await Guard.destroy({ where: { id } })
 
-    if (guard === 0) throw { code: ERROR_CODES.GUARD_NOT_FOUND }
+    if (guard === 0) throw ERROR_CODES.GUARD_NOT_FOUND
 
     return { success: true }
   }
@@ -131,7 +131,7 @@ export class GuardsService implements GuardsServiceInterface {
         limit: formatAmount as number
       })
 
-    if (guards.length === 0) throw { code: ERROR_CODES.GUARD_NOT_FOUND }
+    if (guards.length === 0) throw ERROR_CODES.GUARD_NOT_FOUND
 
     const formatGuards = guards.map((guard) => ({
       id: guard.id,
@@ -163,9 +163,9 @@ export class GuardsService implements GuardsServiceInterface {
         { model: Delegation, as: 'delegation', attributes: ['id', 'name'] },
       ],
     })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!guard) throw { code: ERROR_CODES.GUARD_NOT_FOUND }
+    if (!guard) throw ERROR_CODES.GUARD_NOT_FOUND
 
     const formatGuard = {
       id: guard.id,

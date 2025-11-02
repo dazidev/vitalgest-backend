@@ -10,9 +10,9 @@ export class DelegationsService implements DelegationsServiceInterface {
 
   async getStates(): Promise<object> {
     const states = await State.findAll()
-      .catch((_error) => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (states.length === 0) throw { code: ERROR_CODES.STATES_NOT_FOUND }
+    if (states.length === 0) throw ERROR_CODES.STATES_NOT_FOUND
 
     const results = await Promise.all(
       states.map(async (state) => {
@@ -39,14 +39,14 @@ export class DelegationsService implements DelegationsServiceInterface {
 
   async getMunicipalities(state: number): Promise<object> {
     const exists = await State.findOne({ where: { id: state } })
-      .catch((_error) => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!exists) throw { code: ERROR_CODES.STATE_NOT_FOUND }
+    if (!exists) throw ERROR_CODES.STATE_NOT_FOUND
 
     const municipalities = await Municipality.findAll({ where: { state_id: state } })
-      .catch((_error) => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (municipalities.length === 0) throw { code: ERROR_CODES.MUNICIPALITIES_NOT_FOUND }
+    if (municipalities.length === 0) throw ERROR_CODES.MUNICIPALITIES_NOT_FOUND
 
     const formatMunicipalities = municipalities.map((m) => ({
       id: m.id,
@@ -103,7 +103,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
-      throw { code: ERROR_CODES.INSERT_FAILED }
+      throw ERROR_CODES.INSERT_FAILED
     }
   }
 
@@ -111,19 +111,19 @@ export class DelegationsService implements DelegationsServiceInterface {
     const { id, name, stateId, municipalityId } = delegationEntity
 
     const exists = await Delegation.findOne({ where: { id } })
-      .catch((_error) => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!exists) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+    if (!exists) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
     const existsState = await State.findOne({ where: { id } })
-      .catch((_error) => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsState) throw { code: ERROR_CODES.STATE_NOT_FOUND }
+    if (!existsState) throw ERROR_CODES.STATE_NOT_FOUND
 
     const existsMunicipality = await Municipality.findOne({ where: { id } })
-      .catch((_error) => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsMunicipality) throw { code: ERROR_CODES.STATE_NOT_FOUND }
+    if (!existsMunicipality) throw ERROR_CODES.STATE_NOT_FOUND
 
     let tx: Transaction | undefined
 
@@ -138,14 +138,14 @@ export class DelegationsService implements DelegationsServiceInterface {
 
       await tx.commit()
 
-      if (!delegation) throw { code: ERROR_CODES.UPDATE_FAILED }
+      if (!delegation) throw ERROR_CODES.UPDATE_FAILED
 
       return {
         success: true
       }
     } catch (error) {
       await tx?.rollback()
-      throw { code: ERROR_CODES.UPDATE_FAILED }
+      throw ERROR_CODES.UPDATE_FAILED
     }
   }
 
@@ -167,7 +167,7 @@ export class DelegationsService implements DelegationsServiceInterface {
       await Pharmacy.destroy({ where: { id }, transaction: tx })
 
 
-      if (count === 0) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+      if (count === 0) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
       await tx.commit()
 
@@ -175,7 +175,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
-      throw { code: ERROR_CODES.DELETE_FAILED }
+      throw ERROR_CODES.DELETE_FAILED
     }
   }
 
@@ -209,7 +209,7 @@ export class DelegationsService implements DelegationsServiceInterface {
         limit: newAmount as number
       })
 
-    if (delegations.length === 0) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+    if (delegations.length === 0) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
     const formatDelegations = delegations.map((delegation) => ({
       id: delegation.id,
@@ -239,9 +239,9 @@ export class DelegationsService implements DelegationsServiceInterface {
         exclude: ['state_id', 'municipality_id', 'pharmacy_id']
       }
     })
-      .catch((_error) => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!delegation) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+    if (!delegation) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
     const formatDelegation = {
       id: delegation.id,
