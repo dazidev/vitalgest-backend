@@ -40,7 +40,7 @@ ChecklistAmbulance.init(
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
       onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
-    time: { type: DataTypes.TIME, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIME') },
+    time: { type: DataTypes.TIME, allowNull: false },
     km: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     gas_path: { type: DataTypes.STRING, allowNull: false },
     sign_operator_path: { type: DataTypes.STRING, allowNull: false },
@@ -54,8 +54,9 @@ ChecklistAmbulance.init(
     timestamps: true,
     underscored: true,
     indexes: [
-      { fields: ['shift_id'] },
       { fields: ['ambulance_id'] },
+      { fields: ['shift_id'] },
+      
     ],
     // paranoid: true //* activa borrado lógico
   },

@@ -98,6 +98,14 @@ app.use('/api/ambulances', ambulancesRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/checklists', checklistsRoutes);
 
+// para ver las imagenes
+app.use('/uploads', express.static(path.resolve('uploads'), {
+  // cache opcional
+  maxAge: '7d',
+  etag: true,
+  setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=604800')
+}));
+
 
 
 // rutas que funcionan solo en desarrollo

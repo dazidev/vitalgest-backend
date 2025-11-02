@@ -7,7 +7,7 @@ import State from "./sequelize/state-model.store";
 import User from './sequelize/user-model.store';
 import Ambulance from './sequelize/ambulance-model.store';
 import Shift from "./sequelize/shift-model.store";
-// import ChecklistSupply from "./sequelize/checklist/checklist-supply-model.store";
+import ChecklistSupply from './sequelize/checklist/checklist-supply-model.store';
 import ChecklistAmbulance from './sequelize/checklist/checklist-ambulance-model.store';
 import Question from './sequelize/checklist/question-model.store';
 import Answer from "./sequelize/checklist/answer-model.store";
@@ -77,6 +77,7 @@ export {
   Ambulance,
   Shift,
   ChecklistAmbulance,
+  ChecklistSupply,
   Question,
   Answer,
   AnswerComponent
