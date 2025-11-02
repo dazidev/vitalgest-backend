@@ -4,9 +4,12 @@ import '../infrastructure/models/index'; // importa todos tus modelos
 
 async function run() {
   await sequelize.authenticate();
-  //await sequelize.sync({ alter: true }); // en dev; en prod evita alter
+  await sequelize.drop(); 
   await sequelize.sync({ force: true });
   console.log('Sync OK');
   await sequelize.close();
 }
 run().catch((e) => { console.error(e); process.exit(1); });
+
+
+//await sequelize.sync({ alter: true }); // en dev; en prod evita alter

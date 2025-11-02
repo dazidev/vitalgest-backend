@@ -7,8 +7,8 @@ import State from "./sequelize/state-model.store";
 import User from './sequelize/user-model.store';
 import Ambulance from './sequelize/ambulance-model.store';
 import Shift from "./sequelize/shift-model.store";
-import ChecklistSupply from "./sequelize/checklist/checklist-supply-model.store";
-import ChecklistAmbulance from "./sequelize/checklist/checklist-ambulance-model.store";
+import ChecklistSupply from './sequelize/checklist/checklist-supply-model.store';
+import ChecklistAmbulance from './sequelize/checklist/checklist-ambulance-model.store';
 import Question from './sequelize/checklist/question-model.store';
 import Answer from "./sequelize/checklist/answer-model.store";
 import AnswerComponent from "./sequelize/checklist/answer-component-model.store";
@@ -49,13 +49,13 @@ User.hasMany(Shift,   { foreignKey: 'paramedical_id', as: 'paramedicalShifts' })
 Shift.belongsTo(User, { foreignKey: 'driver_id', as: 'driver' });
 User.hasMany(Shift,   { foreignKey: 'driver_id', as: 'driverShifts' });
 
-Shift.belongsTo(ChecklistSupply, { foreignKey: 'checklist_supply_id', as: 'checklistSupply' });
-ChecklistSupply.hasOne(Shift,    { foreignKey: 'checklist_supply_id', as: 'shift' });
-
-Shift.belongsTo(ChecklistAmbulance, { foreignKey: 'checklist_ambulance_id', as: 'checklistAmbulance' });
-ChecklistAmbulance.hasOne(Shift,    { foreignKey: 'checklist_ambulance_id', as: 'shift' });
-
 // checklists
+ChecklistAmbulance.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' })
+Ambulance.hasMany(ChecklistAmbulance, { foreignKey: 'ambulance_id', as: 'checklists' })
+
+ChecklistAmbulance.belongsTo(Shift, { foreignKey: 'shift_id', as: 'shift' })
+Shift.hasMany(ChecklistAmbulance, { foreignKey: 'shift_id', as: 'checklists' })
+
 Answer.belongsTo(Question, { foreignKey: 'question_id', as: 'question' })
 Question.hasMany(Answer, { foreignKey: 'question_id', as: 'answers' })
 
@@ -77,6 +77,7 @@ export {
   Ambulance,
   Shift,
   ChecklistAmbulance,
+  ChecklistSupply,
   Question,
   Answer,
   AnswerComponent

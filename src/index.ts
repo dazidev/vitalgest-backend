@@ -1,6 +1,7 @@
 import './types/express-augment';
 import './docs/swagger'
 import './docs/adm.docs'
+// import 'undici';
 import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
@@ -96,6 +97,14 @@ app.use('/api/guards', guardsRoutes);
 app.use('/api/ambulances', ambulancesRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/checklists', checklistsRoutes);
+
+// para ver las imagenes
+app.use('/uploads', express.static(path.resolve('uploads'), {
+  // cache opcional
+  maxAge: '7d',
+  etag: true,
+  setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=604800')
+}));
 
 
 
