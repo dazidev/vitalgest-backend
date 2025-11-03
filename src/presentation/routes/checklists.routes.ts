@@ -36,6 +36,11 @@ checklistsRoutes.put(
   controller.putAmbAnswers.bind(controller)
 )
 
+checklistsRoutes.get(
+  '/ambulance/:id',
+  controller.getAmbChecklist.bind(controller)
+)
+
 
 export default checklistsRoutes;
 
