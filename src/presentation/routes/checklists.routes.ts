@@ -1,7 +1,7 @@
 import express from 'express';
 import { ChecklistsService } from '../services/checklists.service';
 import { ChecklistsController } from '../controllers/checklists.controller';
-import { checklistFiles } from '../../infrastructure';
+import { checklistGasFile, checklistSignFiles } from '../../infrastructure';
 
 
 const checklistsRoutes = express.Router();
@@ -16,8 +16,24 @@ checklistsRoutes.get(
 
 checklistsRoutes.post(
   '/ambulance/create',
-  checklistFiles,
+  checklistGasFile,
   controller.createAmbChecklist.bind(controller)
+)
+
+checklistsRoutes.put(
+  '/ambulance/:id/sign',
+  checklistSignFiles,
+  controller.signAmbChecklist.bind(controller)
+)
+
+checklistsRoutes.delete(
+  '/ambulance/delete/:id',
+  controller.deleteAmbChecklist.bind(controller)
+)
+
+checklistsRoutes.put(
+  '/ambulance/answers/:id',
+  controller.putAmbAnswers.bind(controller)
 )
 
 

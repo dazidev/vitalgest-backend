@@ -10,17 +10,17 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     const { delegationId, number } = ambulanceEntityDto
 
     const existsDelegation = await Delegation.findOne({ where: { id: delegationId } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsDelegation) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+    if (!existsDelegation) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
     const exists = await Ambulance.findOne({ where: { number: number } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (exists) throw { code: 'AMBULANCE_EXISTS' }
+    if (exists) throw 'AMBULANCE_EXISTS'
 
     const ambulanceEntity = AmbulanceEntity.create(ambulanceEntityDto)
-    if (!ambulanceEntity) throw { code: ERROR_CODES.INSERT_FAILED }
+    if (!ambulanceEntity) throw ERROR_CODES.INSERT_FAILED
 
     let tx: Transaction | undefined
 
@@ -53,7 +53,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
     } catch (error) {
       tx?.rollback()
-      throw { code: ERROR_CODES.INSERT_FAILED }
+      throw ERROR_CODES.INSERT_FAILED
     }
 
   }
@@ -62,15 +62,15 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     const { id, delegationId } = ambulanceEntityDto
 
     const exists = await Ambulance.findOne({ where: { id } })
-    if (!exists) throw { code: ERROR_CODES.AMBULANCE_NOT_FOUND }
+    if (!exists) throw ERROR_CODES.AMBULANCE_NOT_FOUND
 
     const existsDelegation = await Delegation.findOne({ where: { id: delegationId } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsDelegation) throw { code: ERROR_CODES.DELEGATION_NOT_FOUND }
+    if (!existsDelegation) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
     const ambulanceEntity = AmbulanceEntity.edit(ambulanceEntityDto)
-    if (!ambulanceEntity) throw { code: ERROR_CODES.UPDATE_FAILED }
+    if (!ambulanceEntity) throw ERROR_CODES.UPDATE_FAILED
 
     let tx: Transaction | undefined
 
@@ -90,7 +90,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
     } catch (error) {
       tx?.rollback()
-      throw { code: ERROR_CODES.UPDATE_FAILED }
+      throw ERROR_CODES.UPDATE_FAILED
     }
 
   }
@@ -99,7 +99,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     const { id } = ambulanceEntityDto
     const ambulance = await Ambulance.destroy({ where: { id } })
 
-    if (ambulance === 0) throw { code: ERROR_CODES.AMBULANCE_NOT_FOUND }
+    if (ambulance === 0) throw ERROR_CODES.AMBULANCE_NOT_FOUND
 
     return { success: true }
   }
@@ -125,7 +125,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
         limit: formatAmount as number
       })
 
-    if (ambulances.length === 0) throw { code: ERROR_CODES.AMBULANCE_NOT_FOUND }
+    if (ambulances.length === 0) throw ERROR_CODES.AMBULANCE_NOT_FOUND
 
     const formatAmbulances = ambulances.map((ambulance) => ({
       id: ambulance.id,
@@ -151,9 +151,9 @@ export class AmbulancesService implements AmbulancesServiceInterface {
         { model: Delegation, as: 'delegation', attributes: ['id', 'name'] },
       ],
     })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!ambulance) throw { code: ERROR_CODES.AMBULANCE_NOT_FOUND }
+    if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND
 
     const formatAmbulance = {
       id: ambulance.id,

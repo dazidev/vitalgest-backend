@@ -8,13 +8,13 @@ class AdmController {
     constructor(admService) {
         this.admService = admService;
         this.handleError = (error) => {
-            if (error.code === domain_1.ERROR_CODES.UNKNOWN_ERROR)
-                return application_1.CustomError.internalServer(error.code);
-            if (error.code === domain_1.ERROR_CODES.UNKNOWN_DB_ERROR)
-                return application_1.CustomError.internalServer(error.code);
-            if (error.code === domain_1.ERROR_CODES.TOO_MANY_REQUESTS)
-                return application_1.CustomError.tooManyRequests(error.code);
-            return application_1.CustomError.badRequest(error.code);
+            if (error === domain_1.ERROR_CODES.UNKNOWN_ERROR)
+                return application_1.CustomError.internalServer(error);
+            if (error === domain_1.ERROR_CODES.UNKNOWN_DB_ERROR)
+                return application_1.CustomError.internalServer(error);
+            if (error === domain_1.ERROR_CODES.TOO_MANY_REQUESTS)
+                return application_1.CustomError.tooManyRequests(error);
+            return application_1.CustomError.badRequest(error);
         };
     }
     createUser(req, res, next) {

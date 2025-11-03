@@ -16,10 +16,10 @@ class AdmService {
             tx = await infrastructure_1.sequelize.transaction();
             const exists = await infrastructure_1.User.findOne({ where: { email: email }, transaction: tx });
             if (exists)
-                throw { code: domain_1.ERROR_CODES.EMAIL_ALREADY_REGISTERED };
+                throw domain_1.ERROR_CODES.EMAIL_ALREADY_REGISTERED;
             const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegation_id } });
             if (!existsDelegation)
-                throw { code: domain_1.ERROR_CODES.INVALID_DELEGATION_ID };
+                throw domain_1.ERROR_CODES.INVALID_DELEGATION_ID;
             const hashedPassword = await bcrypt_1.default.hash(password, 10);
             const UserHashed = { name, lastname, email, hashedPassword, role, position, delegation_id };
             const userEntity = domain_1.UserEntity.create(UserHashed);
@@ -44,7 +44,7 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
-            throw { code: domain_1.ERROR_CODES.INSERT_FAILED };
+            throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }
     async editUser(userEntityDto) {
@@ -54,10 +54,10 @@ class AdmService {
             tx = await infrastructure_1.sequelize.transaction();
             const exists = await infrastructure_1.User.findOne({ where: { id }, transaction: tx });
             if (!exists)
-                throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+                throw domain_1.ERROR_CODES.USER_NOT_FOUND;
             const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } });
             if (!existsDelegation)
-                throw { code: domain_1.ERROR_CODES.INVALID_DELEGATION_ID };
+                throw domain_1.ERROR_CODES.INVALID_DELEGATION_ID;
             await infrastructure_1.User.update({
                 name,
                 lastname,
@@ -77,7 +77,7 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
-            throw { code: domain_1.ERROR_CODES.UPDATE_FAILED };
+            throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
     async deleteUser(id) {
@@ -86,14 +86,14 @@ class AdmService {
             tx = await infrastructure_1.sequelize.transaction();
             const exists = await infrastructure_1.User.findOne({ where: { id }, transaction: tx });
             if (!exists)
-                throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+                throw domain_1.ERROR_CODES.USER_NOT_FOUND;
             await infrastructure_1.User.update({ status: false }, { where: { id }, transaction: tx });
             await tx.commit();
             return { success: true };
         }
         catch (error) {
             await tx?.rollback();
-            throw { code: domain_1.ERROR_CODES.DELETE_FAILED };
+            throw domain_1.ERROR_CODES.DELETE_FAILED;
         }
     }
     async getAllUsers(amount, role) {
@@ -117,7 +117,7 @@ class AdmService {
             };
         }
         catch (error) {
-            throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+            throw domain_1.ERROR_CODES.USER_NOT_FOUND;
         }
     }
     async changePasswordUser(id, password) {
@@ -126,7 +126,7 @@ class AdmService {
             tx = await infrastructure_1.sequelize.transaction();
             const exists = await infrastructure_1.User.findOne({ where: { id }, transaction: tx });
             if (!exists)
-                throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+                throw domain_1.ERROR_CODES.USER_NOT_FOUND;
             const hashedPassword = await bcrypt_1.default.hash(password, 10);
             await infrastructure_1.User.update({ password: hashedPassword }, { where: { id }, transaction: tx });
             await tx.commit();
@@ -136,21 +136,21 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
-            throw { code: domain_1.ERROR_CODES.UPDATE_FAILED };
+            throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
     async getUserById(id) {
         try {
             const user = await infrastructure_1.User.findOne({ where: { id }, attributes: { exclude: ['password'] } });
             if (!user)
-                throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND };
+                throw domain_1.ERROR_CODES.USER_NOT_FOUND;
             return {
                 success: true,
                 data: user
             };
         }
         catch (error) {
-            throw { code: domain_1.ERROR_CODES.USER_NOT_FOUND }; // todo: cambiar a error en la busqueda 
+            throw domain_1.ERROR_CODES.USER_NOT_FOUND; // todo: cambiar a error en la busqueda 
         }
     }
 }

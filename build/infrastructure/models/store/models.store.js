@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AnswerComponent = exports.Answer = exports.Question = exports.ChecklistAmbulance = exports.Shift = exports.Ambulance = exports.Guard = exports.User = exports.Delegation = exports.Pharmacy = exports.Municipality = exports.State = void 0;
+exports.AnswerComponent = exports.Answer = exports.Question = exports.ChecklistSupply = exports.ChecklistAmbulance = exports.Shift = exports.Ambulance = exports.Guard = exports.User = exports.Delegation = exports.Pharmacy = exports.Municipality = exports.State = void 0;
 // Modelos sequelize
 const delegation_model_store_1 = __importDefault(require("./sequelize/delegation-model.store"));
 exports.Delegation = delegation_model_store_1.default;
@@ -22,6 +22,7 @@ exports.Ambulance = ambulance_model_store_1.default;
 const shift_model_store_1 = __importDefault(require("./sequelize/shift-model.store"));
 exports.Shift = shift_model_store_1.default;
 const checklist_supply_model_store_1 = __importDefault(require("./sequelize/checklist/checklist-supply-model.store"));
+exports.ChecklistSupply = checklist_supply_model_store_1.default;
 const checklist_ambulance_model_store_1 = __importDefault(require("./sequelize/checklist/checklist-ambulance-model.store"));
 exports.ChecklistAmbulance = checklist_ambulance_model_store_1.default;
 const question_model_store_1 = __importDefault(require("./sequelize/checklist/question-model.store"));
@@ -55,11 +56,11 @@ shift_model_store_1.default.belongsTo(user_model_store_1.default, { foreignKey: 
 user_model_store_1.default.hasMany(shift_model_store_1.default, { foreignKey: 'paramedical_id', as: 'paramedicalShifts' });
 shift_model_store_1.default.belongsTo(user_model_store_1.default, { foreignKey: 'driver_id', as: 'driver' });
 user_model_store_1.default.hasMany(shift_model_store_1.default, { foreignKey: 'driver_id', as: 'driverShifts' });
-shift_model_store_1.default.belongsTo(checklist_supply_model_store_1.default, { foreignKey: 'checklist_supply_id', as: 'checklistSupply' });
-checklist_supply_model_store_1.default.hasOne(shift_model_store_1.default, { foreignKey: 'checklist_supply_id', as: 'shift' });
-shift_model_store_1.default.belongsTo(checklist_ambulance_model_store_1.default, { foreignKey: 'checklist_ambulance_id', as: 'checklistAmbulance' });
-checklist_ambulance_model_store_1.default.hasOne(shift_model_store_1.default, { foreignKey: 'checklist_ambulance_id', as: 'shift' });
 // checklists
+checklist_ambulance_model_store_1.default.belongsTo(ambulance_model_store_1.default, { foreignKey: 'ambulance_id', as: 'ambulance' });
+ambulance_model_store_1.default.hasMany(checklist_ambulance_model_store_1.default, { foreignKey: 'ambulance_id', as: 'checklists' });
+checklist_ambulance_model_store_1.default.belongsTo(shift_model_store_1.default, { foreignKey: 'shift_id', as: 'shift' });
+shift_model_store_1.default.hasMany(checklist_ambulance_model_store_1.default, { foreignKey: 'shift_id', as: 'checklists' });
 answer_model_store_1.default.belongsTo(question_model_store_1.default, { foreignKey: 'question_id', as: 'question' });
 question_model_store_1.default.hasMany(answer_model_store_1.default, { foreignKey: 'question_id', as: 'answers' });
 answer_model_store_1.default.belongsTo(checklist_ambulance_model_store_1.default, { foreignKey: 'checklist_ambulance_id', as: 'checklistAmbulance' });

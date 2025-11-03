@@ -14,10 +14,10 @@ export class ShiftsService implements ShiftsServiceInterface {
       User.findByPk(driverId, { attributes: ['id'], raw: true }),
     ])
 
-    if (!amb) return { code: ERROR_CODES.AMBULANCE_NOT_FOUND }
-    if (!grd) return { code: ERROR_CODES.GUARD_NOT_FOUND }
-    if (!prm) return { code: ERROR_CODES.PARAMEDICAL_NOT_FOUND }
-    if (!drv) return { code: ERROR_CODES.DRIVER_NOT_FOUND }
+    if (!amb) return ERROR_CODES.AMBULANCE_NOT_FOUND
+    if (!grd) return ERROR_CODES.GUARD_NOT_FOUND
+    if (!prm) return ERROR_CODES.PARAMEDICAL_NOT_FOUND
+    if (!drv) return ERROR_CODES.DRIVER_NOT_FOUND
     return true
   }
 
@@ -26,7 +26,7 @@ export class ShiftsService implements ShiftsServiceInterface {
     const { ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto
 
     const ok = await this.validateData(ambulanceId!, guardId!, paramedicalId!, driverId!)
-    if (!ok) throw ok
+    if (typeof ok !== 'boolean') throw ok
 
     let tx: Transaction | undefined
     try {
@@ -73,7 +73,7 @@ export class ShiftsService implements ShiftsServiceInterface {
     } catch (error) {
       tx?.rollback()
       console.log(error)
-      throw { code: ERROR_CODES.INSERT_FAILED }
+      throw ERROR_CODES.INSERT_FAILED
     }
   }
 
@@ -81,10 +81,10 @@ export class ShiftsService implements ShiftsServiceInterface {
     const { id, name, ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto
 
     const shiftExists = await Shift.findOne({ where: { id } })
-    if (!shiftExists) throw { code: ERROR_CODES.SHIFT_NOT_FOUND }
+    if (!shiftExists) throw ERROR_CODES.SHIFT_NOT_FOUND
 
     const ok = await this.validateData(ambulanceId!, guardId!, paramedicalId!, driverId!)
-    if (!ok) throw ok
+    if (typeof ok !== 'boolean') throw ok
 
     let tx: Transaction | undefined
 
@@ -107,7 +107,7 @@ export class ShiftsService implements ShiftsServiceInterface {
     } catch (error) {
       tx?.rollback()
       console.log(error)
-      throw { code: ERROR_CODES.UPDATE_FAILED }
+      throw ERROR_CODES.UPDATE_FAILED
     }
   }
 
@@ -116,7 +116,7 @@ export class ShiftsService implements ShiftsServiceInterface {
 
     const count = await Shift.destroy({ where: { id } })
 
-    if (count === 0) throw { code: ERROR_CODES.SHIFT_NOT_FOUND }
+    if (count === 0) throw ERROR_CODES.SHIFT_NOT_FOUND
 
     return { success: true }
   }
@@ -124,9 +124,9 @@ export class ShiftsService implements ShiftsServiceInterface {
   async getShifts(guardId: string): Promise<object> {
 
     const shifts = await Shift.findAll({ where: { guard_id: guardId } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (shifts.length === 0) throw { code: ERROR_CODES.SHIFT_NOT_FOUND }
+    if (shifts.length === 0) throw ERROR_CODES.SHIFT_NOT_FOUND
 
     const formatShifts = shifts.map((shift) => ({
       id: shift.id,
@@ -155,9 +155,9 @@ export class ShiftsService implements ShiftsServiceInterface {
 
   async getOneShift(id: string): Promise<object> {
     const shift = await Shift.findOne({ where: { id } })
-      .catch(() => { throw { code: ERROR_CODES.UNKNOWN_DB_ERROR } })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!shift) throw { code: ERROR_CODES.SHIFT_NOT_FOUND }
+    if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND
 
     const formatShift = {
       id: shift.id,

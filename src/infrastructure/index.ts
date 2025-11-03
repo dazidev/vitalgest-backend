@@ -14,6 +14,7 @@ export * from './repositories/guards.repositorie';
 
 export * from './http/cookies/refreshCookie'
 export * from './http/cookies/accessCookie'
+export * from './http/interfaces'
 
 export * from './helpers/validators.helper'
 export * from './helpers/file.helper'

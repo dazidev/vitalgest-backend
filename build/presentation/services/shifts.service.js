@@ -13,13 +13,13 @@ class ShiftsService {
                 infrastructure_1.User.findByPk(driverId, { attributes: ['id'], raw: true }),
             ]);
             if (!amb)
-                return { code: domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND };
+                return domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
             if (!grd)
-                return { code: domain_1.ERROR_CODES.GUARD_NOT_FOUND };
+                return domain_1.ERROR_CODES.GUARD_NOT_FOUND;
             if (!prm)
-                return { code: domain_1.ERROR_CODES.PARAMEDICAL_NOT_FOUND };
+                return domain_1.ERROR_CODES.PARAMEDICAL_NOT_FOUND;
             if (!drv)
-                return { code: domain_1.ERROR_CODES.DRIVER_NOT_FOUND };
+                return domain_1.ERROR_CODES.DRIVER_NOT_FOUND;
             return true;
         };
     }
@@ -27,7 +27,7 @@ class ShiftsService {
         //! todo: verificar que no existe una con el mismo día y misma ambulancia
         const { ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto;
         const ok = await this.validateData(ambulanceId, guardId, paramedicalId, driverId);
-        if (!ok)
+        if (typeof ok !== 'boolean')
             throw ok;
         let tx;
         try {
@@ -68,16 +68,16 @@ class ShiftsService {
         catch (error) {
             tx?.rollback();
             console.log(error);
-            throw { code: domain_1.ERROR_CODES.INSERT_FAILED };
+            throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }
     async editShift(shiftEntityDto) {
         const { id, name, ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto;
         const shiftExists = await infrastructure_1.Shift.findOne({ where: { id } });
         if (!shiftExists)
-            throw { code: domain_1.ERROR_CODES.SHIFT_NOT_FOUND };
+            throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         const ok = await this.validateData(ambulanceId, guardId, paramedicalId, driverId);
-        if (!ok)
+        if (typeof ok !== 'boolean')
             throw ok;
         let tx;
         try {
@@ -96,21 +96,21 @@ class ShiftsService {
         catch (error) {
             tx?.rollback();
             console.log(error);
-            throw { code: domain_1.ERROR_CODES.UPDATE_FAILED };
+            throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
     async deleteShift(shiftEntityDto) {
         const { id } = shiftEntityDto;
         const count = await infrastructure_1.Shift.destroy({ where: { id } });
         if (count === 0)
-            throw { code: domain_1.ERROR_CODES.SHIFT_NOT_FOUND };
+            throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         return { success: true };
     }
     async getShifts(guardId) {
         const shifts = await infrastructure_1.Shift.findAll({ where: { guard_id: guardId } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (shifts.length === 0)
-            throw { code: domain_1.ERROR_CODES.SHIFT_NOT_FOUND };
+            throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         const formatShifts = shifts.map((shift) => ({
             id: shift.id,
             name: shift.name,
@@ -136,9 +136,9 @@ class ShiftsService {
     }
     async getOneShift(id) {
         const shift = await infrastructure_1.Shift.findOne({ where: { id } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!shift)
-            throw { code: domain_1.ERROR_CODES.SHIFT_NOT_FOUND };
+            throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         const formatShift = {
             id: shift.id,
             name: shift.name,

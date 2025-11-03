@@ -20,8 +20,11 @@ export const upload = multer({
 })
 
 
-export const checklistFiles = upload.fields([
+export const checklistGasFile = upload.fields([
   { name: 'gasFile', maxCount: 1 },
+])
+
+export const checklistSignFiles = upload.fields([
   { name: 'signOperatorFile', maxCount: 1 },
   { name: 'signRecipientFile', maxCount: 1 },
 ])

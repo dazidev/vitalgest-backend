@@ -13,16 +13,16 @@ class GuardsService {
     async createGuard(guardEntityDto) {
         const { guardChief, delegationId, date } = guardEntityDto;
         const existsGuardChief = await infrastructure_1.User.findOne({ where: { id: guardChief, role: 'head_guard' } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsGuardChief)
-            throw { code: domain_1.ERROR_CODES.USER_NOT_GUARD_CHIEF };
+            throw domain_1.ERROR_CODES.USER_NOT_GUARD_CHIEF;
         const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsDelegation)
-            throw { code: domain_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+            throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const exists = await this.existsGuard(date, delegationId);
         if (exists)
-            throw { code: domain_1.ERROR_CODES.GUARD_ALREADY_EXISTS };
+            throw domain_1.ERROR_CODES.GUARD_ALREADY_EXISTS;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -56,13 +56,13 @@ class GuardsService {
     async editGuard(guardEntityDto) {
         const { id, guardChief, delegationId } = guardEntityDto;
         const existsGuardChief = await infrastructure_1.User.findOne({ where: { id: guardChief, role: 'head_guard' } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsGuardChief)
-            throw { code: domain_1.ERROR_CODES.USER_NOT_GUARD_CHIEF };
+            throw domain_1.ERROR_CODES.USER_NOT_GUARD_CHIEF;
         const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsDelegation)
-            throw { code: domain_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+            throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -75,13 +75,13 @@ class GuardsService {
         }
         catch (error) {
             tx?.rollback();
-            throw { code: domain_1.ERROR_CODES.UPDATE_FAILED };
+            throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
     async deleteGuard(id) {
         const guard = await infrastructure_1.Guard.destroy({ where: { id } });
         if (guard === 0)
-            throw { code: domain_1.ERROR_CODES.GUARD_NOT_FOUND };
+            throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
         return { success: true };
     }
     async getGuards(amount) {
@@ -106,7 +106,7 @@ class GuardsService {
                 limit: formatAmount
             });
         if (guards.length === 0)
-            throw { code: domain_1.ERROR_CODES.GUARD_NOT_FOUND };
+            throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
         const formatGuards = guards.map((guard) => ({
             id: guard.id,
             date: guard.date,
@@ -135,9 +135,9 @@ class GuardsService {
                 { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
             ],
         })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!guard)
-            throw { code: domain_1.ERROR_CODES.GUARD_NOT_FOUND };
+            throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
         const formatGuard = {
             id: guard.id,
             date: guard.date,
