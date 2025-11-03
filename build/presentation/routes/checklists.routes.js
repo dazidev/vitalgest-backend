@@ -15,6 +15,7 @@ checklistsRoutes.post('/ambulance/create', infrastructure_1.checklistGasFile, co
 checklistsRoutes.put('/ambulance/:id/sign', infrastructure_1.checklistSignFiles, controller.signAmbChecklist.bind(controller));
 checklistsRoutes.delete('/ambulance/delete/:id', controller.deleteAmbChecklist.bind(controller));
 checklistsRoutes.put('/ambulance/answers/:id', controller.putAmbAnswers.bind(controller));
+checklistsRoutes.get('/ambulance/:id', controller.getAmbChecklist.bind(controller));
 exports.default = checklistsRoutes;
 /*
 const fd = new FormData()

@@ -90,8 +90,15 @@ class ChecklistsController {
             .then(response => res.json(response))
             .catch(err => next(application_1.CustomError.badRequest(err)));
     }
-    getAmbChecklist(_req, _res, _next) {
-        throw new Error("Method not implemented.");
+    getAmbChecklist(req, res, next) {
+        const { id } = req.params;
+        const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.delete({ id });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
+        const { id: idv } = checkListAmbulanceEntityDto;
+        this.checklistsService.getAmbChecklist(idv)
+            .then(response => res.json(response))
+            .catch(err => next(application_1.CustomError.badRequest(err)));
     }
     putAmbAnswers(req, res, next) {
         const [error, dto] = application_1.AmbAnswersDto.fromRequest(req);
