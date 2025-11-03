@@ -18,5 +18,6 @@ exports.sequelize = new sequelize_1.Sequelize({
             minVersion: 'TLSv1.2',
             rejectUnauthorized: true,
         },
+        connectTimeout: 10000,
     }
 });
