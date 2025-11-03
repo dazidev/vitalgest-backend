@@ -66,4 +66,4 @@ question_model_store_1.default.hasMany(answer_model_store_1.default, { foreignKe
 answer_model_store_1.default.belongsTo(checklist_ambulance_model_store_1.default, { foreignKey: 'checklist_ambulance_id', as: 'checklistAmbulance' });
 checklist_ambulance_model_store_1.default.hasMany(answer_model_store_1.default, { foreignKey: 'checklist_ambulance_id', as: 'answers' });
 answer_component_model_store_1.default.belongsTo(answer_model_store_1.default, { foreignKey: 'answer_id', as: 'answer' });
-answer_model_store_1.default.hasMany(answer_component_model_store_1.default, { foreignKey: 'answer_id', as: 'components' });
+answer_model_store_1.default.hasOne(answer_component_model_store_1.default, { foreignKey: 'answer_id', as: 'components' }); //! solo una.

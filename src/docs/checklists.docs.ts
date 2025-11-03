@@ -295,4 +295,110 @@
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
 
+/**
+ * @openapi
+ * /api/checklists/ambulance/{id}:
+ *   get:
+ *     summary: Obtener checklist de ambulancia con respuestas
+ *     tags: ['ENDPOINTS Gestión de Checklists']
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID del checklist de ambulancia
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Checklist encontrado
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     id: "43a06473-2862-4d1a-90af-6051f20d8509"
+ *                     ambulance_id: "2e0c0a4f-bc9f-4b59-9f21-5e6fbd123456"
+ *                     shift_id: "e1f9f4a1-8b2c-4c4a-9e3b-0f5a9d789abc"
+ *                     time: "12:25:26"
+ *                     km: 12345
+ *                     notes: "Observaciones generales del turno"
+ *                     gas_path: "uploads/ambulance/2025-11/2e0c0a4f-bc9f-4b59-9f21-5e6fbd123456/gas-ticket.jpg"
+ *                     sign_operator_path: "uploads/ambulance/2025-11/2e0c0a4f-bc9f-4b59-9f21-5e6fbd123456/sign-operator.png"
+ *                     sign_recipient_path: "uploads/ambulance/2025-11/2e0c0a4f-bc9f-4b59-9f21-5e6fbd123456/sign-recipient.png"
+ *                     createdAt: "2025-10-27T23:49:38.000Z"
+ *                     updatedAt: "2025-10-27T23:49:38.000Z"
+ *                     answers:
+ *                       - id: "11111111-2222-3333-4444-555555555555"
+ *                         checklist_ambulance_id: "43a06473-2862-4d1a-90af-6051f20d8509"
+ *                         question:
+ *                           id: "9b2f4e6c-9baf-4a64-9f22-6c2d1f1a1a11"
+ *                           question: "¿La ambulancia se encuentra limpia por dentro?"
+ *                           name_category: "Unidad"
+ *                           order_category: 1
+ *                           order_question_category: 1
+ *                           name_subcategory: "Cabina"
+ *                           order_subcategory: 1
+ *                           type_response: "bool"
+ *                         components:
+ *                           - id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+ *                             type: "bool"
+ *                             value_bool: true
+ *                             value_option: null
+ *                             value_text: null
+ *                       - id: "66666666-7777-8888-9999-000000000000"
+ *                         checklist_ambulance_id: "43a06473-2862-4d1a-90af-6051f20d8509"
+ *                         question:
+ *                           id: "1b3c5d7e-8f90-4a12-b345-6789abcdef01"
+ *                           question: "Nivel de combustible"
+ *                           name_category: "Unidad"
+ *                           order_category: 1
+ *                           order_question_category: 2
+ *                           name_subcategory: "Motor"
+ *                           order_subcategory: 2
+ *                           type_response: "option"
+ *                         components:
+ *                           - id: "bbbbbbbb-cccc-dddd-eeee-ffffffffffff"
+ *                             type: "option"
+ *                             value_bool: null
+ *                             value_option: "3/4"
+ *                             value_text: null
+ *                       - id: "99999999-aaaa-bbbb-cccc-dddddddddddd"
+ *                         checklist_ambulance_id: "43a06473-2862-4d1a-90af-6051f20d8509"
+ *                         question:
+ *                           id: "22222222-3333-4444-5555-666666666666"
+ *                           question: "Observaciones adicionales"
+ *                           name_category: "Unidad"
+ *                           order_category: 1
+ *                           order_question_category: 3
+ *                           name_subcategory: "General"
+ *                           order_subcategory: 3
+ *                           type_response: "text"
+ *                         components:
+ *                           - id: "cccccccc-dddd-eeee-ffff-000000000000"
+ *                             type: "text"
+ *                             value_bool: null
+ *                             value_option: null
+ *                             value_text: "La unidad presenta un ligero desgaste en las llantas traseras."
+ *       400:
+ *         description: ID inválido u otros datos inválidos
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       404:
+ *         description: Checklist no encontrado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+
+
 

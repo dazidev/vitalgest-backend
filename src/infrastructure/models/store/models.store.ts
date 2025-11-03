@@ -63,7 +63,7 @@ Answer.belongsTo(ChecklistAmbulance, { foreignKey: 'checklist_ambulance_id', as:
 ChecklistAmbulance.hasMany(Answer, { foreignKey: 'checklist_ambulance_id', as: 'answers' })
 
 AnswerComponent.belongsTo(Answer, { foreignKey: 'answer_id', as: 'answer' })
-Answer.hasMany(AnswerComponent, { foreignKey: 'answer_id', as: 'components' })
+Answer.hasOne(AnswerComponent, { foreignKey: 'answer_id', as: 'components' }) //! solo una.
 
 
 // desde aca se debe hacer las importaciones

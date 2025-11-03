@@ -48,16 +48,8 @@ class DelegationsService {
         const { name, stateId, stateName, municipalityId, municipalityName } = delegationEntity;
         let tx;
         try {
-            console.log('hola');
             tx = await infrastructure_1.sequelize.transaction();
             const pharmacy = await infrastructure_1.Pharmacy.create({}, { transaction: tx });
-            const payload = {
-                name: name,
-                state_id: stateId,
-                municipality_id: municipalityId,
-                pharmacy_id: pharmacy.id
-            };
-            console.log(payload);
             const delegation = await infrastructure_1.Delegation.create({
                 name: name,
                 state_id: stateId,

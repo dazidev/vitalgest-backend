@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 
 import { ChecklistsServiceInterface, ERROR_CODES } from "../../domain";
-import { ChecklistAmbulance, getCurrentTime, Question, relToAbs, saveWebFile, sequelize, Shift } from "../../infrastructure";
+import { Ambulance, ChecklistAmbulance, getCurrentTime, Question, relToAbs, saveWebFile, sequelize, Shift } from "../../infrastructure";
 import { CheckListAmbulanceEntityDto } from '../../application';
 import { Transaction } from 'sequelize';
 import { RequestAnswerInterface } from '../../infrastructure/http/interfaces';
@@ -43,6 +43,16 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction()
 
+      const ambulance = await Ambulance.findOne({
+        where: { id: ambulanceId }
+      })
+      if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND
+
+      const shift = await Shift.findOne({
+        where: { id: shiftId }
+      })
+      if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND
+
       const gas = await saveWebFile(gasFile!, baseDir, subDir);
       saved.push({ absPath: gas.absPath, relPath: gas.relPath });
 
@@ -65,9 +75,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         success: true,
         data: checklist
       }
-    } catch (err) {
+    } catch (error) {
       await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.INSERT_FAILED
     }
   }
@@ -152,8 +163,67 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
   }
 
-  getAmbChecklist(_id: string) {
-    throw new Error("Method not implemented.");
+  async getAmbChecklist(id: string) {
+    try {
+      const checklist = await ChecklistAmbulance.findByPk(id, {
+        include: {
+          model: Answer,
+          as: 'answers',
+          attributes: ['id'],
+          include: [
+            {
+              model: Question,
+              as: 'question',
+              attributes: [
+                'id',
+                'question',
+                'name_category',
+                'order_category',
+                'order_question_category',
+                'name_subcategory',
+                'order_subcategory',
+                'type_response'
+              ]
+            },
+            {
+              model: AnswerComponent,
+              as: 'components',
+              attributes: [
+                'id',
+                'type',
+                'value_bool',
+                'value_option',
+                'value_text'
+              ]
+            },
+          ]
+        },
+        order: [
+          [
+            { model: Answer, as: 'answers' },
+            { model: Question, as: 'question' },
+            'order_category',
+            'ASC',
+          ],
+          [
+            { model: Answer, as: 'answers' },
+            { model: Question, as: 'question' },
+            'order_question_category',
+            'ASC',
+          ],
+        ],
+      })
+      if (!checklist) throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND
+
+      return {
+        success: true,
+        data: checklist
+      }
+    } catch (error) {
+      if (typeof error === 'string') throw error //! TODO: tipificar mejor?
+
+      throw ERROR_CODES.UNKNOWN_ERROR
+    }
   }
 
   async putAmbAnswers(object: RequestAnswerInterface) {
@@ -165,7 +235,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       tx = await sequelize.transaction()
       for (const ans of answers) {
         const questionId = ans.questionId
-  
+
         const [answer] = await Answer.findOrCreate({
           where: {
             checklist_ambulance_id: checklistAmbulanceId,
@@ -177,7 +247,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           },
           transaction: tx
         })
-  
+
         await AnswerComponent.create({
           answer_id: answer.id,
           type: ans.type,
@@ -190,8 +260,9 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       return { success: true }
     } catch (error) {
+      console.log(error)
       await tx?.rollback()
-      throw ERROR_CODES.INSERT_FAILED 
+      throw ERROR_CODES.INSERT_FAILED
     }
   }
 

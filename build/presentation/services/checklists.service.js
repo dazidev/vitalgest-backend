@@ -34,6 +34,16 @@ class ChecklistsService {
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
+            const ambulance = await infrastructure_1.Ambulance.findOne({
+                where: { id: ambulanceId }
+            });
+            if (!ambulance)
+                throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
+            const shift = await infrastructure_1.Shift.findOne({
+                where: { id: shiftId }
+            });
+            if (!shift)
+                throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
             const gas = await (0, infrastructure_1.saveWebFile)(gasFile, baseDir, subDir);
             saved.push({ absPath: gas.absPath, relPath: gas.relPath });
             const checklist = await infrastructure_1.ChecklistAmbulance.create({
@@ -53,9 +63,11 @@ class ChecklistsService {
                 data: checklist
             };
         }
-        catch (err) {
+        catch (error) {
             await Promise.allSettled(saved.map(f => fs_1.promises.unlink(f.absPath)));
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }
@@ -123,8 +135,68 @@ class ChecklistsService {
             throw domain_1.ERROR_CODES.DELETE_FAILED;
         }
     }
-    getAmbChecklist(_id) {
-        throw new Error("Method not implemented.");
+    async getAmbChecklist(id) {
+        try {
+            const checklist = await infrastructure_1.ChecklistAmbulance.findByPk(id, {
+                include: {
+                    model: answer_model_store_1.default,
+                    as: 'answers',
+                    attributes: ['id'],
+                    include: [
+                        {
+                            model: infrastructure_1.Question,
+                            as: 'question',
+                            attributes: [
+                                'id',
+                                'question',
+                                'name_category',
+                                'order_category',
+                                'order_question_category',
+                                'name_subcategory',
+                                'order_subcategory',
+                                'type_response'
+                            ]
+                        },
+                        {
+                            model: answer_component_model_store_1.default,
+                            as: 'components',
+                            attributes: [
+                                'id',
+                                'type',
+                                'value_bool',
+                                'value_option',
+                                'value_text'
+                            ]
+                        },
+                    ]
+                },
+                order: [
+                    [
+                        { model: answer_model_store_1.default, as: 'answers' },
+                        { model: infrastructure_1.Question, as: 'question' },
+                        'order_category',
+                        'ASC',
+                    ],
+                    [
+                        { model: answer_model_store_1.default, as: 'answers' },
+                        { model: infrastructure_1.Question, as: 'question' },
+                        'order_question_category',
+                        'ASC',
+                    ],
+                ],
+            });
+            if (!checklist)
+                throw domain_1.ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
+            return {
+                success: true,
+                data: checklist
+            };
+        }
+        catch (error) {
+            if (typeof error === 'string')
+                throw error; //! TODO: tipificar mejor?
+            throw domain_1.ERROR_CODES.UNKNOWN_ERROR;
+        }
     }
     async putAmbAnswers(object) {
         const { checklistAmbulanceId, answers } = object;
@@ -156,6 +228,7 @@ class ChecklistsService {
             return { success: true };
         }
         catch (error) {
+            console.log(error);
             await tx?.rollback();
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
