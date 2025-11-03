@@ -283,10 +283,6 @@
  *               response:
  *                 value:
  *                   success: true
- *                   data:
- *                     checklistAmbulanceId: "43a06473-2862-4d1a-90af-6051f20d8509"
- *                     saved: 3
- *                     updatedAt: "2025-11-02T01:25:26.000Z"
  *       400:
  *         description: Datos inválidos
  *         content:
