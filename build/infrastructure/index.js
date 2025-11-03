@@ -20,12 +20,16 @@ __exportStar(require("./config/uuid.adapter"), exports);
 __exportStar(require("./middlewares/error.middleware"), exports);
 __exportStar(require("./middlewares/auth.middleware"), exports);
 __exportStar(require("./middlewares/rank.middleware"), exports);
+__exportStar(require("./middlewares/upload.middleware"), exports);
 __exportStar(require("./repositories/adm.repositorie"), exports);
 __exportStar(require("./repositories/auth.repositorie"), exports);
 __exportStar(require("./repositories/guards.repositorie"), exports);
 __exportStar(require("./http/cookies/refreshCookie"), exports);
 __exportStar(require("./http/cookies/accessCookie"), exports);
+__exportStar(require("./http/interfaces"), exports);
 __exportStar(require("./helpers/validators.helper"), exports);
+__exportStar(require("./helpers/file.helper"), exports);
+__exportStar(require("./helpers/time.helper"), exports);
 // Adaptadores
 __exportStar(require("./config/sequelize.adapter"), exports);
 // modelos de sequelize y seeds

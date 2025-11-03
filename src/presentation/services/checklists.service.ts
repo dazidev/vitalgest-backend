@@ -187,6 +187,8 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         }, { transaction: tx })
       }
       await tx?.commit()
+
+      return { success: true }
     } catch (error) {
       await tx?.rollback()
       throw ERROR_CODES.INSERT_FAILED 

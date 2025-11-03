@@ -7,16 +7,16 @@ class AmbulancesService {
     async createAmbulance(ambulanceEntityDto) {
         const { delegationId, number } = ambulanceEntityDto;
         const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsDelegation)
-            throw { code: domain_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+            throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const exists = await infrastructure_1.Ambulance.findOne({ where: { number: number } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (exists)
-            throw { code: 'AMBULANCE_EXISTS' };
+            throw 'AMBULANCE_EXISTS';
         const ambulanceEntity = domain_1.AmbulanceEntity.create(ambulanceEntityDto);
         if (!ambulanceEntity)
-            throw { code: domain_1.ERROR_CODES.INSERT_FAILED };
+            throw domain_1.ERROR_CODES.INSERT_FAILED;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -43,21 +43,21 @@ class AmbulancesService {
         }
         catch (error) {
             tx?.rollback();
-            throw { code: domain_1.ERROR_CODES.INSERT_FAILED };
+            throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }
     async editAmbulance(ambulanceEntityDto) {
         const { id, delegationId } = ambulanceEntityDto;
         const exists = await infrastructure_1.Ambulance.findOne({ where: { id } });
         if (!exists)
-            throw { code: domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND };
+            throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
         const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsDelegation)
-            throw { code: domain_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+            throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const ambulanceEntity = domain_1.AmbulanceEntity.edit(ambulanceEntityDto);
         if (!ambulanceEntity)
-            throw { code: domain_1.ERROR_CODES.UPDATE_FAILED };
+            throw domain_1.ERROR_CODES.UPDATE_FAILED;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -72,14 +72,14 @@ class AmbulancesService {
         }
         catch (error) {
             tx?.rollback();
-            throw { code: domain_1.ERROR_CODES.UPDATE_FAILED };
+            throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
     async deleteAmbulance(ambulanceEntityDto) {
         const { id } = ambulanceEntityDto;
         const ambulance = await infrastructure_1.Ambulance.destroy({ where: { id } });
         if (ambulance === 0)
-            throw { code: domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND };
+            throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
         return { success: true };
     }
     async getAmbulances(amount) {
@@ -102,7 +102,7 @@ class AmbulancesService {
                 limit: formatAmount
             });
         if (ambulances.length === 0)
-            throw { code: domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND };
+            throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
         const formatAmbulances = ambulances.map((ambulance) => ({
             id: ambulance.id,
             number: ambulance.number,
@@ -125,9 +125,9 @@ class AmbulancesService {
                 { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
             ],
         })
-            .catch(() => { throw { code: domain_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!ambulance)
-            throw { code: domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND };
+            throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
         const formatAmbulance = {
             id: ambulance.id,
             number: ambulance.number,

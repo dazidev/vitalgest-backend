@@ -6,9 +6,9 @@ const infrastructure_1 = require("../../infrastructure");
 class DelegationsService {
     async getStates() {
         const states = await infrastructure_1.State.findAll()
-            .catch((_error) => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (states.length === 0)
-            throw { code: error_codes_enum_1.ERROR_CODES.STATES_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.STATES_NOT_FOUND;
         const results = await Promise.all(states.map(async (state) => {
             const municipalities = await infrastructure_1.Municipality.findAll({
                 where: { state_id: state.id },
@@ -28,13 +28,13 @@ class DelegationsService {
     }
     async getMunicipalities(state) {
         const exists = await infrastructure_1.State.findOne({ where: { id: state } })
-            .catch((_error) => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!exists)
-            throw { code: error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND;
         const municipalities = await infrastructure_1.Municipality.findAll({ where: { state_id: state } })
-            .catch((_error) => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (municipalities.length === 0)
-            throw { code: error_codes_enum_1.ERROR_CODES.MUNICIPALITIES_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.MUNICIPALITIES_NOT_FOUND;
         const formatMunicipalities = municipalities.map((m) => ({
             id: m.id,
             name: m.name,
@@ -81,23 +81,23 @@ class DelegationsService {
         }
         catch (error) {
             await tx?.rollback();
-            throw { code: error_codes_enum_1.ERROR_CODES.INSERT_FAILED };
+            throw error_codes_enum_1.ERROR_CODES.INSERT_FAILED;
         }
     }
     async editDelegation(delegationEntity) {
         const { id, name, stateId, municipalityId } = delegationEntity;
         const exists = await infrastructure_1.Delegation.findOne({ where: { id } })
-            .catch((_error) => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!exists)
-            throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const existsState = await infrastructure_1.State.findOne({ where: { id } })
-            .catch((_error) => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsState)
-            throw { code: error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND;
         const existsMunicipality = await infrastructure_1.Municipality.findOne({ where: { id } })
-            .catch((_error) => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsMunicipality)
-            throw { code: error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -108,14 +108,14 @@ class DelegationsService {
             }, { where: { id }, transaction: tx });
             await tx.commit();
             if (!delegation)
-                throw { code: error_codes_enum_1.ERROR_CODES.UPDATE_FAILED };
+                throw error_codes_enum_1.ERROR_CODES.UPDATE_FAILED;
             return {
                 success: true
             };
         }
         catch (error) {
             await tx?.rollback();
-            throw { code: error_codes_enum_1.ERROR_CODES.UPDATE_FAILED };
+            throw error_codes_enum_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
     async deleteDelegation(id) {
@@ -131,13 +131,13 @@ class DelegationsService {
             const count = await infrastructure_1.Delegation.destroy({ where: { id }, transaction: tx });
             await infrastructure_1.Pharmacy.destroy({ where: { id }, transaction: tx });
             if (count === 0)
-                throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+                throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
             await tx.commit();
             return { success: true };
         }
         catch (error) {
             await tx?.rollback();
-            throw { code: error_codes_enum_1.ERROR_CODES.DELETE_FAILED };
+            throw error_codes_enum_1.ERROR_CODES.DELETE_FAILED;
         }
     }
     async getDelegations(amount) {
@@ -170,7 +170,7 @@ class DelegationsService {
                 limit: newAmount
             });
         if (delegations.length === 0)
-            throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const formatDelegations = delegations.map((delegation) => ({
             id: delegation.id,
             name: delegation.name,
@@ -197,9 +197,9 @@ class DelegationsService {
                 exclude: ['state_id', 'municipality_id', 'pharmacy_id']
             }
         })
-            .catch((_error) => { throw { code: error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR }; });
+            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!delegation)
-            throw { code: error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND };
+            throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const formatDelegation = {
             id: delegation.id,
             name: delegation.name,

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChecklistsController = void 0;
 const domain_1 = require("../../domain");
 const application_1 = require("../../application");
+const infrastructure_1 = require("../../infrastructure");
 class ChecklistsController {
     constructor(checklistsService) {
         this.checklistsService = checklistsService;
@@ -25,6 +26,80 @@ class ChecklistsController {
         this.checklistsService.getAmbQuestions()
             .then((response) => res.json(response))
             .catch((err) => next(application_1.CustomError.badRequest(err)));
+    }
+    createAmbChecklist(req, res, next) {
+        try {
+            const { ambulanceId, shiftId, km, notes } = req.body;
+            const files = req.files;
+            const gasFileMf = files?.gasFile?.[0];
+            const signOperatorFileMf = files?.signOperatorFile?.[0];
+            const signRecipientFileMf = files?.signRecipientFile?.[0];
+            const gasFile = (0, infrastructure_1.toWebFile)(gasFileMf);
+            const signOperatorFile = (0, infrastructure_1.toWebFile)(signOperatorFileMf);
+            const signRecipientFile = (0, infrastructure_1.toWebFile)(signRecipientFileMf);
+            const payload = {
+                ambulanceId,
+                shiftId,
+                km,
+                gasFile,
+                signOperatorFile,
+                signRecipientFile,
+                notes,
+            };
+            const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.create(payload);
+            if (error)
+                throw application_1.CustomError.badRequest(error);
+            this.checklistsService.createAmbChecklist(checkListAmbulanceEntityDto)
+                .then(response => res.json(response))
+                .catch(err => next(application_1.CustomError.badRequest(err)));
+        }
+        catch (error) {
+            return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.UNKNOWN_ERROR));
+        }
+    }
+    signAmbChecklist(req, res, next) {
+        try {
+            const { id } = req.params;
+            const files = req.files;
+            const signOperatorFileMf = files?.signOperatorFile?.[0];
+            const signRecipientFileMf = files?.signRecipientFile?.[0];
+            const signOperatorFile = (0, infrastructure_1.toWebFile)(signOperatorFileMf);
+            const signRecipientFile = (0, infrastructure_1.toWebFile)(signRecipientFileMf);
+            const payload = {
+                id,
+                signOperatorFile,
+                signRecipientFile,
+            };
+            const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.sign(payload);
+            if (error)
+                throw application_1.CustomError.badRequest(error);
+            this.checklistsService.signAmbChecklist(checkListAmbulanceEntityDto)
+                .then(response => res.json(response))
+                .catch(err => next(application_1.CustomError.badRequest(err)));
+        }
+        catch (error) {
+            return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.UNKNOWN_ERROR));
+        }
+    }
+    deleteAmbChecklist(req, res, next) {
+        const { id } = req.params;
+        const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.delete({ id });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
+        this.checklistsService.deleteAmbChecklist(checkListAmbulanceEntityDto)
+            .then(response => res.json(response))
+            .catch(err => next(application_1.CustomError.badRequest(err)));
+    }
+    getAmbChecklist(_req, _res, _next) {
+        throw new Error("Method not implemented.");
+    }
+    putAmbAnswers(req, res, next) {
+        const [error, dto] = application_1.AmbAnswersDto.fromRequest(req);
+        if (error)
+            return next(application_1.CustomError.badRequest(error));
+        this.checklistsService.putAmbAnswers(dto)
+            .then(response => res.json(response))
+            .catch(err => next(application_1.CustomError.badRequest(err)));
     }
 }
 exports.ChecklistsController = ChecklistsController;

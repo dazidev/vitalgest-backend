@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const sequelize_adapter_1 = require("../../../../config/sequelize.adapter");
-const ANSWER_TYPES = ['bool', 'option', 'text'];
+const ANSWER_TYPES = ["bool", "option", "text", "bool_option", "bool_text", "option_text", "bool_option_text"];
 class AnswerComponent extends sequelize_1.Model {
 }
 AnswerComponent.init({

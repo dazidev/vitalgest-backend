@@ -68,7 +68,7 @@ const createSeed = async () => {
             position: 'developer',
             delegation_id: delegation.id,
         }, { transaction: tx });
-        await models_store_1.User.create({
+        const guardChief = await models_store_1.User.create({
             name: 'Jefe Guardia',
             lastname: 'Seed',
             email: 'jefeguardiaseed@vitalgest.mx',
@@ -78,7 +78,7 @@ const createSeed = async () => {
             position: 'Jefe de guardia',
             delegation_id: delegation.id,
         }, { transaction: tx });
-        await models_store_1.User.create({
+        const paramedical = await models_store_1.User.create({
             name: 'Paramedico',
             lastname: 'Seed',
             email: 'paramedicoseed@vitalgest.mx',
@@ -88,7 +88,7 @@ const createSeed = async () => {
             position: 'Paramedico',
             delegation_id: delegation.id,
         }, { transaction: tx });
-        await models_store_1.User.create({
+        const driver = await models_store_1.User.create({
             name: 'Chofer',
             lastname: 'Seed',
             email: 'choferseed@vitalgest.mx',
@@ -99,11 +99,28 @@ const createSeed = async () => {
             delegation_id: delegation.id,
         }, { transaction: tx });
         //* Ambulancia semilla
-        await models_store_1.Ambulance.create({
+        const ambulance = await models_store_1.Ambulance.create({
             number: 'DF434F7',
             model: '2018',
             brand: 'Mercedez Benz',
             delegation_id: delegation.id,
+        }, { transaction: tx });
+        //* Guardia semilla
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const guard = await models_store_1.Guard.create({
+            date: startOfDay,
+            state: 'Nueva',
+            guard_chief: guardChief.id,
+            delegation_id: delegation.id,
+        }, { transaction: tx });
+        //* Turno semilla
+        await models_store_1.Shift.create({
+            name: `Turno ${ambulance.number}`,
+            ambulance_id: ambulance.id,
+            guard_id: guard.id,
+            paramedical_id: paramedical.id,
+            driver_id: driver.id
         }, { transaction: tx });
         await tx.commit();
         return { success: true };

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("./types/express-augment");
 require("./docs/swagger");
 require("./docs/adm.docs");
+// import 'undici';
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = require("dotenv");
@@ -89,6 +90,13 @@ app.use('/api/guards', presentation_1.guardsRoutes);
 app.use('/api/ambulances', presentation_1.ambulancesRoutes);
 app.use('/api/shifts', presentation_1.shiftRoutes);
 app.use('/api/checklists', presentation_1.checklistsRoutes);
+// para ver las imagenes
+app.use('/uploads', express_1.default.static(path_1.default.resolve('uploads'), {
+    // cache opcional
+    maxAge: '7d',
+    etag: true,
+    setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=604800')
+}));
 // rutas que funcionan solo en desarrollo
 if (process.env.NODE_ENV === 'development') {
     app.use('/api/dev', presentation_1.devRoutes);

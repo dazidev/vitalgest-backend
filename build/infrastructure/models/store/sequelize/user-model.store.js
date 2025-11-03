@@ -8,7 +8,7 @@ User.init({
     id: { type: sequelize_1.DataTypes.UUID, primaryKey: true, defaultValue: sequelize_1.UUIDV4, allowNull: false },
     name: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
     lastname: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
-    email: { type: sequelize_1.DataTypes.STRING(150), allowNull: false, unique: true },
+    email: { type: sequelize_1.DataTypes.STRING(150), allowNull: false, /*unique: true*/ },
     password: { type: sequelize_1.DataTypes.STRING(255), allowNull: false },
     status: { type: sequelize_1.DataTypes.BOOLEAN, allowNull: false },
     role: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
@@ -20,6 +20,7 @@ User.init({
     tableName: 'users',
     timestamps: true,
     underscored: true,
+    indexes: [{ unique: true, fields: ['email'], name: 'uq_users_email' }]
     // paranoid: true //* activa borrado lógico
 });
 exports.default = User;
