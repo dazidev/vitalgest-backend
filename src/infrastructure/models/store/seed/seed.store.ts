@@ -1,6 +1,6 @@
 import { Transaction } from "sequelize"
 import { sequelize } from "../../../config/sequelize.adapter"
-import { Ambulance, Delegation, Municipality, Pharmacy, State, User } from "../models.store"
+import { Ambulance, Delegation, Guard, Municipality, Pharmacy, Shift, State, User } from "../models.store"
 import { config } from "dotenv"
 import bcrypt from 'bcrypt';
 
@@ -75,7 +75,7 @@ export const createSeed = async () => {
       delegation_id: delegation.id,
     }, { transaction: tx })
 
-    await User.create({ // Jefe de guardia
+    const guardChief = await User.create({ // Jefe de guardia
       name: 'Jefe Guardia',
       lastname: 'Seed',
       email: 'jefeguardiaseed@vitalgest.mx',
@@ -86,7 +86,7 @@ export const createSeed = async () => {
       delegation_id: delegation.id,
     }, { transaction: tx })
 
-    await User.create({ // Paramedico
+    const paramedical = await User.create({ // Paramedico
       name: 'Paramedico',
       lastname: 'Seed',
       email: 'paramedicoseed@vitalgest.mx',
@@ -97,7 +97,7 @@ export const createSeed = async () => {
       delegation_id: delegation.id,
     }, { transaction: tx })
 
-    await User.create({ // Chofer
+    const driver = await User.create({ // Chofer
       name: 'Chofer',
       lastname: 'Seed',
       email: 'choferseed@vitalgest.mx',
@@ -109,11 +109,31 @@ export const createSeed = async () => {
     }, { transaction: tx })
 
     //* Ambulancia semilla
-    await Ambulance.create({
+    const ambulance = await Ambulance.create({
       number: 'DF434F7',
       model: '2018',
       brand: 'Mercedez Benz',
       delegation_id: delegation.id,
+    }, { transaction: tx })
+
+    //* Guardia semilla
+    const now = new Date()
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+
+    const guard = await Guard.create({
+      date: startOfDay,
+      state: 'Nueva',
+      guard_chief: guardChief.id,
+      delegation_id: delegation.id,
+    }, { transaction: tx })
+
+    //* Turno semilla
+    await Shift.create({
+      name: `Turno ${ambulance!.number}`,
+      ambulance_id: ambulance.id,
+      guard_id: guard.id,
+      paramedical_id: paramedical.id,
+      driver_id: driver.id
     }, { transaction: tx })
 
     await tx.commit()

@@ -2,7 +2,7 @@ import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreation
 import { sequelize } from '../../../../config/sequelize.adapter';
 import Answer from './answer-model.store';
 
-const ANSWER_TYPES = ['bool', 'option', 'text'] as const
+const ANSWER_TYPES = ["bool", "option", "text", "bool_option", "bool_text", "option_text", "bool_option_text"] as const
 type AnswerTypes = typeof ANSWER_TYPES[number]
 
 class AnswerComponent extends Model<

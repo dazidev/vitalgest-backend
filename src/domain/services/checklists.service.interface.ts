@@ -1,4 +1,5 @@
 import { CheckListAmbulanceEntityDto } from "../../application";
+import { RequestAnswerInterface } from "../../infrastructure";
 
 
 export interface ChecklistsServiceInterface {
@@ -6,8 +7,8 @@ export interface ChecklistsServiceInterface {
   getAmbQuestionPerCategory (category: number): Promise<object>;
 
   createAmbChecklist (checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto): void
-  editAmbChecklist (): void
-  deleteAmbChecklist (id: string): void
+  signAmbChecklist (checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto): void
+  deleteAmbChecklist (checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto): void
   getAmbChecklist (id: string): void
-  putAmbAnswers (): void
+  putAmbAnswers (object: RequestAnswerInterface): void
 };

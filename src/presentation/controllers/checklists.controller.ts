@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { CheckListsControllerInterface, ERROR_CODES } from "../../domain";
 import { ChecklistsService } from "../services/checklists.service";
-import { CheckListAmbulanceEntityDto, CustomError } from "../../application";
+import { AmbAnswersDto, CheckListAmbulanceEntityDto, CustomError } from "../../application";
 import { toWebFile } from "../../infrastructure";
 
 
 export class ChecklistsController implements CheckListsControllerInterface {
 
   constructor(public readonly checklistsService: ChecklistsService) { }
-
 
   getAmbQuestions(req: Request, res: Response, next: NextFunction): void {
 
@@ -70,23 +69,61 @@ export class ChecklistsController implements CheckListsControllerInterface {
     } catch (error) {
       return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR))
     }
-    
   }
 
+  signAmbChecklist(req: Request, res: Response, next: NextFunction): void {
+    try {
+      const { id } = req.params
 
+      const files = req.files as {
+        [field: string]: Express.Multer.File[]
+      } | undefined
 
+      const signOperatorFileMf = files?.signOperatorFile?.[0]
+      const signRecipientFileMf = files?.signRecipientFile?.[0]
 
-  editAmbChecklist(_req: Request, _res: Response, _next: NextFunction): void {
-    throw new Error("Method not implemented.");
+      const signOperatorFile = toWebFile(signOperatorFileMf)
+      const signRecipientFile = toWebFile(signRecipientFileMf)
+
+      const payload = {
+        id,
+        signOperatorFile,
+        signRecipientFile,
+      }
+
+      const [error, checkListAmbulanceEntityDto] = CheckListAmbulanceEntityDto.sign(payload)
+      if (error) throw CustomError.badRequest(error)
+
+      this.checklistsService.signAmbChecklist(checkListAmbulanceEntityDto!)
+        .then(response => res.json(response))
+        .catch(err => next(CustomError.badRequest(err)))
+
+    } catch (error) {
+      return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR))
+    }
   }
-  deleteAmbChecklist(_req: Request, _res: Response, _next: NextFunction): void {
-    throw new Error("Method not implemented.");
+
+  deleteAmbChecklist(req: Request, res: Response, next: NextFunction): void {
+    const { id } = req.params
+
+    const [error, checkListAmbulanceEntityDto] = CheckListAmbulanceEntityDto.delete({ id })
+    if (error) throw CustomError.badRequest(error)
+
+    this.checklistsService.deleteAmbChecklist(checkListAmbulanceEntityDto!)
+      .then(response => res.json(response))
+      .catch(err => next(CustomError.badRequest(err)))
   }
+
   getAmbChecklist(_req: Request, _res: Response, _next: NextFunction): void {
     throw new Error("Method not implemented.");
   }
-  putAmbAnswers(_req: Request, _res: Response, _next: NextFunction): void {
-    throw new Error("Method not implemented.");
-  }
 
+  putAmbAnswers(req: Request, res: Response, next: NextFunction): void {
+    const [error, dto] = AmbAnswersDto.fromRequest(req)
+    if (error) return next(CustomError.badRequest(error))
+
+    this.checklistsService.putAmbAnswers(dto!)
+      .then(response => res.json(response))
+      .catch(err => next(CustomError.badRequest(err)))
+  }
 }

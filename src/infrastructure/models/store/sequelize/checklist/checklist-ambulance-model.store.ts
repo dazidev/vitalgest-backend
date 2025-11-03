@@ -14,8 +14,8 @@ class ChecklistAmbulance extends Model<
   declare time: string
   declare km: number
   declare gas_path: string
-  declare sign_operator_path: string
-  declare sign_recipient_path: string
+  declare sign_operator_path?: string
+  declare sign_recipient_path?: string
   declare notes?: string
 
   declare ambulance?: NonAttribute<Ambulance>
@@ -43,8 +43,8 @@ ChecklistAmbulance.init(
     time: { type: DataTypes.TIME, allowNull: false },
     km: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     gas_path: { type: DataTypes.STRING, allowNull: false },
-    sign_operator_path: { type: DataTypes.STRING, allowNull: false },
-    sign_recipient_path: { type: DataTypes.STRING, allowNull: false },
+    sign_operator_path: { type: DataTypes.STRING, defaultValue: null ,allowNull: true },
+    sign_recipient_path: { type: DataTypes.STRING, defaultValue: null ,allowNull: true },
     notes: { type: DataTypes.TEXT, allowNull: true }
   },
   {

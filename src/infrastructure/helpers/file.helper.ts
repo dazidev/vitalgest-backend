@@ -115,6 +115,26 @@ export function toWebFile(mf?: Express.Multer.File): File | undefined {
   return new WebFile([part], mf.originalname, { type: mf.mimetype }) as File
 }
 
+const ABS_UPLOADS_ROOT = path.resolve('uploads')
+
+export function relToAbs(relPath: string): string {
+  const normalized = relPath.replace(/\\/g, '/');
+  const withoutPrefix = normalized.replace(/^uploads\//, '');
+
+  const abs = path.resolve(ABS_UPLOADS_ROOT, withoutPrefix);
+
+  if (!abs.startsWith(ABS_UPLOADS_ROOT + path.sep)) {
+    throw new Error('INVALID_PATH_TRAVERSAL');
+  }
+  return abs;
+}
+
+export function absToRel(absPath: string): string {
+  const relFromRoot = path.relative(ABS_UPLOADS_ROOT, absPath).split(path.sep).join('/');
+  return `uploads/${relFromRoot}`; // mismo formato que guardas en DB
+}
+
+
 
 
 
