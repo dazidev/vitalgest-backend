@@ -65,9 +65,20 @@ export class DelegationsService implements DelegationsServiceInterface {
     let tx: Transaction | undefined
 
     try {
+      console.log('hola')
       tx = await sequelize.transaction()
 
-      const pharmacy = await Pharmacy.create()
+      
+      const pharmacy = await Pharmacy.create({}, { transaction: tx })
+
+      const payload = {
+        name: name!,
+        state_id: stateId!,
+        municipality_id: municipalityId!,
+        pharmacy_id: pharmacy.id
+      }
+
+      console.log(payload)
 
       const delegation = await Delegation.create({
         name: name!,
@@ -102,6 +113,7 @@ export class DelegationsService implements DelegationsServiceInterface {
       }
 
     } catch (error) {
+      console.log(error)
       await tx?.rollback()
       throw ERROR_CODES.INSERT_FAILED
     }
