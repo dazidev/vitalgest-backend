@@ -123,7 +123,14 @@ export class ShiftsService implements ShiftsServiceInterface {
 
   async getShifts(guardId: string): Promise<object> {
 
-    const shifts = await Shift.findAll({ where: { guard_id: guardId } })
+    const shifts = await Shift.findAll({ 
+      where: { guard_id: guardId },
+      include: [
+        { model: Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
+        { model: User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
+        { model: User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+      ]
+    })
       .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
     if (shifts.length === 0) throw ERROR_CODES.SHIFT_NOT_FOUND
@@ -131,18 +138,10 @@ export class ShiftsService implements ShiftsServiceInterface {
     const formatShifts = shifts.map((shift) => ({
       id: shift.id,
       name: shift.name,
-      ambulance: {
-        id: shift.ambulance_id
-      },
-      guard: {
-        id: shift.guard_id
-      },
-      paramedical: {
-        id: shift.paramedical_id
-      },
-      driver: {
-        id: shift.driver_id
-      },
+      ambulance: shift.ambulance,
+      guard: shift.guard,
+      paramedical: shift.paramedical,
+      driver: shift.driver,
       createdAt: shift.get('createdAt') as Date,
       updatedAt: shift.get('updatedAt') as Date,
     }))

@@ -79,10 +79,25 @@ class GuardsService {
         }
     }
     async deleteGuard(id) {
-        const guard = await infrastructure_1.Guard.destroy({ where: { id } });
-        if (guard === 0)
-            throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
-        return { success: true };
+        try {
+            const guard = await infrastructure_1.Guard.findOne({
+                where: { id },
+                attributes: ['state']
+            });
+            if (!guard?.state)
+                throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
+            if (guard.state !== 'Nueva')
+                throw domain_1.ERROR_CODES.STATE_NOT_ALLOWED;
+            const row = await infrastructure_1.Guard.destroy({ where: { id } });
+            if (row === 0)
+                throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
+            return { success: true };
+        }
+        catch (error) {
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_ERROR;
+        }
     }
     async getGuards(amount) {
         let formatAmount;
@@ -93,12 +108,24 @@ class GuardsService {
         let guards;
         formatAmount === 'all'
             ? guards = await infrastructure_1.Guard.findAll({
+                attributes: ['id', 'date', 'state', 'created_at', 'updated_at'],
                 include: [
                     { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
                     { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                    {
+                        model: infrastructure_1.Shift,
+                        as: 'shifts',
+                        attributes: ['id', 'name', 'checklist_supply_id', 'checklist_ambulance_id', 'created_at', 'updated_at'],
+                        include: [
+                            { model: infrastructure_1.Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
+                            { model: infrastructure_1.User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
+                            { model: infrastructure_1.User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+                        ]
+                    },
                 ],
             })
             : guards = await infrastructure_1.Guard.findAll({
+                attributes: ['id', 'date', 'state', 'created_at', 'updated_at'],
                 include: [
                     { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
                     { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
@@ -107,24 +134,9 @@ class GuardsService {
             });
         if (guards.length === 0)
             throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
-        const formatGuards = guards.map((guard) => ({
-            id: guard.id,
-            date: guard.date,
-            state: guard.state,
-            guardChief: {
-                id: guard.guardChief?.id,
-                name: guard.guardChief?.name,
-                lastname: guard.guardChief?.lastname,
-                email: guard.guardChief?.email,
-            },
-            delegation: {
-                id: guard.delegation?.id,
-                name: guard.delegation?.name,
-            }
-        }));
         return {
             success: true,
-            data: formatGuards
+            data: guards
         };
     }
     async getOneGuard(id) {

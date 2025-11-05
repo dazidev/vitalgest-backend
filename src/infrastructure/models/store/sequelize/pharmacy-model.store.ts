@@ -1,4 +1,4 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
+import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, UUIDV4 } from 'sequelize';
 import { sequelize } from '../../../config/sequelize.adapter';
 
 
@@ -6,12 +6,12 @@ class Pharmacy extends Model<
   InferAttributes<Pharmacy>,
   InferCreationAttributes<Pharmacy>
 > {
-  declare id: CreationOptional<number>;
+  declare id: CreationOptional<string>;
 }
 
 Pharmacy.init(
   {
-    id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, allowNull: false, autoIncrement: true },
+    id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
   },
   {
     sequelize,

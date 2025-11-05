@@ -22,7 +22,7 @@ Delegation.init({
         onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     pharmacy_id: {
-        type: sequelize_1.DataTypes.BIGINT.UNSIGNED,
+        type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: { model: 'pharmacies', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id

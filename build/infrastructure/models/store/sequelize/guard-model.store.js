@@ -16,14 +16,14 @@ Guard.init({
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     delegation_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: { model: 'delegations', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        onDelete: 'CASCADE',
     },
 }, {
     sequelize: sequelize_adapter_1.sequelize,

@@ -1,7 +1,7 @@
 import { Transaction } from "sequelize";
 import { GuardsEntityDto } from "../../application";
 import { ERROR_CODES, GuardsServiceInterface } from "../../domain";
-import { Delegation, Guard, sequelize, User } from "../../infrastructure";
+import { Ambulance, Delegation, Guard, sequelize, Shift, User } from "../../infrastructure";
 
 
 export class GuardsService implements GuardsServiceInterface {
@@ -9,7 +9,7 @@ export class GuardsService implements GuardsServiceInterface {
   private async existsGuard(date: string, delegationId: string): Promise<boolean> {
     const exists = await Guard.findOne({ where: { delegation_id: delegationId, date } })
     if (exists) return true
-    
+
     return false
   }
 
@@ -39,7 +39,7 @@ export class GuardsService implements GuardsServiceInterface {
         guard_chief: guardChief,
         state: 'Nueva',
         delegation_id: delegationId,
-      }, { transaction: tx } )
+      }, { transaction: tx })
 
       await tx.commit()
 
@@ -101,11 +101,24 @@ export class GuardsService implements GuardsServiceInterface {
   }
 
   async deleteGuard(id: string): Promise<object> {
-    const guard = await Guard.destroy({ where: { id } })
+    try {
+      const guard = await Guard.findOne({
+        where: { id },
+        attributes: ['state']
+      })
 
-    if (guard === 0) throw ERROR_CODES.GUARD_NOT_FOUND
+      if (!guard?.state) throw ERROR_CODES.GUARD_NOT_FOUND
+      if (guard.state !== 'Nueva') throw ERROR_CODES.STATE_NOT_ALLOWED
 
-    return { success: true }
+      const row = await Guard.destroy({ where: { id } })
+      if (row === 0) throw ERROR_CODES.GUARD_NOT_FOUND
+
+      return { success: true }
+
+    } catch (error) {
+      if (typeof error === 'string') throw error
+      throw ERROR_CODES.UNKNOWN_ERROR
+    }
   }
 
   async getGuards(amount: string): Promise<object> {
@@ -118,12 +131,24 @@ export class GuardsService implements GuardsServiceInterface {
 
     formatAmount === 'all'
       ? guards = await Guard.findAll({
+        attributes: ['id', 'date', 'state', 'created_at', 'updated_at'],
         include: [
           { model: User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
           { model: Delegation, as: 'delegation', attributes: ['id', 'name'] },
+          {
+            model: Shift,
+            as: 'shifts',
+            attributes: ['id', 'name', 'checklist_supply_id', 'checklist_ambulance_id', 'created_at', 'updated_at'],
+            include: [
+              { model: Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
+              { model: User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
+              { model: User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+            ]
+          },
         ],
       })
       : guards = await Guard.findAll({
+        attributes: ['id', 'date', 'state', 'created_at', 'updated_at'],
         include: [
           { model: User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
           { model: Delegation, as: 'delegation', attributes: ['id', 'name'] },
@@ -133,25 +158,9 @@ export class GuardsService implements GuardsServiceInterface {
 
     if (guards.length === 0) throw ERROR_CODES.GUARD_NOT_FOUND
 
-    const formatGuards = guards.map((guard) => ({
-      id: guard.id,
-      date: guard.date,
-      state: guard.state,
-      guardChief: {
-        id: guard.guardChief?.id,
-        name: guard.guardChief?.name,
-        lastname: guard.guardChief?.lastname,
-        email: guard.guardChief?.email,
-      },
-      delegation: {
-        id: guard.delegation?.id,
-        name: guard.delegation?.name,
-      }
-    }))
-
-    return { 
+    return {
       success: true,
-      data: formatGuards
+      data: guards
     }
   }
 

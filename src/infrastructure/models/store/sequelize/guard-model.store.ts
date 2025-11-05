@@ -8,16 +8,16 @@ class Guard extends Model<
   InferAttributes<Guard>,
   InferCreationAttributes<Guard>
 > {
-  declare id: CreationOptional<string>;
-  declare date: Date;
-  declare state: String;
+  declare id: CreationOptional<string>
+  declare date: Date
+  declare state: String
 
-  declare guard_chief: ForeignKey<User['id']>;
-  declare delegation_id: ForeignKey<Delegation['id']>;
+  declare guard_chief: ForeignKey<User['id']>
+  declare delegation_id: ForeignKey<Delegation['id']>
 
 
-  declare guardChief?: NonAttribute<User>;
-  declare delegation?: NonAttribute<Delegation>;
+  declare guardChief?: NonAttribute<User>
+  declare delegation?: NonAttribute<Delegation>
 }
 
 Guard.init(
@@ -33,14 +33,14 @@ Guard.init(
       allowNull: false,
       references: { model: 'users', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     delegation_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'delegations', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      onDelete: 'CASCADE',
     },
   },
   {

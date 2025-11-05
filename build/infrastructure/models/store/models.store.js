@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AnswerComponent = exports.Answer = exports.Question = exports.ChecklistSupply = exports.ChecklistAmbulance = exports.Shift = exports.Ambulance = exports.Guard = exports.User = exports.Delegation = exports.Pharmacy = exports.Municipality = exports.State = void 0;
+exports.SupplyAmbulance = exports.Supply = exports.AnswerComponent = exports.Answer = exports.Question = exports.ChecklistSupply = exports.ChecklistAmbulance = exports.Shift = exports.Ambulance = exports.Guard = exports.User = exports.Delegation = exports.Pharmacy = exports.Municipality = exports.State = void 0;
 // Modelos sequelize
 const delegation_model_store_1 = __importDefault(require("./sequelize/delegation-model.store"));
 exports.Delegation = delegation_model_store_1.default;
@@ -31,6 +31,10 @@ const answer_model_store_1 = __importDefault(require("./sequelize/checklist/answ
 exports.Answer = answer_model_store_1.default;
 const answer_component_model_store_1 = __importDefault(require("./sequelize/checklist/answer-component-model.store"));
 exports.AnswerComponent = answer_component_model_store_1.default;
+const supply_model_store_1 = __importDefault(require("./sequelize/supplies/supply-model.store"));
+exports.Supply = supply_model_store_1.default;
+const supply_ambulance_model_store_1 = __importDefault(require("./sequelize/supplies/supply-ambulance-model.store"));
+exports.SupplyAmbulance = supply_ambulance_model_store_1.default;
 // Definicion de asociaciones 
 state_model_store_1.default.hasMany(municipality_model_store_1.default, { foreignKey: 'state_id', as: 'municipalities' });
 municipality_model_store_1.default.belongsTo(state_model_store_1.default, { foreignKey: 'state_id', as: 'state' });
@@ -49,9 +53,9 @@ ambulance_model_store_1.default.belongsTo(delegation_model_store_1.default, { fo
 delegation_model_store_1.default.hasMany(ambulance_model_store_1.default, { foreignKey: 'delegation_id', as: 'ambulances' });
 // Turnos
 shift_model_store_1.default.belongsTo(guard_model_store_1.default, { foreignKey: 'guard_id', as: 'guard' });
-guard_model_store_1.default.hasMany(shift_model_store_1.default, { foreignKey: 'guard_id', as: 'guard' });
+guard_model_store_1.default.hasMany(shift_model_store_1.default, { foreignKey: 'guard_id', as: 'shifts' });
 shift_model_store_1.default.belongsTo(ambulance_model_store_1.default, { foreignKey: 'ambulance_id', as: 'ambulance' });
-ambulance_model_store_1.default.hasMany(shift_model_store_1.default, { foreignKey: 'ambulance_id', as: 'shifts' });
+ambulance_model_store_1.default.hasMany(shift_model_store_1.default, { foreignKey: 'ambulance_id', as: 'ambulanceShifts' });
 shift_model_store_1.default.belongsTo(user_model_store_1.default, { foreignKey: 'paramedical_id', as: 'paramedical' });
 user_model_store_1.default.hasMany(shift_model_store_1.default, { foreignKey: 'paramedical_id', as: 'paramedicalShifts' });
 shift_model_store_1.default.belongsTo(user_model_store_1.default, { foreignKey: 'driver_id', as: 'driver' });
@@ -67,3 +71,10 @@ answer_model_store_1.default.belongsTo(checklist_ambulance_model_store_1.default
 checklist_ambulance_model_store_1.default.hasMany(answer_model_store_1.default, { foreignKey: 'checklist_ambulance_id', as: 'answers' });
 answer_component_model_store_1.default.belongsTo(answer_model_store_1.default, { foreignKey: 'answer_id', as: 'answer' });
 answer_model_store_1.default.hasOne(answer_component_model_store_1.default, { foreignKey: 'answer_id', as: 'components' }); //! solo una.
+// insumos
+supply_model_store_1.default.belongsTo(pharmacy_model_store_1.default, { foreignKey: 'pharmacy_id', as: 'pharmacy' });
+pharmacy_model_store_1.default.hasMany(supply_model_store_1.default, { foreignKey: 'pharmacy_id', as: 'supplies' });
+supply_ambulance_model_store_1.default.belongsTo(supply_model_store_1.default, { foreignKey: 'supply_id', as: 'supply' });
+supply_model_store_1.default.hasMany(supply_ambulance_model_store_1.default, { foreignKey: 'supply_id', as: 'ambulanceSupplies' });
+supply_ambulance_model_store_1.default.belongsTo(ambulance_model_store_1.default, { foreignKey: 'ambulance_id', as: 'ambulance' });
+ambulance_model_store_1.default.hasMany(supply_ambulance_model_store_1.default, { foreignKey: 'ambulance_id', as: 'supplies' });
