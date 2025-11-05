@@ -12,42 +12,42 @@ Shift.init({
         allowNull: false,
         references: { model: 'ambulances', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        onDelete: 'CASCADE', // elimina los hijos
     },
     guard_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: { model: 'guards', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        onDelete: 'CASCADE', // elimina los hijos
     },
     paramedical_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     driver_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: { model: 'users', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     checklist_supply_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: true,
         references: { model: 'checklist_supplies', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     checklist_ambulance_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: true,
         references: { model: 'checklist_ambulances', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
 }, {
     sequelize: sequelize_adapter_1.sequelize,
