@@ -12,6 +12,8 @@ import ChecklistAmbulance from './sequelize/checklist/checklist-ambulance-model.
 import Question from './sequelize/checklist/question-model.store';
 import Answer from "./sequelize/checklist/answer-model.store";
 import AnswerComponent from "./sequelize/checklist/answer-component-model.store";
+import Supply from "./sequelize/supplies/supply-model.store";
+import SupplyAmbulance from "./sequelize/supplies/supply-ambulance-model.store";
 
 
 // Definicion de asociaciones 
@@ -38,10 +40,10 @@ Delegation.hasMany(Ambulance, { foreignKey: 'delegation_id', as: 'ambulances' })
 
 // Turnos
 Shift.belongsTo(Guard, { foreignKey: 'guard_id', as: 'guard' })
-Guard.hasMany(Shift, { foreignKey: 'guard_id', as: 'guard' })
+Guard.hasMany(Shift, { foreignKey: 'guard_id', as: 'guardShifts' })
 
 Shift.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' });
-Ambulance.hasMany(Shift,   { foreignKey: 'ambulance_id', as: 'shifts' });
+Ambulance.hasMany(Shift,   { foreignKey: 'ambulance_id', as: 'ambulanceShifts' });
 
 Shift.belongsTo(User, { foreignKey: 'paramedical_id', as: 'paramedical' });
 User.hasMany(Shift,   { foreignKey: 'paramedical_id', as: 'paramedicalShifts' });
@@ -65,6 +67,18 @@ ChecklistAmbulance.hasMany(Answer, { foreignKey: 'checklist_ambulance_id', as: '
 AnswerComponent.belongsTo(Answer, { foreignKey: 'answer_id', as: 'answer' })
 Answer.hasOne(AnswerComponent, { foreignKey: 'answer_id', as: 'components' }) //! solo una.
 
+// insumos
+Supply.belongsTo(Pharmacy, { foreignKey: 'pharmacy_id', as: 'pharmacy' })
+Pharmacy.hasMany(Supply, { foreignKey: 'pharmacy_id', as: 'supplies' })
+
+SupplyAmbulance.belongsTo(Supply, { foreignKey: 'supply_id', as: 'supply' })
+Supply.hasMany(SupplyAmbulance, { foreignKey: 'supply_id', as: 'ambulanceSupplies' })
+
+SupplyAmbulance.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' })
+Ambulance.hasMany(SupplyAmbulance, { foreignKey: 'ambulance_id', as: 'supplies' })
+
+
+
 
 // desde aca se debe hacer las importaciones
 export { 
@@ -80,5 +94,7 @@ export {
   ChecklistSupply,
   Question,
   Answer,
-  AnswerComponent
+  AnswerComponent,
+  Supply,
+  SupplyAmbulance
 };

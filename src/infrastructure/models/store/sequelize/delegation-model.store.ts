@@ -39,7 +39,7 @@ Delegation.init(
       onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     pharmacy_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'pharmacies', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
