@@ -8,16 +8,16 @@ class Guard extends Model<
   InferAttributes<Guard>,
   InferCreationAttributes<Guard>
 > {
-  declare id: CreationOptional<string>;
-  declare date: Date;
-  declare state: String;
+  declare id: CreationOptional<string>
+  declare date: Date
+  declare state: String
 
-  declare guard_chief: ForeignKey<User['id']>;
-  declare delegation_id: ForeignKey<Delegation['id']>;
+  declare guard_chief: ForeignKey<User['id']>
+  declare delegation_id: ForeignKey<Delegation['id']>
 
 
-  declare guardChief?: NonAttribute<User>;
-  declare delegation?: NonAttribute<Delegation>;
+  declare guardChief?: NonAttribute<User>
+  declare delegation?: NonAttribute<Delegation>
 }
 
 Guard.init(

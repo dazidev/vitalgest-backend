@@ -40,7 +40,7 @@ Delegation.hasMany(Ambulance, { foreignKey: 'delegation_id', as: 'ambulances' })
 
 // Turnos
 Shift.belongsTo(Guard, { foreignKey: 'guard_id', as: 'guard' })
-Guard.hasMany(Shift, { foreignKey: 'guard_id', as: 'guardShifts' })
+Guard.hasMany(Shift, { foreignKey: 'guard_id', as: 'shifts' })
 
 Shift.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' });
 Ambulance.hasMany(Shift,   { foreignKey: 'ambulance_id', as: 'ambulanceShifts' });

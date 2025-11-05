@@ -131,11 +131,9 @@ export class ShiftsService implements ShiftsServiceInterface {
         { model: User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
       ]
     })
-      .catch((error) => { console.log(error); throw ERROR_CODES.UNKNOWN_DB_ERROR })
+      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
     if (shifts.length === 0) throw ERROR_CODES.SHIFT_NOT_FOUND
-
-    console.log(shifts)
 
     const formatShifts = shifts.map((shift) => ({
       id: shift.id,
@@ -147,8 +145,6 @@ export class ShiftsService implements ShiftsServiceInterface {
       createdAt: shift.get('createdAt') as Date,
       updatedAt: shift.get('updatedAt') as Date,
     }))
-
-    //! TODO: traer los nombres de las personas
 
     return {
       success: true,
