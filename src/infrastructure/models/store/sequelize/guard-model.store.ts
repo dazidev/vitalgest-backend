@@ -33,14 +33,14 @@ Guard.init(
       allowNull: false,
       references: { model: 'users', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
     delegation_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'delegations', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      onDelete: 'CASCADE',
     },
   },
   {

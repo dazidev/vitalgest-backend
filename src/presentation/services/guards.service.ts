@@ -101,11 +101,24 @@ export class GuardsService implements GuardsServiceInterface {
   }
 
   async deleteGuard(id: string): Promise<object> {
-    const guard = await Guard.destroy({ where: { id } })
+    try {
+      const guard = await Guard.findOne({
+        where: { id },
+        attributes: ['state']
+      })
 
-    if (guard === 0) throw ERROR_CODES.GUARD_NOT_FOUND
+      if (!guard?.state) throw ERROR_CODES.GUARD_NOT_FOUND
+      if (guard.state !== 'Nueva') throw ERROR_CODES.STATE_NOT_ALLOWED
 
-    return { success: true }
+      const row = await Guard.destroy({ where: { id } })
+      if (row === 0) throw ERROR_CODES.GUARD_NOT_FOUND
+
+      return { success: true }
+
+    } catch (error) {
+      if (typeof error === 'string') throw error
+      throw ERROR_CODES.UNKNOWN_ERROR
+    }
   }
 
   async getGuards(amount: string): Promise<object> {
