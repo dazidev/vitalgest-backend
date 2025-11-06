@@ -10,20 +10,20 @@ class Supply extends Model<
 > {
   declare id: CreationOptional<string>
   declare category: string
-  declare specification: string 
+  declare specification?: string 
   declare avaible_quantity: number
   declare expiration_date: Date
   declare measurement_unit: string
   
-  declare pharmacy_id: ForeignKey<Pharmacy['id']>;
-  declare pharmacy?: NonAttribute<Pharmacy>;
+  declare pharmacy_id: ForeignKey<Pharmacy['id']>
+  declare pharmacy?: NonAttribute<Pharmacy>
 }
 
 Supply.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
     category: { type: DataTypes.STRING, allowNull: false },
-    specification: { type: DataTypes.STRING, allowNull: false },
+    specification: { type: DataTypes.STRING, allowNull: true },
     avaible_quantity: { type: DataTypes.INTEGER, allowNull: false },
     expiration_date: { type: DataTypes.DATE, allowNull: false },
     measurement_unit: { type: DataTypes.STRING, allowNull: false },

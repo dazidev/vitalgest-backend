@@ -5,7 +5,6 @@ import { regularExp } from "../../infrastructure"
 type DelegationDtoProps = {
   id?: string
   name?: string
-  stateId?: number
   stateName?: string
   municipalityId?: number
   municipalityName?: string
@@ -15,7 +14,6 @@ type DelegationDtoProps = {
 export class DelegationEntityDto {
   readonly id?: string
   readonly name?: string
-  readonly stateId?: number
   readonly stateName?: string
   readonly municipalityId?: number
   readonly municipalityName?: string
@@ -26,11 +24,10 @@ export class DelegationEntityDto {
   }
 
   static create(object: {[key: string]: any}): [string?, DelegationEntityDto?] {
-    const { stateId, stateName, municipalityId, municipalityName } = object
+    const { stateName, municipalityId, municipalityName } = object
     
     // todo: hace falta verificar el formato de lo que viene
     
-    if (!stateId) return [ERROR_CODES.MISSING_STATE_ID]
     if (!stateName) return [ERROR_CODES.MISSING_STATE_NAME]
     if (!municipalityId) return [ERROR_CODES.MISSING_MUNICIPALITY]
     if (!municipalityName) return [ERROR_CODES.MISSING_MUNICIPALITY_NAME]
@@ -38,21 +35,20 @@ export class DelegationEntityDto {
     const name = `Delegación ${municipalityName}, ${stateName}`
 
     
-    return [undefined, new DelegationEntityDto({name, stateId, stateName, municipalityId, municipalityName})]
+    return [undefined, new DelegationEntityDto({name, stateName, municipalityId, municipalityName})]
   }
 
   static edit(object: {[key: string]: any}): [string?, DelegationEntityDto?] {
-    const { id, name, stateId, municipalityId } = object
+    const { id, name, municipalityId } = object
 
     // todo: hace falta verificar el formato de lo que viene
     if (!id) return [ERROR_CODES.MISSING_DELEGATION_ID]
     if (!regularExp.uuid.test(id)) return [ERROR_CODES.INVALID_DELEGATION_ID]
     if (!name) return [ERROR_CODES.MISSING_DELEGATION_NAME]
-    if (!stateId) return [ERROR_CODES.MISSING_STATE_ID]
     if (!municipalityId) return [ERROR_CODES.MISSING_MUNICIPALITY]
 
   
-    return [undefined, new DelegationEntityDto({id, name, stateId, municipalityId})]
+    return [undefined, new DelegationEntityDto({id, name, municipalityId})]
   }
 
   static delete(object: {[key: string]: any}): [string?, DelegationEntityDto?] {

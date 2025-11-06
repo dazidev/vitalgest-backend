@@ -8,10 +8,8 @@ class DelegationEntityDto {
         Object.assign(this, props);
     }
     static create(object) {
-        const { stateId, stateName, municipalityId, municipalityName } = object;
+        const { stateName, municipalityId, municipalityName } = object;
         // todo: hace falta verificar el formato de lo que viene
-        if (!stateId)
-            return [domain_1.ERROR_CODES.MISSING_STATE_ID];
         if (!stateName)
             return [domain_1.ERROR_CODES.MISSING_STATE_NAME];
         if (!municipalityId)
@@ -19,10 +17,10 @@ class DelegationEntityDto {
         if (!municipalityName)
             return [domain_1.ERROR_CODES.MISSING_MUNICIPALITY_NAME];
         const name = `Delegación ${municipalityName}, ${stateName}`;
-        return [undefined, new DelegationEntityDto({ name, stateId, stateName, municipalityId, municipalityName })];
+        return [undefined, new DelegationEntityDto({ name, stateName, municipalityId, municipalityName })];
     }
     static edit(object) {
-        const { id, name, stateId, municipalityId } = object;
+        const { id, name, municipalityId } = object;
         // todo: hace falta verificar el formato de lo que viene
         if (!id)
             return [domain_1.ERROR_CODES.MISSING_DELEGATION_ID];
@@ -30,11 +28,9 @@ class DelegationEntityDto {
             return [domain_1.ERROR_CODES.INVALID_DELEGATION_ID];
         if (!name)
             return [domain_1.ERROR_CODES.MISSING_DELEGATION_NAME];
-        if (!stateId)
-            return [domain_1.ERROR_CODES.MISSING_STATE_ID];
         if (!municipalityId)
             return [domain_1.ERROR_CODES.MISSING_MUNICIPALITY];
-        return [undefined, new DelegationEntityDto({ id, name, stateId, municipalityId })];
+        return [undefined, new DelegationEntityDto({ id, name, municipalityId })];
     }
     static delete(object) {
         const { id } = object;

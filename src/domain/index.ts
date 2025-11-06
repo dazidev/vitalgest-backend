@@ -10,6 +10,7 @@ export * from './controllers/guards.controller.interface';
 export * from './controllers/ambulances.controller.interface';
 export * from './controllers/shifts.controller.interface';
 export * from './controllers/checklists.controller.interface';
+export * from './controllers/supplies.controller.interface';
 
 export * from './enums/user-roles.enum';
 export * from './enums/error-codes.enum';
@@ -29,3 +30,4 @@ export * from './services/guards.service.interface';
 export * from './services/ambulances.service.interface';
 export * from './services/shifts.service.interface';
 export * from './services/checklists.service.interface';
+export * from './services/supplies.service.interface';

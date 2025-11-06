@@ -25,6 +25,7 @@ __exportStar(require("./controllers/guards.controller.interface"), exports);
 __exportStar(require("./controllers/ambulances.controller.interface"), exports);
 __exportStar(require("./controllers/shifts.controller.interface"), exports);
 __exportStar(require("./controllers/checklists.controller.interface"), exports);
+__exportStar(require("./controllers/supplies.controller.interface"), exports);
 __exportStar(require("./enums/user-roles.enum"), exports);
 __exportStar(require("./enums/error-codes.enum"), exports);
 // repositorios
@@ -40,3 +41,4 @@ __exportStar(require("./services/guards.service.interface"), exports);
 __exportStar(require("./services/ambulances.service.interface"), exports);
 __exportStar(require("./services/shifts.service.interface"), exports);
 __exportStar(require("./services/checklists.service.interface"), exports);
+__exportStar(require("./services/supplies.service.interface"), exports);

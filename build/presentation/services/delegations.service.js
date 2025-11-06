@@ -45,23 +45,22 @@ class DelegationsService {
         return formatMunicipalities;
     }
     async createDelegation(delegationEntity) {
-        const { name, stateId, stateName, municipalityId, municipalityName } = delegationEntity;
+        const { name, stateName, municipalityId, municipalityName } = delegationEntity;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const pharmacy = await infrastructure_1.Pharmacy.create({}, { transaction: tx });
             const delegation = await infrastructure_1.Delegation.create({
                 name: name,
-                state_id: stateId,
-                municipality_id: municipalityId,
-                pharmacy_id: pharmacy.id
+                municipality_id: municipalityId
+            }, { transaction: tx });
+            const pharmacy = await infrastructure_1.Pharmacy.create({
+                delegation_id: delegation.id
             }, { transaction: tx });
             await tx.commit();
             const formatDelegation = {
                 id: delegation.id,
                 name: delegation.name,
                 state: {
-                    id: delegation.state_id,
                     name: stateName,
                 },
                 municipality: {
@@ -69,7 +68,7 @@ class DelegationsService {
                     name: municipalityName
                 },
                 pharmacy: {
-                    id: delegation.pharmacy_id
+                    id: pharmacy.id,
                 },
                 createdAt: delegation.get('createdAt'),
                 updatedAt: delegation.get('updatedAt'),
@@ -87,7 +86,7 @@ class DelegationsService {
         }
     }
     async editDelegation(delegationEntity) {
-        const { id, name, stateId, municipalityId } = delegationEntity;
+        const { id, name, municipalityId } = delegationEntity;
         const exists = await infrastructure_1.Delegation.findOne({ where: { id } })
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!exists)
@@ -105,7 +104,6 @@ class DelegationsService {
             tx = await infrastructure_1.sequelize.transaction();
             const delegation = await infrastructure_1.Delegation.update({
                 name: name,
-                state_id: stateId,
                 municipality_id: municipalityId
             }, { where: { id }, transaction: tx });
             await tx.commit();
@@ -156,22 +154,20 @@ class DelegationsService {
         newAmount === 'all'
             ? delegations = await infrastructure_1.Delegation.findAll({
                 include: [
-                    { model: infrastructure_1.State, as: 'state', attributes: ['id', 'name'] },
                     { model: infrastructure_1.Municipality, as: 'municipality', attributes: ['id', 'name'] },
                     { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
                 ],
                 attributes: {
-                    exclude: ['state_id', 'municipality_id', 'pharmacy_id']
+                    exclude: ['municipality_id', 'pharmacy_id']
                 }
             })
             : delegations = await infrastructure_1.Delegation.findAll({
                 include: [
-                    { model: infrastructure_1.State, as: 'state', attributes: ['id', 'name'] },
                     { model: infrastructure_1.Municipality, as: 'municipality', attributes: ['id', 'name'] },
                     { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
                 ],
                 attributes: {
-                    exclude: ['state_id', 'municipality_id', 'pharmacy_id']
+                    exclude: ['municipality_id', 'pharmacy_id']
                 },
                 limit: newAmount
             });
@@ -180,9 +176,7 @@ class DelegationsService {
         const formatDelegations = delegations.map((delegation) => ({
             id: delegation.id,
             name: delegation.name,
-            state: delegation.state,
             municipality: delegation.municipality,
-            pharmacy: delegation.pharmacy,
             createdAt: delegation.get('createdAt'),
             updatedAt: delegation.get('updatedAt'),
         }));
@@ -195,12 +189,11 @@ class DelegationsService {
         const delegation = await infrastructure_1.Delegation.findOne({
             where: { id },
             include: [
-                { model: infrastructure_1.State, as: 'state', attributes: ['id', 'name'] },
                 { model: infrastructure_1.Municipality, as: 'municipality', attributes: ['id', 'name'] },
                 { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
             ],
             attributes: {
-                exclude: ['state_id', 'municipality_id', 'pharmacy_id']
+                exclude: ['municipality_id', 'pharmacy_id']
             }
         })
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
@@ -209,9 +202,7 @@ class DelegationsService {
         const formatDelegation = {
             id: delegation.id,
             name: delegation.name,
-            state: delegation.state,
             municipality: delegation.municipality,
-            pharmacy: delegation.pharmacy,
             createdAt: delegation.get('createdAt'),
             updatedAt: delegation.get('updatedAt'),
         };

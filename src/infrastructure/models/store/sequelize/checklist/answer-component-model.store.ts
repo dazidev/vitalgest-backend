@@ -59,7 +59,7 @@ AnswerComponent.init(
     timestamps: true,
     underscored: true,
     indexes: [
-      { unique: true, fields: ['answer_id'] },
+      { unique: true, fields: ['answer_id'], name: 'uq_answer' },
     ],
   },
 );

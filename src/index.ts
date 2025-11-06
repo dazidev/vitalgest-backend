@@ -15,7 +15,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './docs/swagger';
 
 // se importan las rutas
-import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes, devRoutes, ambulancesRoutes, shiftRoutes, checklistsRoutes } from './presentation';
+import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes, devRoutes, ambulancesRoutes, shiftRoutes, checklistsRoutes, suppliesRoutes } from './presentation';
 import { errorHandler } from './infrastructure';
 
 
@@ -97,6 +97,7 @@ app.use('/api/guards', guardsRoutes);
 app.use('/api/ambulances', ambulancesRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/checklists', checklistsRoutes);
+app.use('/api/supplies', suppliesRoutes);
 
 // para ver las imagenes
 app.use('/uploads', express.static(path.resolve('uploads'), {
