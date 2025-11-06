@@ -136,31 +136,29 @@ class ShiftsService {
         };
     }
     async getOneShift(id) {
-        const shift = await infrastructure_1.Shift.findOne({ where: { id } })
+        const shift = await infrastructure_1.Shift.findOne({
+            where: { id },
+            attributes: ['id', 'name', 'created_at', 'updated_at'],
+            include: [
+                { model: infrastructure_1.Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
+                { model: infrastructure_1.User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
+                { model: infrastructure_1.User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+                {
+                    model: infrastructure_1.Guard,
+                    as: 'guard',
+                    attributes: ['id', 'date', 'state', 'delegation_id', 'created_at', 'updated_at'],
+                    include: [
+                        { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname'] }
+                    ]
+                }
+            ]
+        })
             .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!shift)
             throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
-        const formatShift = {
-            id: shift.id,
-            name: shift.name,
-            ambulance: {
-                id: shift.ambulance_id
-            },
-            guard: {
-                id: shift.guard_id
-            },
-            paramedical: {
-                id: shift.paramedical_id
-            },
-            driver: {
-                id: shift.driver_id
-            },
-            createdAt: shift.get('createdAt'),
-            updatedAt: shift.get('updatedAt'),
-        };
         return {
             success: true,
-            data: formatShift
+            data: shift
         };
     }
 }

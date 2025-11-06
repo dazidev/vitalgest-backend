@@ -153,33 +153,30 @@ export class ShiftsService implements ShiftsServiceInterface {
   }
 
   async getOneShift(id: string): Promise<object> {
-    const shift = await Shift.findOne({ where: { id } })
+    const shift = await Shift.findOne({ 
+      where: { id },
+      attributes: ['id', 'name', 'created_at', 'updated_at'],
+      include: [
+        { model: Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
+        { model: User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
+        { model: User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+        { 
+          model: Guard,
+          as: 'guard',
+          attributes: ['id', 'date', 'state', 'delegation_id', 'created_at', 'updated_at'],
+          include: [
+            { model: User, as: 'guardChief', attributes: ['id', 'name', 'lastname'] }
+          ]
+        }
+      ]
+    })
       .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
     if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND
 
-    const formatShift = {
-      id: shift.id,
-      name: shift.name,
-      ambulance: {
-        id: shift.ambulance_id
-      },
-      guard: {
-        id: shift.guard_id
-      },
-      paramedical: {
-        id: shift.paramedical_id
-      },
-      driver: {
-        id: shift.driver_id
-      },
-      createdAt: shift.get('createdAt') as Date,
-      updatedAt: shift.get('updatedAt') as Date,
-    }
-
     return {
       success: true,
-      data: formatShift
+      data: shift
     }
   }
 
