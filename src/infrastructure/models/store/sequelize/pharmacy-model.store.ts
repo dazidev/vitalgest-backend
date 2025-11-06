@@ -32,7 +32,7 @@ Pharmacy.init(
     underscored: true,
     // paranoid: true //* activa borrado lógico
     indexes: [
-      { unique: true, fields: ['delegation_id'], name: 'uq_delegation' }
+      { unique: true, fields: ['delegation_id'], name: 'uq_delegations_pharmacy' }
     ]
   },
 );

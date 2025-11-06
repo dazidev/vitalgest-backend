@@ -26,7 +26,7 @@ Municipality.belongsTo(State, { foreignKey: 'state_id', as: 'state' });
 State.hasMany(Delegation, { foreignKey: 'state_id', as: 'delegations' });*/
 
 Delegation.belongsTo(Municipality, { foreignKey: 'municipality_id', as: 'municipality' })
-Municipality.hasOne(Delegation, { foreignKey: 'municipality_id', as: 'delegations' })
+Municipality.hasOne(Delegation, { foreignKey: 'municipality_id', as: 'delegation' })
 
 Pharmacy.belongsTo(Delegation, { foreignKey: 'delegation_id', as: 'delegation' })
 Delegation.hasOne(Pharmacy, { foreignKey: 'delegation_id', as: 'pharmacy' })

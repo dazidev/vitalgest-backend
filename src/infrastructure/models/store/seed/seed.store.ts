@@ -51,15 +51,14 @@ export const createSeed = async () => {
       include: { model: State, as: 'state', attributes: ['name'] }
     })
 
-    //* Delegacion
-    const pharmacy = await Pharmacy.create({}, { transaction: tx })
-
+    //* Delegación semilla
     const delegation = await Delegation.create({
-      state_id: municipality?.state_id,
       name: `Delegación ${municipality?.name}, ${municipality?.state?.name}`,
       municipality_id: municipality?.id,
-      pharmacy_id: pharmacy.id,
     }, { transaction: tx })
+
+    //* Pharmacia
+    await Pharmacy.create({ delegation_id: delegation.id }, { transaction: tx })
 
     //* Usuarios semilla
     const password = await bcrypt.hash(process.env.USER_PASSWORD_SEED as string, 10);

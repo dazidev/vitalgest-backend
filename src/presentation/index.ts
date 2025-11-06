@@ -8,6 +8,7 @@ export { default as devRoutes } from './routes/dev/dev.routes'
 export { default as ambulancesRoutes } from './routes/ambulance.routes'
 export { default as shiftRoutes } from './routes/shift.routes'
 export { default as checklistsRoutes } from './routes/checklists.routes'
+export { default as suppliesRoutes } from './routes/supplies.routes'
 
 // controladores
 export * from './controllers/adm.controller'

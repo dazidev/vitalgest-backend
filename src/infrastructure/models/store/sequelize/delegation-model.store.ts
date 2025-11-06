@@ -32,7 +32,11 @@ Delegation.init(
     timestamps: true,
     underscored: true,
     indexes: [
-      { unique: true, fields: ['municipality_id'], name: 'uq_muni' },
+      {
+        unique: true,
+        fields: ['municipality_id'],
+        name: 'uq_delegations_municipality',
+      },
     ],
     // paranoid: true //* activa borrado lógico
   },
