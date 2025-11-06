@@ -21,20 +21,21 @@ import AreaAmbulance from "./sequelize/supplies/area-ambulance-model.store";
 State.hasMany(Municipality, { foreignKey: 'state_id', as: 'municipalities' });
 Municipality.belongsTo(State, { foreignKey: 'state_id', as: 'state' });
 
-Delegation.belongsTo(State, { foreignKey: 'state_id', as: 'state' });
-State.hasMany(Delegation, { foreignKey: 'state_id', as: 'delegations' });
+//* con la relación de municipio basta.
+/*Delegation.belongsTo(State, { foreignKey: 'state_id', as: 'state' });
+State.hasMany(Delegation, { foreignKey: 'state_id', as: 'delegations' });*/
 
-Delegation.belongsTo(Municipality, { foreignKey: 'municipality_id', as: 'municipality' });
-Municipality.hasOne(Delegation, { foreignKey: 'municipality_id', as: 'delegations' });
+Delegation.belongsTo(Municipality, { foreignKey: 'municipality_id', as: 'municipality' })
+Municipality.hasOne(Delegation, { foreignKey: 'municipality_id', as: 'delegations' })
 
-Delegation.belongsTo(Pharmacy, { foreignKey: 'pharmacy_id', as: 'pharmacy' });
-Pharmacy.hasOne(Delegation, { foreignKey: 'pharmacy_id', as: 'delegations' });
+Pharmacy.belongsTo(Delegation, { foreignKey: 'delegation_id', as: 'delegation' })
+Delegation.hasOne(Pharmacy, { foreignKey: 'delegation_id', as: 'pharmacy' })
 
-Guard.belongsTo(User, { foreignKey: 'guard_chief', as: 'guardChief' });
-User.hasMany(Guard, { foreignKey: 'guard_chief', as: 'guardsAsChief' });
+Guard.belongsTo(User, { foreignKey: 'guard_chief', as: 'guardChief' })
+User.hasMany(Guard, { foreignKey: 'guard_chief', as: 'guardsAsChief' })
 
-Guard.belongsTo(Delegation, { foreignKey: 'delegation_id', as: 'delegation' });
-Delegation.hasMany(Guard, { foreignKey: 'delegation_id', as: 'guards' });
+Guard.belongsTo(Delegation, { foreignKey: 'delegation_id', as: 'delegation' })
+Delegation.hasMany(Guard, { foreignKey: 'delegation_id', as: 'guards' })
 
 // Ambulancias
 Ambulance.belongsTo(Delegation, { foreignKey: 'delegation_id', as: 'delegation' })
@@ -44,14 +45,14 @@ Delegation.hasMany(Ambulance, { foreignKey: 'delegation_id', as: 'ambulances' })
 Shift.belongsTo(Guard, { foreignKey: 'guard_id', as: 'guard' })
 Guard.hasMany(Shift, { foreignKey: 'guard_id', as: 'shifts' })
 
-Shift.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' });
-Ambulance.hasMany(Shift,   { foreignKey: 'ambulance_id', as: 'ambulanceShifts' });
+Shift.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' })
+Ambulance.hasMany(Shift,   { foreignKey: 'ambulance_id', as: 'ambulanceShifts' })
 
-Shift.belongsTo(User, { foreignKey: 'paramedical_id', as: 'paramedical' });
-User.hasMany(Shift,   { foreignKey: 'paramedical_id', as: 'paramedicalShifts' });
+Shift.belongsTo(User, { foreignKey: 'paramedical_id', as: 'paramedical' })
+User.hasMany(Shift,   { foreignKey: 'paramedical_id', as: 'paramedicalShifts' })
 
-Shift.belongsTo(User, { foreignKey: 'driver_id', as: 'driver' });
-User.hasMany(Shift,   { foreignKey: 'driver_id', as: 'driverShifts' });
+Shift.belongsTo(User, { foreignKey: 'driver_id', as: 'driver' })
+User.hasMany(Shift,   { foreignKey: 'driver_id', as: 'driverShifts' })
 
 // checklists
 // ambulance
@@ -105,4 +106,4 @@ export {
   Supply,
   SupplyAmbulance,
   AreaAmbulance
-};
+}
