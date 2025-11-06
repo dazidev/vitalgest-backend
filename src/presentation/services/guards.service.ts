@@ -1,7 +1,7 @@
 import { Transaction } from "sequelize";
 import { GuardsEntityDto } from "../../application";
 import { ERROR_CODES, GuardsServiceInterface } from "../../domain";
-import { Ambulance, Delegation, Guard, sequelize, Shift, User } from "../../infrastructure";
+import { Ambulance, ChecklistAmbulance, ChecklistSupply, Delegation, Guard, sequelize, Shift, User } from "../../infrastructure";
 
 
 export class GuardsService implements GuardsServiceInterface {
@@ -61,13 +61,14 @@ export class GuardsService implements GuardsServiceInterface {
 
     } catch (error) {
       tx?.rollback()
+      if (typeof error === 'string') throw error
       throw { code: ERROR_CODES.INSERT_FAILED }
     }
 
   }
 
   async editGuard(guardEntityDto: GuardsEntityDto): Promise<object> {
-    const { id, guardChief, delegationId } = guardEntityDto
+    const { id, guardChief, date, delegationId, state } = guardEntityDto
 
     const existsGuardChief = await User.findOne({ where: { id: guardChief, role: 'head_guard' } })
       .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
@@ -86,7 +87,9 @@ export class GuardsService implements GuardsServiceInterface {
 
       await Guard.update({
         guard_chief: guardChief,
-        delegation_id: delegationId
+        delegation_id: delegationId,
+        date: new Date(date!),
+        state: state
       }, { where: { id }, transaction: tx })
 
       await tx.commit()
@@ -95,6 +98,7 @@ export class GuardsService implements GuardsServiceInterface {
 
     } catch (error) {
       tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.UPDATE_FAILED
     }
 
@@ -138,11 +142,13 @@ export class GuardsService implements GuardsServiceInterface {
           {
             model: Shift,
             as: 'shifts',
-            attributes: ['id', 'name', 'checklist_supply_id', 'checklist_ambulance_id', 'created_at', 'updated_at'],
+            attributes: ['id', 'name', 'created_at', 'updated_at'],
             include: [
               { model: Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
               { model: User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
               { model: User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+              { model: ChecklistAmbulance, as: 'checklistAmbulance' },
+              { model: ChecklistSupply, as: 'checklistSupplies' },
             ]
           },
         ],

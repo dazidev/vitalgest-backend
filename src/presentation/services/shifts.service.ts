@@ -72,7 +72,7 @@ export class ShiftsService implements ShiftsServiceInterface {
 
     } catch (error) {
       tx?.rollback()
-      console.log(error)
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.INSERT_FAILED
     }
   }
@@ -106,7 +106,7 @@ export class ShiftsService implements ShiftsServiceInterface {
 
     } catch (error) {
       tx?.rollback()
-      console.log(error)
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.UPDATE_FAILED
     }
   }

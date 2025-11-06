@@ -1,7 +1,7 @@
 import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model, NonAttribute, UUIDV4 } from 'sequelize';
 import { sequelize } from '../../../../config/sequelize.adapter';
-import Supply from './supply-model.store';
 import Ambulance from '../ambulance-model.store';
+import AreaAmbulance from './area-ambulance-model.store';
 
 
 
@@ -10,37 +10,43 @@ class SupplyAmbulance extends Model<
   InferCreationAttributes<SupplyAmbulance>
 > {
   declare id: CreationOptional<string>
+  declare category: string
+  declare specification: string
   declare avaible_quantity: number
-  declare area: string
-  declare order_area: number 
+  declare min_quantity: number
+  declare expiration_date: Date
+  declare measurement_unit: string
 
+
+  declare area_id: ForeignKey<AreaAmbulance['id']>
   declare ambulance_id: ForeignKey<Ambulance['id']>
-  declare supply_id: ForeignKey<Supply['id']>
 
-  declare supply?: NonAttribute<Supply>
+  declare area?: NonAttribute<AreaAmbulance>
   declare ambulance?: NonAttribute<Ambulance>
 }
 
 SupplyAmbulance.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
+    category: { type: DataTypes.STRING, allowNull: false },
+    specification: { type: DataTypes.STRING, allowNull: false },
     avaible_quantity: { type: DataTypes.INTEGER, allowNull: false },
-    area: { type: DataTypes.STRING, allowNull: true }, //! puede ser nulo?
-    order_area: { type: DataTypes.INTEGER, allowNull: true },
+    min_quantity: { type: DataTypes.INTEGER, allowNull: false },
+    expiration_date: { type: DataTypes.DATE, allowNull: false },
+    measurement_unit: { type: DataTypes.STRING, allowNull: false },
+    area_id: { 
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false, 
+      references: { model: 'areas_ambulance', key: 'id' },
+      onUpdate: 'CASCADE'
+    },
     ambulance_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'ambulances', key: 'id' },
-      onUpdate: 'CASCADE', // actualiza si el padre cambia de id
+      onUpdate: 'CASCADE',
       //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
-    supply_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: { model: 'supplies', key: 'id' },
-      onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    }
   },
   {
     sequelize,
@@ -48,11 +54,6 @@ SupplyAmbulance.init(
     tableName: 'supplies_ambulances',
     timestamps: true,
     underscored: true,
-    indexes: [
-      { fields: ['supply_id'] },
-      { unique: true, fields: ['area'], name : 'uq_area' },
-      { unique: true, fields: ['area', 'order_area'], name : 'uq_area_order' }
-    ],
     // paranoid: true //* activa borrado lógico
   },
 );

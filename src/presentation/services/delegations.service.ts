@@ -102,8 +102,8 @@ export class DelegationsService implements DelegationsServiceInterface {
       }
 
     } catch (error) {
-      console.log(error)
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.INSERT_FAILED
     }
   }
@@ -146,6 +146,7 @@ export class DelegationsService implements DelegationsServiceInterface {
       }
     } catch (error) {
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.UPDATE_FAILED
     }
   }
@@ -176,6 +177,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.DELETE_FAILED
     }
   }
