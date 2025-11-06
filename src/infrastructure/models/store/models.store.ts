@@ -14,19 +14,21 @@ import Answer from "./sequelize/checklist/answer-model.store";
 import AnswerComponent from "./sequelize/checklist/answer-component-model.store";
 import Supply from "./sequelize/supplies/supply-model.store";
 import SupplyAmbulance from "./sequelize/supplies/supply-ambulance-model.store";
+import AreaAmbulance from "./sequelize/supplies/area-ambulance-model.store";
 
 
 // Definicion de asociaciones 
 State.hasMany(Municipality, { foreignKey: 'state_id', as: 'municipalities' });
 Municipality.belongsTo(State, { foreignKey: 'state_id', as: 'state' });
 
-State.hasMany(Delegation, { foreignKey: 'state_id', as: 'delegations' });
-Municipality.hasMany(Delegation, { foreignKey: 'municipality_id', as: 'delegations' });
-Pharmacy.hasMany(Delegation, { foreignKey: 'pharmacy_id', as: 'delegations' });
-
 Delegation.belongsTo(State, { foreignKey: 'state_id', as: 'state' });
+State.hasMany(Delegation, { foreignKey: 'state_id', as: 'delegations' });
+
 Delegation.belongsTo(Municipality, { foreignKey: 'municipality_id', as: 'municipality' });
+Municipality.hasOne(Delegation, { foreignKey: 'municipality_id', as: 'delegations' });
+
 Delegation.belongsTo(Pharmacy, { foreignKey: 'pharmacy_id', as: 'pharmacy' });
+Pharmacy.hasOne(Delegation, { foreignKey: 'pharmacy_id', as: 'delegations' });
 
 Guard.belongsTo(User, { foreignKey: 'guard_chief', as: 'guardChief' });
 User.hasMany(Guard, { foreignKey: 'guard_chief', as: 'guardsAsChief' });
@@ -52,11 +54,18 @@ Shift.belongsTo(User, { foreignKey: 'driver_id', as: 'driver' });
 User.hasMany(Shift,   { foreignKey: 'driver_id', as: 'driverShifts' });
 
 // checklists
+// ambulance
 ChecklistAmbulance.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' })
-Ambulance.hasMany(ChecklistAmbulance, { foreignKey: 'ambulance_id', as: 'checklists' })
+Ambulance.hasMany(ChecklistAmbulance, { foreignKey: 'ambulance_id', as: 'checklistsAmbulance' })
 
 ChecklistAmbulance.belongsTo(Shift, { foreignKey: 'shift_id', as: 'shift' })
-Shift.hasMany(ChecklistAmbulance, { foreignKey: 'shift_id', as: 'checklists' })
+Shift.hasOne(ChecklistAmbulance, { foreignKey: 'shift_id', as: 'checklistAmbulance' })
+// supplies
+ChecklistSupply.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' })
+Ambulance.hasMany(ChecklistSupply, { foreignKey: 'ambulance_id', as: 'checklistsSupplies' })
+
+ChecklistSupply.belongsTo(Shift, { foreignKey: 'shift_id', as: 'shift' })
+Shift.hasOne(ChecklistSupply, { foreignKey: 'shift_id', as: 'checklistSupplies' })
 
 Answer.belongsTo(Question, { foreignKey: 'question_id', as: 'question' })
 Question.hasMany(Answer, { foreignKey: 'question_id', as: 'answers' })
@@ -71,13 +80,11 @@ Answer.hasOne(AnswerComponent, { foreignKey: 'answer_id', as: 'components' }) //
 Supply.belongsTo(Pharmacy, { foreignKey: 'pharmacy_id', as: 'pharmacy' })
 Pharmacy.hasMany(Supply, { foreignKey: 'pharmacy_id', as: 'supplies' })
 
-SupplyAmbulance.belongsTo(Supply, { foreignKey: 'supply_id', as: 'supply' })
-Supply.hasMany(SupplyAmbulance, { foreignKey: 'supply_id', as: 'ambulanceSupplies' })
+SupplyAmbulance.belongsTo(AreaAmbulance, { foreignKey: 'area_id', as: 'areaAmbulance' })
+AreaAmbulance.hasMany(SupplyAmbulance, { foreignKey: 'area_id', as: 'supplies' })
 
 SupplyAmbulance.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' })
 Ambulance.hasMany(SupplyAmbulance, { foreignKey: 'ambulance_id', as: 'supplies' })
-
-
 
 
 // desde aca se debe hacer las importaciones
@@ -96,5 +103,6 @@ export {
   Answer,
   AnswerComponent,
   Supply,
-  SupplyAmbulance
+  SupplyAmbulance,
+  AreaAmbulance
 };

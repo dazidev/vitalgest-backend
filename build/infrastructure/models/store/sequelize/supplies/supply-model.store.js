@@ -8,10 +8,9 @@ Supply.init({
     id: { type: sequelize_1.DataTypes.UUID, primaryKey: true, defaultValue: sequelize_1.UUIDV4, allowNull: false },
     category: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     specification: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-    measurement_unit: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-    min_quantity: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
     avaible_quantity: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
     expiration_date: { type: sequelize_1.DataTypes.DATE, allowNull: false },
+    measurement_unit: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     pharmacy_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,

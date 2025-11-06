@@ -34,7 +34,11 @@ ChecklistAmbulance.init({
     underscored: true,
     indexes: [
         { fields: ['ambulance_id'] },
-        { fields: ['shift_id'] },
+        {
+            unique: true,
+            fields: ['shift_id'],
+            name: 'checklist_ambulance_shift_id',
+        },
     ],
     // paranoid: true //* activa borrado lógico
 });

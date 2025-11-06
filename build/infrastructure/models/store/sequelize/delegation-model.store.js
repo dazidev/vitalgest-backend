@@ -38,7 +38,7 @@ Delegation.init({
         { fields: ['state_id'] },
         { fields: ['municipality_id'] },
         { fields: ['pharmacy_id'] },
-        { unique: true, fields: ['state_id', 'municipality_id', 'pharmacy_id'], name: 'uq_delegation_triple' },
+        { unique: true, fields: ['state_id', 'municipality_id'], name: 'uq_state_muni' },
     ],
     // paranoid: true //* activa borrado lógico
 });

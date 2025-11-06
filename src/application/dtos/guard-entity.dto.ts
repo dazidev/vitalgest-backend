@@ -8,6 +8,7 @@ type GuardsDtoProps = {
   guardChief?: string
   date?: string
   delegationId?: string
+  state?: string
 }
 
 export class GuardsEntityDto {
@@ -15,6 +16,7 @@ export class GuardsEntityDto {
   readonly guardChief?: string
   readonly date?: string
   readonly delegationId?: string
+  readonly state?: string
 
   private constructor (props: GuardsDtoProps){
     Object.assign(this, props)
@@ -40,7 +42,7 @@ export class GuardsEntityDto {
   }
 
   static edit(object: {[key: string]: any}): [string?, GuardsEntityDto?] {
-    const { id, guardChief, date, delegationId } = object
+    const { id, guardChief, date, delegationId, state } = object
 
     const validDate = isDateNotExpired(new Date(date))
 
@@ -52,6 +54,7 @@ export class GuardsEntityDto {
     if (!regularExp.date.test(date)) return [ERROR_CODES.INVALID_DATE]
     if (!delegationId) return [ERROR_CODES.MISSING_DELEGATION_ID]
     if (!regularExp.uuid.test(delegationId)) return [ERROR_CODES.INVALID_DELEGATION_ID]
+    if (!state) return [ERROR_CODES.MISSING_STATE]
 
   
     return [undefined, new GuardsEntityDto({id, guardChief, date, delegationId})]

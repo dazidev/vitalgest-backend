@@ -2,8 +2,6 @@ import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreation
 import { sequelize } from '../../../config/sequelize.adapter';
 import Guard from './guard-model.store';
 import User from './user-model.store';
-import ChecklistSupply from './checklist/checklist-supply-model.store';
-import ChecklistAmbulance from './checklist/checklist-ambulance-model.store';
 import Ambulance from './ambulance-model.store';
 
 
@@ -26,12 +24,6 @@ class Shift extends Model<
 
   declare driver_id: ForeignKey<User['id']>
   declare driver?: NonAttribute<User>
-
-  declare checklist_supply_id: ForeignKey<ChecklistSupply['id']>
-  declare checklistSupply?: NonAttribute<ChecklistSupply>
-
-  declare checklist_ambulance_id: ForeignKey<ChecklistAmbulance['id']>
-  declare checklistAmbulance?: NonAttribute<ChecklistAmbulance>
 }
 
 Shift.init(
@@ -67,20 +59,6 @@ Shift.init(
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
       //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
-    checklist_supply_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: { model: 'checklist_supplies', key: 'id' },
-      onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    },
-    checklist_ambulance_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: { model: 'checklist_ambulances', key: 'id' },
-      onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    },
   },
   {
     sequelize,
@@ -93,8 +71,6 @@ Shift.init(
       { fields: ['ambulance_id'] },
       { fields: ['paramedical_id'] },
       { fields: ['driver_id'] },
-      { fields: ['checklist_supply_id'] },
-      { fields: ['checklist_ambulance_id'] },
     ],
     // paranoid: true //* activa borrado lógico
   },

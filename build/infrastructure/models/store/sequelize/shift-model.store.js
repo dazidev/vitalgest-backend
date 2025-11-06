@@ -35,20 +35,6 @@ Shift.init({
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
         //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
-    checklist_supply_id: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: true,
-        references: { model: 'checklist_supplies', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    },
-    checklist_ambulance_id: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: true,
-        references: { model: 'checklist_ambulances', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    },
 }, {
     sequelize: sequelize_adapter_1.sequelize,
     modelName: 'Shift',
@@ -60,8 +46,6 @@ Shift.init({
         { fields: ['ambulance_id'] },
         { fields: ['paramedical_id'] },
         { fields: ['driver_id'] },
-        { fields: ['checklist_supply_id'] },
-        { fields: ['checklist_ambulance_id'] },
     ],
     // paranoid: true //* activa borrado lógico
 });

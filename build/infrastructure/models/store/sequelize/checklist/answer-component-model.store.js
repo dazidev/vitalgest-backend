@@ -40,8 +40,7 @@ AnswerComponent.init({
     timestamps: true,
     underscored: true,
     indexes: [
-        { fields: ['answer_id'] },
-        { unique: true, fields: ['answer_id', 'type'], name: 'uq_answer_type_once' },
+        { unique: true, fields: ['answer_id'] },
     ],
 });
 exports.default = AnswerComponent;

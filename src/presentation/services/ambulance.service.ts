@@ -53,6 +53,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
     } catch (error) {
       tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.INSERT_FAILED
     }
 
@@ -90,6 +91,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
     } catch (error) {
       tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.UPDATE_FAILED
     }
 

@@ -26,7 +26,7 @@ class ChecklistAmbulance extends Model<
 ChecklistAmbulance.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
-    ambulance_id:{
+    ambulance_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'ambulances', key: 'id' },
@@ -43,8 +43,8 @@ ChecklistAmbulance.init(
     time: { type: DataTypes.TIME, allowNull: false },
     km: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     gas_path: { type: DataTypes.STRING, allowNull: false },
-    sign_operator_path: { type: DataTypes.STRING, defaultValue: null ,allowNull: true },
-    sign_recipient_path: { type: DataTypes.STRING, defaultValue: null ,allowNull: true },
+    sign_operator_path: { type: DataTypes.STRING, defaultValue: null, allowNull: true },
+    sign_recipient_path: { type: DataTypes.STRING, defaultValue: null, allowNull: true },
     notes: { type: DataTypes.TEXT, allowNull: true }
   },
   {
@@ -55,8 +55,11 @@ ChecklistAmbulance.init(
     underscored: true,
     indexes: [
       { fields: ['ambulance_id'] },
-      { fields: ['shift_id'] },
-      
+      {
+        unique: true,
+        fields: ['shift_id'],
+        name: 'checklist_ambulance_shift_id',
+      },
     ],
     // paranoid: true //* activa borrado lógico
   },

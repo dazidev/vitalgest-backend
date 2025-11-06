@@ -11,6 +11,7 @@ type UserDtoProps = {
   position?: string;
   password?: string;
   delegationId?: string;
+  status?: boolean;
 };
 
 
@@ -23,14 +24,15 @@ export class UserEntityDto {
   readonly position?: string;
   readonly password?: string;
   readonly delegationId?: string;
+  readonly status?: boolean;
 
-  private constructor (props: UserDtoProps) {
+  private constructor(props: UserDtoProps) {
     Object.assign(this, props);
   };
 
   private static validateData = (object: any, type: 'create' | 'edit' | 'password'): null | [string] => {
-    const {id, name, lastname, email, password, role, position, delegationId} = object;
-    
+    const { id, name, lastname, email, password, role, position, delegationId, status } = object;
+
     if (type === 'password') {
       if (!email) return [ERROR_CODES.MISSING_EMAIL];
       if (!regularExp.email.test(email)) return [ERROR_CODES.INVALID_EMAIL_FORMAT];
@@ -44,7 +46,8 @@ export class UserEntityDto {
     if (!lastname) return [ERROR_CODES.MISSING_LASTNAME];
     if (!email) return [ERROR_CODES.MISSING_EMAIL];
     if (!regularExp.email.test(email)) return [ERROR_CODES.INVALID_EMAIL_FORMAT];
-    
+    if (!status) return [ERROR_CODES.MISSING_STATUS]
+
     if (type === 'create') {
       if (!password) return [ERROR_CODES.MISSING_PASSWORD];
       if (!regularExp.password.test(password)) return [ERROR_CODES.INVALID_PASSWORD_FORMAT];
@@ -57,8 +60,8 @@ export class UserEntityDto {
     return null
   };
 
-  static create(object: {[key: string]: any}): [string?, UserEntityDto?] {
-    const {name, lastname, email, password, role, position, delegationId} = object;
+  static create(object: { [key: string]: any }): [string?, UserEntityDto?] {
+    const { name, lastname, email, password, role, position, delegationId } = object;
 
     const validate = this.validateData(object, 'create');
     if (validate !== null) return validate;
@@ -66,17 +69,17 @@ export class UserEntityDto {
     return [undefined, new UserEntityDto({ name, lastname, email: email.toLowerCase(), password, role, position, delegationId })];
   };
 
-  static edit(object: {[key: string]: any}): [string?, UserEntityDto?] {
-    const {id, name, lastname, email, role, position, delegationId} = object;
+  static edit(object: { [key: string]: any }): [string?, UserEntityDto?] {
+    const { id, name, lastname, email, role, position, delegationId, status } = object;
 
     const validate = this.validateData(object, 'edit');
     if (validate !== null) return validate;
 
-    return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position, delegationId })];
+    return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position, delegationId, status })];
   };
 
-  static login(object: {[key: string]: any}): [string?, UserEntityDto?] {
-    const {email, password} = object;
+  static login(object: { [key: string]: any }): [string?, UserEntityDto?] {
+    const { email, password } = object;
 
     const validate = this.validateData(object, 'password');
     if (validate !== null) return validate;

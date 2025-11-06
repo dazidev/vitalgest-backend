@@ -67,7 +67,8 @@ class ShiftsService {
         }
         catch (error) {
             tx?.rollback();
-            console.log(error);
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }
@@ -95,7 +96,8 @@ class ShiftsService {
         }
         catch (error) {
             tx?.rollback();
-            console.log(error);
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }

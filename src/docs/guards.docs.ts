@@ -61,6 +61,7 @@
  *                 guardChief: "e732b0e9-d9cf-4c6a-974f-8ca92937a132"
  *                 date: "2025-10-02"
  *                 delegationId: "d50b8d02-02a9-41a2-88e2-74e7c4baf9f0"
+ *                 state: "Nueva"
  *     responses:
  *       200:
  *         description: Guardia actualizada

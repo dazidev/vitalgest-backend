@@ -54,9 +54,6 @@ class ChecklistsService {
                 notes: notes ?? undefined,
                 gas_path: gas.relPath
             }, { transaction: tx });
-            await infrastructure_1.Shift.update({
-                checklist_ambulance_id: checklist.id
-            }, { where: { id: shiftId }, transaction: tx });
             await tx?.commit();
             return {
                 success: true,
@@ -228,8 +225,9 @@ class ChecklistsService {
             return { success: true };
         }
         catch (error) {
-            console.log(error);
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }

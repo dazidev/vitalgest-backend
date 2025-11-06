@@ -52,12 +52,13 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.INSERT_FAILED
     }
   }
 
   public async editUser(userEntityDto: UserEntityDto): Promise<object> {
-    const { id, name, lastname, email, role, position, delegationId } = userEntityDto;
+    const { id, name, lastname, email, role, position, delegationId, status } = userEntityDto;
     let tx: Transaction | undefined
 
     try {
@@ -75,7 +76,8 @@ export class AdmService implements AdmServiceInterface {
         email,
         role,
         position,
-        delegation_id: delegationId
+        delegation_id: delegationId,
+        status: status
       }, { where: { id }, transaction: tx })
 
       await tx.commit()
@@ -91,6 +93,7 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.UPDATE_FAILED
     }
   }
@@ -112,6 +115,7 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.DELETE_FAILED
     }
   }
@@ -137,7 +141,8 @@ export class AdmService implements AdmServiceInterface {
       }
 
     } catch (error) {
-      throw ERROR_CODES.USER_NOT_FOUND
+      if (typeof error === 'string') throw error
+      throw ERROR_CODES.UNKNOWN_DB_ERROR
     }
   }
 
@@ -162,6 +167,7 @@ export class AdmService implements AdmServiceInterface {
 
     } catch (error) {
       await tx?.rollback()
+      if (typeof error === 'string') throw error
       throw ERROR_CODES.UPDATE_FAILED
     }
   }
@@ -177,7 +183,8 @@ export class AdmService implements AdmServiceInterface {
         data: user
       }
     } catch (error) {
-      throw ERROR_CODES.USER_NOT_FOUND // todo: cambiar a error en la busqueda 
+      if (typeof error === 'string') throw error
+      throw ERROR_CODES.UNKNOWN_DB_ERROR // todo: cambiar a error en la busqueda 
     }
   }
 }

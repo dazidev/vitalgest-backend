@@ -17,11 +17,11 @@ class UserEntityDto {
     }
     ;
     static edit(object) {
-        const { id, name, lastname, email, role, position, delegationId } = object;
+        const { id, name, lastname, email, role, position, delegationId, status } = object;
         const validate = this.validateData(object, 'edit');
         if (validate !== null)
             return validate;
-        return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position, delegationId })];
+        return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position, delegationId, status })];
     }
     ;
     static login(object) {
@@ -35,7 +35,7 @@ class UserEntityDto {
 }
 exports.UserEntityDto = UserEntityDto;
 UserEntityDto.validateData = (object, type) => {
-    const { id, name, lastname, email, password, role, position, delegationId } = object;
+    const { id, name, lastname, email, password, role, position, delegationId, status } = object;
     if (type === 'password') {
         if (!email)
             return [domain_1.ERROR_CODES.MISSING_EMAIL];
@@ -58,6 +58,8 @@ UserEntityDto.validateData = (object, type) => {
         return [domain_1.ERROR_CODES.MISSING_EMAIL];
     if (!infrastructure_1.regularExp.email.test(email))
         return [domain_1.ERROR_CODES.INVALID_EMAIL_FORMAT];
+    if (!status)
+        return [domain_1.ERROR_CODES.MISSING_STATUS];
     if (type === 'create') {
         if (!password)
             return [domain_1.ERROR_CODES.MISSING_PASSWORD];
