@@ -7,13 +7,6 @@ class Delegation extends sequelize_1.Model {
 Delegation.init({
     id: { type: sequelize_1.DataTypes.UUID, primaryKey: true, defaultValue: sequelize_1.UUIDV4, allowNull: false },
     name: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
-    state_id: {
-        type: sequelize_1.DataTypes.BIGINT.UNSIGNED,
-        allowNull: false,
-        references: { model: 'states', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    },
     municipality_id: {
         type: sequelize_1.DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
@@ -21,13 +14,6 @@ Delegation.init({
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
         onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
-    pharmacy_id: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: false,
-        references: { model: 'pharmacies', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    }
 }, {
     sequelize: sequelize_adapter_1.sequelize,
     modelName: 'Delegation',
@@ -35,10 +21,11 @@ Delegation.init({
     timestamps: true,
     underscored: true,
     indexes: [
-        { fields: ['state_id'] },
-        { fields: ['municipality_id'] },
-        { fields: ['pharmacy_id'] },
-        { unique: true, fields: ['state_id', 'municipality_id'], name: 'uq_state_muni' },
+        {
+            unique: true,
+            fields: ['municipality_id'],
+            name: 'uq_delegations_municipality',
+        },
     ],
     // paranoid: true //* activa borrado lógico
 });

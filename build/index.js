@@ -90,6 +90,7 @@ app.use('/api/guards', presentation_1.guardsRoutes);
 app.use('/api/ambulances', presentation_1.ambulancesRoutes);
 app.use('/api/shifts', presentation_1.shiftRoutes);
 app.use('/api/checklists', presentation_1.checklistsRoutes);
+app.use('/api/supplies', presentation_1.suppliesRoutes);
 // para ver las imagenes
 app.use('/uploads', express_1.default.static(path_1.default.resolve('uploads'), {
     // cache opcional
