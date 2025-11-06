@@ -6,34 +6,31 @@ class SupplyAmbulance extends sequelize_1.Model {
 }
 SupplyAmbulance.init({
     id: { type: sequelize_1.DataTypes.UUID, primaryKey: true, defaultValue: sequelize_1.UUIDV4, allowNull: false },
+    category: { type: sequelize_1.DataTypes.STRING, allowNull: false },
+    specification: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     avaible_quantity: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
-    area: { type: sequelize_1.DataTypes.STRING, allowNull: true }, //! puede ser nulo?
-    order_area: { type: sequelize_1.DataTypes.INTEGER, allowNull: true },
+    min_quantity: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
+    expiration_date: { type: sequelize_1.DataTypes.DATE, allowNull: false },
+    measurement_unit: { type: sequelize_1.DataTypes.STRING, allowNull: false },
+    area_id: {
+        type: sequelize_1.DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
+        references: { model: 'areas_ambulance', key: 'id' },
+        onUpdate: 'CASCADE'
+    },
     ambulance_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: { model: 'ambulances', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
+        onUpdate: 'CASCADE',
         //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
     },
-    supply_id: {
-        type: sequelize_1.DataTypes.UUID,
-        allowNull: false,
-        references: { model: 'supplies', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
-    }
 }, {
     sequelize: sequelize_adapter_1.sequelize,
     modelName: 'SupplyAmbulance',
     tableName: 'supplies_ambulances',
     timestamps: true,
     underscored: true,
-    indexes: [
-        { fields: ['supply_id'] },
-        { unique: true, fields: ['area'], name: 'uq_area' },
-        { unique: true, fields: ['area', 'order_area'], name: 'uq_area_order' }
-    ],
     // paranoid: true //* activa borrado lógico
 });
 exports.default = SupplyAmbulance;

@@ -44,11 +44,13 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }
     async editUser(userEntityDto) {
-        const { id, name, lastname, email, role, position, delegationId } = userEntityDto;
+        const { id, name, lastname, email, role, position, delegationId, status } = userEntityDto;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -64,7 +66,8 @@ class AdmService {
                 email,
                 role,
                 position,
-                delegation_id: delegationId
+                delegation_id: delegationId,
+                status: status
             }, { where: { id }, transaction: tx });
             await tx.commit();
             const userSafe = await infrastructure_1.User.findByPk(id, {
@@ -77,6 +80,8 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
@@ -93,6 +98,8 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.DELETE_FAILED;
         }
     }
@@ -117,7 +124,9 @@ class AdmService {
             };
         }
         catch (error) {
-            throw domain_1.ERROR_CODES.USER_NOT_FOUND;
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
     }
     async changePasswordUser(id, password) {
@@ -136,6 +145,8 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
@@ -150,7 +161,9 @@ class AdmService {
             };
         }
         catch (error) {
-            throw domain_1.ERROR_CODES.USER_NOT_FOUND; // todo: cambiar a error en la busqueda 
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; // todo: cambiar a error en la busqueda 
         }
     }
 }

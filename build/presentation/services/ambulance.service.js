@@ -43,6 +43,8 @@ class AmbulancesService {
         }
         catch (error) {
             tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
     }
@@ -72,6 +74,8 @@ class AmbulancesService {
         }
         catch (error) {
             tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }

@@ -50,11 +50,13 @@ class GuardsService {
         }
         catch (error) {
             tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw { code: domain_1.ERROR_CODES.INSERT_FAILED };
         }
     }
     async editGuard(guardEntityDto) {
-        const { id, guardChief, delegationId } = guardEntityDto;
+        const { id, guardChief, date, delegationId, state } = guardEntityDto;
         const existsGuardChief = await infrastructure_1.User.findOne({ where: { id: guardChief, role: 'head_guard' } })
             .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsGuardChief)
@@ -68,13 +70,17 @@ class GuardsService {
             tx = await infrastructure_1.sequelize.transaction();
             await infrastructure_1.Guard.update({
                 guard_chief: guardChief,
-                delegation_id: delegationId
+                delegation_id: delegationId,
+                date: new Date(date),
+                state: state
             }, { where: { id }, transaction: tx });
             await tx.commit();
             return { success: true };
         }
         catch (error) {
             tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
@@ -115,11 +121,13 @@ class GuardsService {
                     {
                         model: infrastructure_1.Shift,
                         as: 'shifts',
-                        attributes: ['id', 'name', 'checklist_supply_id', 'checklist_ambulance_id', 'created_at', 'updated_at'],
+                        attributes: ['id', 'name', 'created_at', 'updated_at'],
                         include: [
                             { model: infrastructure_1.Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
                             { model: infrastructure_1.User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
                             { model: infrastructure_1.User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+                            { model: infrastructure_1.ChecklistAmbulance, as: 'checklistAmbulance' },
+                            { model: infrastructure_1.ChecklistSupply, as: 'checklistSupplies' },
                         ]
                     },
                 ],

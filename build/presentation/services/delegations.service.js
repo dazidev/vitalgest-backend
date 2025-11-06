@@ -80,8 +80,9 @@ class DelegationsService {
             };
         }
         catch (error) {
-            console.log(error);
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw error_codes_enum_1.ERROR_CODES.INSERT_FAILED;
         }
     }
@@ -116,6 +117,8 @@ class DelegationsService {
         }
         catch (error) {
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw error_codes_enum_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
@@ -138,6 +141,8 @@ class DelegationsService {
         }
         catch (error) {
             await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
             throw error_codes_enum_1.ERROR_CODES.DELETE_FAILED;
         }
     }
