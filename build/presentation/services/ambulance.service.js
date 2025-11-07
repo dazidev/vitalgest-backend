@@ -155,7 +155,7 @@ class AmbulancesService {
             const supplyInfo = await infrastructure_1.Supply.findOne({ where: { id: supplyId }, transaction: tx });
             if (!supplyInfo)
                 throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
-            if (avaibleQuantity > supplyInfo.avaible_quantity)
+            if (Number(avaibleQuantity) > supplyInfo.avaible_quantity)
                 throw domain_1.ERROR_CODES.QUANTITY_NOT_EXIST;
             const newQuantity = supplyInfo.avaible_quantity - avaibleQuantity;
             await infrastructure_1.Supply.update({
@@ -164,11 +164,11 @@ class AmbulancesService {
             const supplyAmb = await infrastructure_1.SupplyAmbulance.create({
                 category: supplyInfo.category,
                 specification: supplyInfo.specification,
-                avaible_quantity: avaibleQuantity,
-                min_quantity: minQuantity,
+                avaible_quantity: Number(avaibleQuantity),
+                min_quantity: Number(minQuantity),
                 expiration_date: supplyInfo.expiration_date,
                 measurement_unit: supplyInfo.measurement_unit,
-                area_id: areaId, //! todo: hacer la tabla de areas
+                area_id: Number(areaId), //! todo: hacer la tabla de areas
                 ambulance_id: ambulanceId,
             }, { transaction: tx });
             await tx.commit();
@@ -193,9 +193,9 @@ class AmbulancesService {
             if (!supply)
                 throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
             await infrastructure_1.SupplyAmbulance.update({
-                avaible_quantity: avaibleQuantity,
-                min_quantity: minQuantity,
-                area_id: areaId, //! todo: hacer la tabla de areas
+                avaible_quantity: Number(avaibleQuantity),
+                min_quantity: Number(minQuantity),
+                area_id: Number(areaId), //! todo: hacer la tabla de areas
                 ambulance_id: ambulanceId,
             }, { where: { id }, transaction: tx });
             await tx.commit();

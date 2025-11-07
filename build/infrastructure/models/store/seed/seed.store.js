@@ -121,6 +121,63 @@ const createSeed = async () => {
             paramedical_id: paramedical.id,
             driver_id: driver.id
         }, { transaction: tx });
+        //* Areas de ambulancia semilla
+        await models_store_1.AreaAmbulance.bulkCreate([
+            {
+                id: 1,
+                name: 'EQUIPO DE COMUNICACIÓN Y SEÑALIZACIÓN',
+                section: 'GENERAL',
+                order: 1
+            },
+            {
+                id: 2,
+                name: 'ÁREA DE TRANSPORTE Y SEGURIDAD',
+                section: 'GENERAL',
+                order: 2
+            },
+            {
+                id: 3,
+                name: 'EQUIPO DE VÍAS AÉREAS',
+                section: 'GABINETE 1',
+                order: 3
+            },
+            {
+                id: 4,
+                name: 'EQUIPO DE CIRCULACIÓN Y CONTROL DE HEMORRAGIAS',
+                section: 'GABINETE 2',
+                order: 4
+            },
+            {
+                id: 5,
+                name: 'MATERIAL PARTO DE EMERGANCIA',
+                section: 'GABINETE 3',
+                order: 5
+            },
+            {
+                id: 6,
+                name: 'OTROS ELEMENTOS',
+                section: 'GABINETE 4',
+                order: 6
+            },
+            {
+                id: 7,
+                name: 'SOLUCIONES Y MEDICAMENTOS',
+                section: 'GABINETE 5',
+                order: 7
+            },
+            {
+                id: 8,
+                name: 'CAMAPEL',
+                section: 'VARIOS',
+                order: 8
+            },
+            {
+                id: 9,
+                name: 'BOTIQUIN',
+                section: 'VARIOS',
+                order: 9
+            }
+        ], { transaction: tx });
         await tx.commit();
         return { success: true };
     }

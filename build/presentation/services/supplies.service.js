@@ -15,7 +15,7 @@ class SuppliesService {
             const supply = await infrastructure_1.Supply.create({
                 category: category,
                 specification: specification,
-                avaible_quantity: avaibleQuantity,
+                avaible_quantity: Number(avaibleQuantity),
                 expiration_date: new Date(expirationDate),
                 measurement_unit: measurementUnit,
                 pharmacy_id: pharmacyId
@@ -44,7 +44,7 @@ class SuppliesService {
             await infrastructure_1.Supply.update({
                 category: category,
                 specification: specification,
-                avaible_quantity: avaibleQuantity,
+                avaible_quantity: Number(avaibleQuantity),
                 expiration_date: expirationDate,
                 measurement_unit: measurementUnit,
                 pharmacy_id: pharmacyId

@@ -12,6 +12,8 @@ class SupplyEntityDto {
             return domain_1.ERROR_CODES.MISSING_CATEGORY;
         if (!avaibleQuantity)
             return domain_1.ERROR_CODES.MISSING_QUANTITY;
+        if (!infrastructure_1.regularExp.numIntPositive.test(avaibleQuantity))
+            return domain_1.ERROR_CODES.INVALID_QUANTITY;
         if (!expirationDate)
             return domain_1.ERROR_CODES.MISSING_EXPIRATION_DATE;
         if (!measurementUnit)

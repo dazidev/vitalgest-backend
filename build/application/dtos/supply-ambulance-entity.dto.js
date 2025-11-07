@@ -10,10 +10,16 @@ class SupplyAmbEntityDto {
     static validateData(avaibleQuantity, minQuantity, areaId, ambulanceId) {
         if (!avaibleQuantity)
             return domain_1.ERROR_CODES.MISSING_QUANTITY;
+        if (!infrastructure_1.regularExp.numIntPositive.test(avaibleQuantity))
+            return domain_1.ERROR_CODES.INVALID_QUANTITY;
         if (!minQuantity)
             return domain_1.ERROR_CODES.MISSING_MIN_QUANTITY;
+        if (!infrastructure_1.regularExp.numIntPositive.test(minQuantity))
+            return domain_1.ERROR_CODES.INVALID_MIN_QUANTITY;
         if (!areaId)
             return domain_1.ERROR_CODES.MISSING_AREA_ID;
+        if (!infrastructure_1.regularExp.numIntPositive.test(areaId))
+            return domain_1.ERROR_CODES.INVALID_AREA_ID;
         if (!ambulanceId)
             return domain_1.ERROR_CODES.MISSING_AMBULANCE_ID;
         if (!infrastructure_1.regularExp.uuid.test(ambulanceId))

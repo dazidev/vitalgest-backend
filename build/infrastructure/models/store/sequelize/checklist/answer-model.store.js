@@ -11,14 +11,14 @@ Answer.init({
         allowNull: false,
         references: { model: 'checklist_ambulances', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     },
     question_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
         references: { model: 'questions', key: 'id' },
         onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+        onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     }
 }, {
     sequelize: sequelize_adapter_1.sequelize,
