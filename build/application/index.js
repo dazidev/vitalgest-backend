@@ -22,4 +22,5 @@ __exportStar(require("./dtos/shift-entity.dto"), exports);
 __exportStar(require("./dtos/checklist-ambulance-entity.dto"), exports);
 __exportStar(require("./dtos/amb-answers.dto"), exports);
 __exportStar(require("./dtos/supply-entity.dto"), exports);
+__exportStar(require("./dtos/supply-ambulance-entity.dto"), exports);
 __exportStar(require("./errors/custom.error"), exports);

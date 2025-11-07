@@ -33,4 +33,30 @@ AmbulanceRoutes.get(
   controller.getOneAmbulance.bind(controller)
 );
 
+//* SUPPLIES
+AmbulanceRoutes.post(
+  '/supplies/create/:id',
+  controller.addSupply.bind(controller)
+);
+
+AmbulanceRoutes.put(
+  '/supplies/edit/:id',
+  controller.editSupply.bind(controller)
+);
+
+AmbulanceRoutes.delete(
+  '/supplies/delete/:id',
+  controller.deleteSupply.bind(controller)
+);
+
+AmbulanceRoutes.get(
+  '/supplies/:id',
+  controller.getAmbSupplies.bind(controller)
+);
+
+AmbulanceRoutes.get(
+  '/supplies/one/:id',
+  controller.getOneAmbSupply.bind(controller)
+)
+
 export default AmbulanceRoutes;

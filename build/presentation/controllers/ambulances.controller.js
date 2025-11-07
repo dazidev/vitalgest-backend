@@ -52,5 +52,52 @@ class AmbulancesController {
             .then(response => res.json(response))
             .catch(error => next(application_1.CustomError.badRequest(error)));
     }
+    //* SUPPLIES
+    addSupply(req, res, next) {
+        const { id: ambulanceId } = req.params;
+        const [error, supplyAmbEntityDto] = application_1.SupplyAmbEntityDto.create({ ...req.body, ambulanceId });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
+        this.ambulancesService.addSupply(supplyAmbEntityDto)
+            .then((response) => res.json(response))
+            .catch((err) => next(application_1.CustomError.badRequest(err)));
+    }
+    editSupply(req, res, next) {
+        const { id } = req.params;
+        const [error, supplyAmbEntityDto] = application_1.SupplyAmbEntityDto.edit({ id, ...req.body });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
+        this.ambulancesService.editSupply(supplyAmbEntityDto)
+            .then((response) => res.json(response))
+            .catch((err) => next(application_1.CustomError.badRequest(err)));
+    }
+    deleteSupply(req, res, next) {
+        const { id } = req.params;
+        const [error, supplyAmbEntityDto] = application_1.SupplyAmbEntityDto.id({ id });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
+        this.ambulancesService.deleteSupply(supplyAmbEntityDto)
+            .then((response) => res.json(response))
+            .catch((err) => next(application_1.CustomError.badRequest(err)));
+    }
+    getAmbSupplies(req, res, next) {
+        const { id } = req.params;
+        if (!id)
+            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_AMBULANCE_ID);
+        if (!infrastructure_1.regularExp.uuid.test(id))
+            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_AMBULANCE_ID);
+        this.ambulancesService.getAmbSupplies(id)
+            .then((response) => res.json(response))
+            .catch((err) => next(application_1.CustomError.badRequest(err)));
+    }
+    getOneAmbSupply(req, res, next) {
+        const { id } = req.params;
+        const [error, supplyAmbEntityDto] = application_1.SupplyAmbEntityDto.id({ id });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
+        this.ambulancesService.getOneAmbSupply(supplyAmbEntityDto)
+            .then((response) => res.json(response))
+            .catch((err) => next(application_1.CustomError.badRequest(err)));
+    }
 }
 exports.AmbulancesController = AmbulancesController;

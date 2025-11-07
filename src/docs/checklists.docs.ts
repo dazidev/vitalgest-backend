@@ -161,7 +161,7 @@
 
 /**
  * @openapi
- * /api/checklists/ambulance/:id/sign:
+ * /api/checklists/ambulance/{id}/sign:
  *   put:
  *     summary: Firmar checklist de ambulancia
  *     tags: ['ENDPOINTS Gestión de Checklists']

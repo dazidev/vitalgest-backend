@@ -147,5 +147,121 @@ class AmbulancesService {
             data: formatAmbulance
         };
     }
+    async addSupply(supplyAmbEntityDto) {
+        const { avaibleQuantity, minQuantity, areaId, ambulanceId, supplyId } = supplyAmbEntityDto;
+        let tx;
+        try {
+            tx = await infrastructure_1.sequelize.transaction();
+            const supplyInfo = await infrastructure_1.Supply.findOne({ where: { id: supplyId }, transaction: tx });
+            if (!supplyInfo)
+                throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
+            if (avaibleQuantity > supplyInfo.avaible_quantity)
+                throw domain_1.ERROR_CODES.QUANTITY_NOT_EXIST;
+            const newQuantity = supplyInfo.avaible_quantity - avaibleQuantity;
+            await infrastructure_1.Supply.update({
+                avaible_quantity: newQuantity,
+            }, { where: { id: supplyId }, transaction: tx });
+            const supplyAmb = await infrastructure_1.SupplyAmbulance.create({
+                category: supplyInfo.category,
+                specification: supplyInfo.specification,
+                avaible_quantity: avaibleQuantity,
+                min_quantity: minQuantity,
+                expiration_date: supplyInfo.expiration_date,
+                measurement_unit: supplyInfo.measurement_unit,
+                area_id: areaId, //! todo: hacer la tabla de areas
+                ambulance_id: ambulanceId,
+            }, { transaction: tx });
+            await tx.commit();
+            return {
+                success: true,
+                data: supplyAmb
+            };
+        }
+        catch (error) {
+            tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        }
+    }
+    async editSupply(supplyAmbEntityDto) {
+        const { id, avaibleQuantity, minQuantity, areaId, ambulanceId } = supplyAmbEntityDto;
+        let tx;
+        try {
+            tx = await infrastructure_1.sequelize.transaction();
+            const supply = await infrastructure_1.SupplyAmbulance.findOne({ where: { id }, transaction: tx });
+            if (!supply)
+                throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
+            await infrastructure_1.SupplyAmbulance.update({
+                avaible_quantity: avaibleQuantity,
+                min_quantity: minQuantity,
+                area_id: areaId, //! todo: hacer la tabla de areas
+                ambulance_id: ambulanceId,
+            }, { where: { id }, transaction: tx });
+            await tx.commit();
+            return { success: true };
+        }
+        catch (error) {
+            await tx?.rollback();
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        }
+    }
+    async deleteSupply(supplyAmbEntityDto) {
+        const { id } = supplyAmbEntityDto;
+        try {
+            const supply = await infrastructure_1.SupplyAmbulance.findOne({
+                where: { id }
+            });
+            if (!supply)
+                throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
+            const row = await infrastructure_1.SupplyAmbulance.destroy({ where: { id } });
+            if (row === 0)
+                throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
+            return { success: true };
+        }
+        catch (error) {
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        }
+    }
+    async getAmbSupplies(ambulanceId) {
+        try {
+            const pharmacy = infrastructure_1.Ambulance.findOne({ where: { id: ambulanceId } });
+            if (!pharmacy)
+                throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
+            const supplies = await infrastructure_1.SupplyAmbulance.findAll({ where: { ambulance_id: ambulanceId } });
+            if (supplies.length === 0)
+                throw domain_1.ERROR_CODES.SUPPLIES_NOT_FOUND;
+            return {
+                success: true,
+                data: supplies
+            };
+        }
+        catch (error) {
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        }
+    }
+    async getOneAmbSupply(supplyAmbEntityDto) {
+        const { id } = supplyAmbEntityDto;
+        try {
+            const supply = await infrastructure_1.SupplyAmbulance.findOne({ where: { id } });
+            if (!supply)
+                throw domain_1.ERROR_CODES.SUPPLIES_NOT_FOUND;
+            return {
+                success: true,
+                data: supply
+            };
+        }
+        catch (error) {
+            if (typeof error === 'string')
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        }
+    }
 }
 exports.AmbulancesService = AmbulancesService;
