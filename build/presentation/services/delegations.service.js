@@ -91,14 +91,10 @@ class DelegationsService {
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!exists)
             throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
-        const existsState = await infrastructure_1.State.findOne({ where: { id } })
-            .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
-        if (!existsState)
-            throw error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND;
         const existsMunicipality = await infrastructure_1.Municipality.findOne({ where: { id } })
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsMunicipality)
-            throw error_codes_enum_1.ERROR_CODES.STATE_NOT_FOUND;
+            throw error_codes_enum_1.ERROR_CODES.MUNICIPALITY_NOT_FOUND;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();

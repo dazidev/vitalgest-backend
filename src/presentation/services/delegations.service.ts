@@ -115,15 +115,10 @@ export class DelegationsService implements DelegationsServiceInterface {
 
     if (!exists) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
-    const existsState = await State.findOne({ where: { id } })
-      .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
-
-    if (!existsState) throw ERROR_CODES.STATE_NOT_FOUND
-
     const existsMunicipality = await Municipality.findOne({ where: { id } })
       .catch((_error) => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
 
-    if (!existsMunicipality) throw ERROR_CODES.STATE_NOT_FOUND
+    if (!existsMunicipality) throw ERROR_CODES.MUNICIPALITY_NOT_FOUND
 
     let tx: Transaction | undefined
 
