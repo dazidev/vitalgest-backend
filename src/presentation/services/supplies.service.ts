@@ -22,7 +22,7 @@ export class SuppliesService implements SuppliesServiceInterface {
       const supply = await Supply.create({
         category: category!,
         specification: specification!,
-        avaible_quantity: avaibleQuantity!,
+        avaible_quantity: Number(avaibleQuantity!),
         expiration_date: new Date(expirationDate!),
         measurement_unit: measurementUnit!,
         pharmacy_id: pharmacyId
@@ -59,7 +59,7 @@ export class SuppliesService implements SuppliesServiceInterface {
       await Supply.update({
         category: category,
         specification: specification,
-        avaible_quantity: avaibleQuantity,
+        avaible_quantity: Number(avaibleQuantity),
         expiration_date: expirationDate,
         measurement_unit: measurementUnit,
         pharmacy_id: pharmacyId

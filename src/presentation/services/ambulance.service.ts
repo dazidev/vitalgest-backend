@@ -184,7 +184,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
       const supplyInfo = await Supply.findOne({ where: { id: supplyId }, transaction: tx })
       if (!supplyInfo) throw ERROR_CODES.SUPPLY_NOT_FOUND
 
-      if (avaibleQuantity! > supplyInfo.avaible_quantity) throw ERROR_CODES.QUANTITY_NOT_EXIST
+      if (Number(avaibleQuantity!) > supplyInfo.avaible_quantity) throw ERROR_CODES.QUANTITY_NOT_EXIST
       const newQuantity = supplyInfo.avaible_quantity - avaibleQuantity!
 
       await Supply.update({
@@ -194,11 +194,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
       const supplyAmb = await SupplyAmbulance.create({
         category: supplyInfo.category!,
         specification: supplyInfo.specification!,
-        avaible_quantity: avaibleQuantity!,
-        min_quantity: minQuantity!,
+        avaible_quantity: Number(avaibleQuantity!),
+        min_quantity: Number(minQuantity!),
         expiration_date: supplyInfo.expiration_date!,
         measurement_unit: supplyInfo.measurement_unit!,
-        area_id: areaId, //! todo: hacer la tabla de areas
+        area_id: Number(areaId), //! todo: hacer la tabla de areas
         ambulance_id: ambulanceId,
       }, { transaction: tx })
 
@@ -227,9 +227,9 @@ export class AmbulancesService implements AmbulancesServiceInterface {
       if (!supply) throw ERROR_CODES.SUPPLY_NOT_FOUND
 
       await SupplyAmbulance.update({
-        avaible_quantity: avaibleQuantity!,
-        min_quantity: minQuantity!,
-        area_id: areaId, //! todo: hacer la tabla de areas
+        avaible_quantity: Number(avaibleQuantity!),
+        min_quantity: Number(minQuantity!),
+        area_id: Number(areaId), //! todo: hacer la tabla de areas
         ambulance_id: ambulanceId,
       }, { where: { id }, transaction: tx })
 

@@ -4,6 +4,17 @@ exports.DelegationsService = void 0;
 const error_codes_enum_1 = require("../../domain/enums/error-codes.enum");
 const infrastructure_1 = require("../../infrastructure");
 class DelegationsService {
+    async getDelegationName(municipalityId) {
+        const municipality = await infrastructure_1.Municipality.findOne({
+            where: { id: municipalityId },
+            attributes: ['name'],
+            include: { model: infrastructure_1.State, as: 'state', attributes: ['name'] }
+        });
+        if (!municipality)
+            return false;
+        const name = `Delegación ${municipality.name}, ${municipality.state?.name}`;
+        return name;
+    }
     async getStates() {
         const states = await infrastructure_1.State.findAll()
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
@@ -45,8 +56,11 @@ class DelegationsService {
         return formatMunicipalities;
     }
     async createDelegation(delegationEntity) {
-        const { name, stateName, municipalityId, municipalityName } = delegationEntity;
+        const { municipalityId } = delegationEntity;
         let tx;
+        const name = await this.getDelegationName(municipalityId);
+        if (!name)
+            throw error_codes_enum_1.ERROR_CODES.UPDATE_FAILED;
         try {
             tx = await infrastructure_1.sequelize.transaction();
             const delegation = await infrastructure_1.Delegation.create({
@@ -60,13 +74,6 @@ class DelegationsService {
             const formatDelegation = {
                 id: delegation.id,
                 name: delegation.name,
-                state: {
-                    name: stateName,
-                },
-                municipality: {
-                    id: delegation.municipality_id,
-                    name: municipalityName
-                },
                 pharmacy: {
                     id: pharmacy.id,
                 },
@@ -86,15 +93,18 @@ class DelegationsService {
         }
     }
     async editDelegation(delegationEntity) {
-        const { id, name, municipalityId } = delegationEntity;
+        const { id, municipalityId } = delegationEntity;
         const exists = await infrastructure_1.Delegation.findOne({ where: { id } })
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!exists)
             throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
-        const existsMunicipality = await infrastructure_1.Municipality.findOne({ where: { id } })
+        const existsMunicipality = await infrastructure_1.Municipality.findOne({ where: { id: municipalityId } })
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!existsMunicipality)
             throw error_codes_enum_1.ERROR_CODES.MUNICIPALITY_NOT_FOUND;
+        const name = await this.getDelegationName(municipalityId);
+        if (!name)
+            throw error_codes_enum_1.ERROR_CODES.UPDATE_FAILED;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -134,6 +144,7 @@ class DelegationsService {
             return { success: true };
         }
         catch (error) {
+            console.log(error);
             await tx?.rollback();
             if (typeof error === 'string')
                 throw error;
@@ -154,7 +165,7 @@ class DelegationsService {
                     { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
                 ],
                 attributes: {
-                    exclude: ['municipality_id', 'pharmacy_id']
+                    exclude: ['municipality_id']
                 }
             })
             : delegations = await infrastructure_1.Delegation.findAll({
@@ -163,7 +174,7 @@ class DelegationsService {
                     { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
                 ],
                 attributes: {
-                    exclude: ['municipality_id', 'pharmacy_id']
+                    exclude: ['municipality_id']
                 },
                 limit: newAmount
             });

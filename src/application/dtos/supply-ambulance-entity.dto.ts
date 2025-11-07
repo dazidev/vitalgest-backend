@@ -31,8 +31,12 @@ export class SupplyAmbEntityDto {
   ) {
     
     if (!avaibleQuantity) return ERROR_CODES.MISSING_QUANTITY
+    if (!regularExp.numIntPositive.test(avaibleQuantity)) return ERROR_CODES.INVALID_QUANTITY
     if (!minQuantity) return ERROR_CODES.MISSING_MIN_QUANTITY
+    if (!regularExp.numIntPositive.test(minQuantity)) return ERROR_CODES.INVALID_MIN_QUANTITY
+
     if (!areaId) return ERROR_CODES.MISSING_AREA_ID
+    if (!regularExp.numIntPositive.test(areaId)) return ERROR_CODES.INVALID_AREA_ID
 
     if (!ambulanceId) return ERROR_CODES.MISSING_AMBULANCE_ID
     if (!regularExp.uuid.test(ambulanceId)) return ERROR_CODES.INVALID_AMBULANCE_ID

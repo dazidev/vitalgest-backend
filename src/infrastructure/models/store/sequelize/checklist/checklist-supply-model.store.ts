@@ -24,14 +24,14 @@ ChecklistSupply.init(
       allowNull: false,
       references: { model: 'ambulances', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     },
     shift_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'shifts', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     },
   },
 
