@@ -8,6 +8,7 @@ class AreaAmbulance extends Model<
 > {
   declare id: CreationOptional<number>
   declare name: string
+  declare section: string
   declare order: number
 }
 
@@ -15,6 +16,7 @@ AreaAmbulance.init(
   {
     id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, allowNull: false, autoIncrement: true },
     name: { type: DataTypes.STRING(100), allowNull: false },
+    section: { type: DataTypes.STRING(100), allowNull: false },
     order: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false }
   },
   {

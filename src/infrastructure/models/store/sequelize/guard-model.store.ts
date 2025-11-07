@@ -33,7 +33,7 @@ Guard.init(
       allowNull: false,
       references: { model: 'users', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     },
     delegation_id: {
       type: DataTypes.UUID,
@@ -52,6 +52,7 @@ Guard.init(
     indexes: [
       { fields: ['guard_chief'] },
       { fields: ['delegation_id'] },
+      { unique: true, fields: ['delegation_id', 'date'], name: 'uq_guard_delegation_date' }
     ],
     // paranoid: true //* activa borrado lógico
   },

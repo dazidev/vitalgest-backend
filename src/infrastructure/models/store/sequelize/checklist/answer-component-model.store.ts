@@ -30,7 +30,7 @@ AnswerComponent.init(
       allowNull: false,
       references: { model: 'answers', key: 'id' },
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     },
     type: {
       type: DataTypes.ENUM(...ANSWER_TYPES),

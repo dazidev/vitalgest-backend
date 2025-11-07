@@ -34,7 +34,10 @@ export class SupplyEntityDto {
   ) {
     
     if (!category) return ERROR_CODES.MISSING_CATEGORY
+
     if (!avaibleQuantity) return ERROR_CODES.MISSING_QUANTITY
+    if (!regularExp.numIntPositive.test(avaibleQuantity)) return ERROR_CODES.INVALID_QUANTITY
+
     if (!expirationDate) return ERROR_CODES.MISSING_EXPIRATION_DATE
     if (!measurementUnit) return ERROR_CODES.MISSING_MEASUREMENT_UNIT
 

@@ -38,14 +38,15 @@ SupplyAmbulance.init(
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false, 
       references: { model: 'areas_ambulance', key: 'id' },
-      onUpdate: 'CASCADE'
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
     },
     ambulance_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'ambulances', key: 'id' },
       onUpdate: 'CASCADE',
-      //onDelete: 'RESTRICT', // impide eliminar al padre si tiene hijos
+      onDelete: 'CASCADE',
     },
   },
   {
