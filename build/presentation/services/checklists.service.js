@@ -1,14 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChecklistsService = void 0;
 const fs_1 = require("fs");
 const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
-const answer_model_store_1 = __importDefault(require("../../infrastructure/models/store/sequelize/checklist/answer-model.store"));
-const answer_component_model_store_1 = __importDefault(require("../../infrastructure/models/store/sequelize/checklist/answer-component-model.store"));
 class ChecklistsService {
     //* QUESTIONS
     async getAmbQuestions() {
@@ -65,7 +60,7 @@ class ChecklistsService {
             await tx?.rollback();
             if (typeof error === 'string')
                 throw error;
-            throw domain_1.ERROR_CODES.INSERT_FAILED;
+            throw error; //! todo: cambiar
         }
     }
     async signAmbChecklist(checkListAmbulanceEntityDto) {
@@ -136,7 +131,7 @@ class ChecklistsService {
         try {
             const checklist = await infrastructure_1.ChecklistAmbulance.findByPk(id, {
                 include: {
-                    model: answer_model_store_1.default,
+                    model: infrastructure_1.Answer,
                     as: 'answers',
                     attributes: ['id'],
                     include: [
@@ -155,7 +150,7 @@ class ChecklistsService {
                             ]
                         },
                         {
-                            model: answer_component_model_store_1.default,
+                            model: infrastructure_1.AnswerComponent,
                             as: 'components',
                             attributes: [
                                 'id',
@@ -169,13 +164,13 @@ class ChecklistsService {
                 },
                 order: [
                     [
-                        { model: answer_model_store_1.default, as: 'answers' },
+                        { model: infrastructure_1.Answer, as: 'answers' },
                         { model: infrastructure_1.Question, as: 'question' },
                         'order_category',
                         'ASC',
                     ],
                     [
-                        { model: answer_model_store_1.default, as: 'answers' },
+                        { model: infrastructure_1.Answer, as: 'answers' },
                         { model: infrastructure_1.Question, as: 'question' },
                         'order_question_category',
                         'ASC',
@@ -202,7 +197,7 @@ class ChecklistsService {
             tx = await infrastructure_1.sequelize.transaction();
             for (const ans of answers) {
                 const questionId = ans.questionId;
-                const [answer] = await answer_model_store_1.default.findOrCreate({
+                const [answer] = await infrastructure_1.Answer.findOrCreate({
                     where: {
                         checklist_ambulance_id: checklistAmbulanceId,
                         question_id: questionId
@@ -213,7 +208,7 @@ class ChecklistsService {
                     },
                     transaction: tx
                 });
-                await answer_component_model_store_1.default.create({
+                await infrastructure_1.AnswerComponent.create({
                     answer_id: answer.id,
                     type: ans.type,
                     value_bool: ans.valueBool ?? null,

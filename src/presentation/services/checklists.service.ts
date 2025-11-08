@@ -1,13 +1,10 @@
 import { promises as fs } from 'fs';
 
 import { ChecklistsServiceInterface, ERROR_CODES } from "../../domain";
-import { Ambulance, ChecklistAmbulance, getCurrentTime, Question, relToAbs, saveWebFile, sequelize, Shift } from "../../infrastructure";
+import { Ambulance, Answer, AnswerComponent, ChecklistAmbulance, getCurrentTime, Question, relToAbs, saveWebFile, sequelize, Shift } from "../../infrastructure";
 import { CheckListAmbulanceEntityDto } from '../../application';
 import { Transaction } from 'sequelize';
 import { RequestAnswerInterface } from '../../infrastructure/http/interfaces';
-import Answer from '../../infrastructure/models/store/sequelize/checklist/answer-model.store';
-import AnswerComponent from '../../infrastructure/models/store/sequelize/checklist/answer-component-model.store';
-
 
 
 export class ChecklistsService implements ChecklistsServiceInterface {
@@ -75,7 +72,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
       await tx?.rollback()
       if (typeof error === 'string') throw error
-      throw ERROR_CODES.INSERT_FAILED
+      throw error //! todo: cambiar
     }
   }
 
