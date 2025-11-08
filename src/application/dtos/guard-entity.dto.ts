@@ -57,7 +57,7 @@ export class GuardsEntityDto {
     if (!state) return [ERROR_CODES.MISSING_STATE]
 
   
-    return [undefined, new GuardsEntityDto({id, guardChief, date, delegationId})]
+    return [undefined, new GuardsEntityDto({id, guardChief, date, delegationId, state})]
   }
 
   static delete(object: {[key: string]: any}): [string?, GuardsEntityDto?] {
