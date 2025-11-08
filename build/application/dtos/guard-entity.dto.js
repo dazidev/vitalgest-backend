@@ -49,7 +49,7 @@ class GuardsEntityDto {
             return [domain_1.ERROR_CODES.INVALID_DELEGATION_ID];
         if (!state)
             return [domain_1.ERROR_CODES.MISSING_STATE];
-        return [undefined, new GuardsEntityDto({ id, guardChief, date, delegationId })];
+        return [undefined, new GuardsEntityDto({ id, guardChief, date, delegationId, state })];
     }
     static delete(object) {
         const { id } = object;
