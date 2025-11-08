@@ -41,13 +41,15 @@ export class UserEntityDto {
       return null
     }
 
-    if (type === 'edit') if (!id) return [ERROR_CODES.MISSING_USER_ID];
+    if (type === 'edit') {
+      if (!id) return [ERROR_CODES.MISSING_USER_ID];
+      if (!status) return [ERROR_CODES.MISSING_STATUS]
+    }
     if (!name) return [ERROR_CODES.MISSING_NAME];
     if (!lastname) return [ERROR_CODES.MISSING_LASTNAME];
     if (!email) return [ERROR_CODES.MISSING_EMAIL];
     if (!regularExp.email.test(email)) return [ERROR_CODES.INVALID_EMAIL_FORMAT];
-    if (!status) return [ERROR_CODES.MISSING_STATUS]
-
+    
     if (type === 'create') {
       if (!password) return [ERROR_CODES.MISSING_PASSWORD];
       if (!regularExp.password.test(password)) return [ERROR_CODES.INVALID_PASSWORD_FORMAT];

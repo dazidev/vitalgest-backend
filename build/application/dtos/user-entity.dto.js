@@ -47,9 +47,12 @@ UserEntityDto.validateData = (object, type) => {
             return [domain_1.ERROR_CODES.INVALID_PASSWORD_FORMAT];
         return null;
     }
-    if (type === 'edit')
+    if (type === 'edit') {
         if (!id)
             return [domain_1.ERROR_CODES.MISSING_USER_ID];
+        if (!status)
+            return [domain_1.ERROR_CODES.MISSING_STATUS];
+    }
     if (!name)
         return [domain_1.ERROR_CODES.MISSING_NAME];
     if (!lastname)
@@ -58,8 +61,6 @@ UserEntityDto.validateData = (object, type) => {
         return [domain_1.ERROR_CODES.MISSING_EMAIL];
     if (!infrastructure_1.regularExp.email.test(email))
         return [domain_1.ERROR_CODES.INVALID_EMAIL_FORMAT];
-    if (!status)
-        return [domain_1.ERROR_CODES.MISSING_STATUS];
     if (type === 'create') {
         if (!password)
             return [domain_1.ERROR_CODES.MISSING_PASSWORD];
