@@ -1,7 +1,4 @@
 "use strict";
-// src/infrastructure/files/file.helpers.ts
-// Helper autosuficiente para guardar File (Web API) en disco.
-// Compatible con distintas versiones de undici (sin usar export nombrado).
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -47,17 +44,14 @@ exports.ensureUploadsRoot = ensureUploadsRoot;
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const crypto_1 = require("crypto");
-const undici = __importStar(require("undici")); // namespace import
-// Usa el File global o el de undici
+const undici = __importStar(require("undici"));
 const WebFile = globalThis.File ?? undici.File;
-// --- Configuración de extensiones por MIME ---
 const MIME_EXT = {
     'image/jpeg': 'jpg',
     'image/png': 'png',
     'image/webp': 'webp',
     'application/pdf': 'pdf',
 };
-// --- Utils ---
 function sanitizeName(name) {
     const base = path_1.default.basename(name || 'file').replace(/\s+/g, '-');
     return base.replace(/[^a-zA-Z0-9._-]/g, '');
@@ -72,16 +66,6 @@ function getExt(file) {
 async function ensureDir(dir) {
     await fs_1.promises.mkdir(dir, { recursive: true });
 }
-// --- API ---
-/**
- * Guarda un File (Web API) en disco, creando las carpetas necesarias.
- *
- * @param file   Archivo Web (instancia de File)
- * @param baseDir Carpeta base (por defecto 'uploads')
- * @param subDir  Subcarpeta lógica (p. ej. 'YYYY-MM/<ambulanceId>'); si no se indica, usa 'YYYY-MM'
- *
- * @returns { relPath, absPath, size, mime, filename }
- */
 async function saveWebFile(file, baseDir = 'uploads', subDir) {
     if (!WebFile) {
         throw new Error('File API no disponible. Usa Node >= 18 o undici con File.');
@@ -89,23 +73,23 @@ async function saveWebFile(file, baseDir = 'uploads', subDir) {
     if (!(file instanceof WebFile)) {
         throw new Error('INVALID_FILE_OBJECT');
     }
-    // 1) Crea carpeta base uploads/
+    //* crea la carpeta
     const absBase = path_1.default.resolve(baseDir);
     await ensureDir(absBase);
-    // 2) Crea subcarpeta
+    //* crea subcarpeta
     const now = new Date();
     const defaultSub = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const relSub = subDir ?? defaultSub;
     const absDir = path_1.default.join(absBase, relSub);
     const relDir = path_1.default.join(baseDir, relSub);
     await ensureDir(absDir);
-    // 3) Nombre único
+    //* genera nombre unico
     const ext = getExt(file);
     const safeOriginal = sanitizeName(file.name || `file.${ext}`);
     const uuid = (0, crypto_1.randomUUID)();
     const hasExt = path_1.default.extname(safeOriginal).toLowerCase() === `.${ext.toLowerCase()}`;
     const filename = hasExt ? `${uuid}-${safeOriginal}` : `${uuid}-${safeOriginal}.${ext}`;
-    // 4) Escribir archivo
+    //* conf para escribir el archivo
     const buffer = Buffer.from(await file.arrayBuffer());
     const absPath = path_1.default.join(absDir, filename);
     const relPath = path_1.default.join(relDir, filename);
@@ -115,7 +99,7 @@ async function saveWebFile(file, baseDir = 'uploads', subDir) {
     catch (e) {
         if (e?.code !== 'EEXIST')
             throw e;
-        // Reintento raro si colisiona el nombre
+        //* reintento raro si colisiona el nombre
         const retryName = `${(0, crypto_1.randomUUID)()}-${safeOriginal}${hasExt ? '' : `.${ext}`}`;
         const retryAbs = path_1.default.join(absDir, retryName);
         const retryRel = path_1.default.join(relDir, retryName);
@@ -124,16 +108,13 @@ async function saveWebFile(file, baseDir = 'uploads', subDir) {
     }
     return { relPath, absPath, size: buffer.length, mime: file.type, filename };
 }
-/**
- * Convierte un archivo de multer (memoria) a File Web compatible con este helper.
- */
+//*Convierte un archivo de multer (memoria) a File Web compatible con este helper
 function toWebFile(mf) {
     if (!mf)
         return undefined;
     if (!WebFile) {
         throw new Error('File API no disponible. Usa Node >= 18 o undici con File.');
     }
-    // Crea un Uint8Array NUEVO (con ArrayBuffer normal) y copia el Buffer de multer
     const part = new Uint8Array(mf.buffer.length);
     part.set(mf.buffer);
     return new WebFile([part], mf.originalname, { type: mf.mimetype });
@@ -150,11 +131,9 @@ function relToAbs(relPath) {
 }
 function absToRel(absPath) {
     const relFromRoot = path_1.default.relative(ABS_UPLOADS_ROOT, absPath).split(path_1.default.sep).join('/');
-    return `uploads/${relFromRoot}`; // mismo formato que guardas en DB
+    return `uploads/${relFromRoot}`;
 }
-/**
- * (Opcional) Crea la carpeta raíz de uploads al iniciar la app.
- */
+//* crea la carpeta raíz de uploads al iniciar el api
 async function ensureUploadsRoot(baseDir = 'uploads') {
     const absBase = path_1.default.resolve(baseDir);
     await ensureDir(absBase);

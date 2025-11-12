@@ -17,5 +17,7 @@ admRoutes.get('/get-all/users/:amount',
 //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin', true)],
 controller.getAllUsers.bind(controller));
 admRoutes.put('/change-password/user/:id', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.changePasswordUser.bind(controller));
-admRoutes.get('/get/user/:id', [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate('admin')], controller.getUserById.bind(controller));
+admRoutes.get('/get/user/:id', 
+//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+controller.getUserById.bind(controller));
 exports.default = admRoutes;

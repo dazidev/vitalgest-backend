@@ -30,20 +30,25 @@ class ChecklistsController {
     createAmbChecklist(req, res, next) {
         try {
             const { ambulanceId, shiftId, km, notes } = req.body;
-            const files = req.files;
-            const gasFileMf = files?.gasFile?.[0];
-            const signOperatorFileMf = files?.signOperatorFile?.[0];
-            const signRecipientFileMf = files?.signRecipientFile?.[0];
-            const gasFile = (0, infrastructure_1.toWebFile)(gasFileMf);
-            const signOperatorFile = (0, infrastructure_1.toWebFile)(signOperatorFileMf);
-            const signRecipientFile = (0, infrastructure_1.toWebFile)(signRecipientFileMf);
+            // todo: habilitar después
+            /*const files = req.files as {
+              [field: string]: Express.Multer.File[]
+            } | undefined
+      
+            const gasFileMf = files?.gasFile?.[0]
+            const signOperatorFileMf = files?.signOperatorFile?.[0]
+            const signRecipientFileMf = files?.signRecipientFile?.[0]
+      
+            const gasFile = toWebFile(gasFileMf)
+            const signOperatorFile = toWebFile(signOperatorFileMf)
+            const signRecipientFile = toWebFile(signRecipientFileMf)*/
             const payload = {
                 ambulanceId,
                 shiftId,
                 km,
-                gasFile,
+                /*gasFile,
                 signOperatorFile,
-                signRecipientFile,
+                signRecipientFile,*/
                 notes,
             };
             const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.create(payload);

@@ -22,10 +22,11 @@ class ChecklistsService {
     }
     //* AMBULANCE CHECKLIST
     async createAmbChecklist(checkListAmbulanceEntityDto) {
-        const { ambulanceId, shiftId, km, gasFile, notes } = checkListAmbulanceEntityDto;
-        const baseDir = 'uploads/ambulance';
+        const { ambulanceId, shiftId, km, /*gasFile,*/ notes } = checkListAmbulanceEntityDto;
+        /*const baseDir = 'uploads/ambulance';
         const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
-        const saved = [];
+    
+        const saved: { absPath: string; relPath: string }[] = [];*/
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -39,15 +40,15 @@ class ChecklistsService {
             });
             if (!shift)
                 throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
-            const gas = await (0, infrastructure_1.saveWebFile)(gasFile, baseDir, subDir);
-            saved.push({ absPath: gas.absPath, relPath: gas.relPath });
+            /*const gas = await saveWebFile(gasFile!, baseDir, subDir);
+            saved.push({ absPath: gas.absPath, relPath: gas.relPath });*/
             const checklist = await infrastructure_1.ChecklistAmbulance.create({
                 ambulance_id: ambulanceId,
                 shift_id: shiftId,
                 time: (0, infrastructure_1.getCurrentTime)(),
                 km: Number(km),
                 notes: notes ?? undefined,
-                gas_path: gas.relPath
+                gas_path: 'sin utilizar' /*gas.relPath*/
             }, { transaction: tx });
             await tx?.commit();
             return {
@@ -56,7 +57,7 @@ class ChecklistsService {
             };
         }
         catch (error) {
-            await Promise.allSettled(saved.map(f => fs_1.promises.unlink(f.absPath)));
+            // await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
             await tx?.rollback();
             if (typeof error === 'string')
                 throw error;
