@@ -55,20 +55,20 @@ class CheckListAmbulanceEntityDto {
             return [error];
         return [undefined, new CheckListAmbulanceEntityDto({ id, signOperatorFile, signRecipientFile })];
     }
-    static edit(object) {
-        const { id, ambulanceId, shiftId, km, /*gasFile,*/ signOperatorFile, signRecipientFile, notes } = object;
-        if (!id)
-            return [domain_1.ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID];
-        if (!infrastructure_1.regularExp.uuid.test(id))
-            return [domain_1.ERROR_CODES.INVALID_CHECKLIST_AMBULANCE_ID];
-        const error = this.validateData(ambulanceId, shiftId, km);
-        if (!(error === true))
-            return [error];
-        const errorSign = this.validateSign(signOperatorFile, signRecipientFile);
-        if (!(errorSign === true))
-            return [errorSign];
-        return [undefined, new CheckListAmbulanceEntityDto({ id, ambulanceId, shiftId, km, /*gasFile,*/ signOperatorFile, signRecipientFile, notes })];
-    }
+    /*static edit(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
+      const { id, ambulanceId, shiftId, km, /*gasFile,*/ /*signOperatorFile, signRecipientFile, notes } = object
+    
+    if (!id) return [ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID]
+    if (!regularExp.uuid.test(id)) return [ERROR_CODES.INVALID_CHECKLIST_AMBULANCE_ID]
+
+    const error = this.validateData(ambulanceId, shiftId, km, /*gasFile*/ /*)
+    if (!(error === true)) return [error]
+
+    const errorSign = this.validateSign(signOperatorFile, signRecipientFile)
+    if (!(errorSign === true)) return [errorSign]
+
+    return [undefined, new CheckListAmbulanceEntityDto({id, ambulanceId, shiftId, km, /*gasFile,*/ /*signOperatorFile, signRecipientFile, notes})]
+  }*/
     static delete(object) {
         const { id } = object;
         if (!id)

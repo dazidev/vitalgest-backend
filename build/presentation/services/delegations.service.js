@@ -193,10 +193,14 @@ class DelegationsService {
         };
     }
     async getDelegation(id) {
-        const delegation = await infrastructure_1.Delegation.findOne({
-            where: { id },
+        const delegation = await infrastructure_1.Delegation.findByPk(id, {
             include: [
-                { model: infrastructure_1.Municipality, as: 'municipality', attributes: ['id', 'name'] },
+                {
+                    model: infrastructure_1.Municipality,
+                    as: 'municipality',
+                    attributes: ['id', 'name'],
+                    include: [{ model: infrastructure_1.State, as: 'state', attributes: ['id', 'name'] }]
+                },
                 { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
             ],
             attributes: {
@@ -206,16 +210,9 @@ class DelegationsService {
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!delegation)
             throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
-        const formatDelegation = {
-            id: delegation.id,
-            name: delegation.name,
-            municipality: delegation.municipality,
-            createdAt: delegation.get('createdAt'),
-            updatedAt: delegation.get('updatedAt'),
-        };
         return {
             success: true,
-            data: formatDelegation
+            data: delegation
         };
     }
 }

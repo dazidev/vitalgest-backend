@@ -68,6 +68,7 @@ export class ChecklistsController implements CheckListsControllerInterface {
         .catch(err => next(CustomError.badRequest(err)))
 
     } catch (error) {
+      if (typeof error === 'string') return next(CustomError.badRequest(error))
       return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR))
     }
   }

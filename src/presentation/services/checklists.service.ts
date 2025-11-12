@@ -41,14 +41,22 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       tx = await sequelize.transaction()
 
       const ambulance = await Ambulance.findOne({
-        where: { id: ambulanceId }
+        where: { id: ambulanceId },
+        transaction: tx
       })
       if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND
 
       const shift = await Shift.findOne({
-        where: { id: shiftId }
+        where: { id: shiftId },
+        transaction: tx
       })
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND
+
+      const exists = await ChecklistAmbulance.findOne({
+        where: { ambulance_id: ambulanceId, shift_id: shiftId },
+        transaction: tx
+      })
+      if (exists) throw ERROR_CODES.CHECKLIST_ALREADY_EXISTS
 
       /*const gas = await saveWebFile(gasFile!, baseDir, subDir);
       saved.push({ absPath: gas.absPath, relPath: gas.relPath });*/

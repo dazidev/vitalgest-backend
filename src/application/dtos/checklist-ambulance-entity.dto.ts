@@ -77,20 +77,20 @@ export class CheckListAmbulanceEntityDto {
     return [undefined, new CheckListAmbulanceEntityDto({id, signOperatorFile, signRecipientFile})]
   }
 
-  static edit(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
-    const { id, ambulanceId, shiftId, km, /*gasFile,*/ signOperatorFile, signRecipientFile, notes } = object
+  /*static edit(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
+    const { id, ambulanceId, shiftId, km, /*gasFile,*/ /*signOperatorFile, signRecipientFile, notes } = object
     
     if (!id) return [ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID]
     if (!regularExp.uuid.test(id)) return [ERROR_CODES.INVALID_CHECKLIST_AMBULANCE_ID]
 
-    const error = this.validateData(ambulanceId, shiftId, km, /*gasFile*/)
+    const error = this.validateData(ambulanceId, shiftId, km, /*gasFile*//*)
     if (!(error === true)) return [error]
 
     const errorSign = this.validateSign(signOperatorFile, signRecipientFile)
     if (!(errorSign === true)) return [errorSign]
 
-    return [undefined, new CheckListAmbulanceEntityDto({id, ambulanceId, shiftId, km, /*gasFile,*/ signOperatorFile, signRecipientFile, notes})]
-  }
+    return [undefined, new CheckListAmbulanceEntityDto({id, ambulanceId, shiftId, km, /*gasFile,*/ /*signOperatorFile, signRecipientFile, notes})]
+  }*/
 
   static delete(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
     const { id } = object

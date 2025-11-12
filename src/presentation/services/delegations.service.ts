@@ -232,10 +232,14 @@ export class DelegationsService implements DelegationsServiceInterface {
   }
 
   async getDelegation(id: string): Promise<object> {
-    const delegation = await Delegation.findOne({
-      where: { id },
+    const delegation = await Delegation.findByPk(id, {
       include: [
-        { model: Municipality, as: 'municipality', attributes: ['id', 'name'] },
+        { 
+          model: Municipality,
+          as: 'municipality',
+          attributes: ['id', 'name'],
+          include: [{ model: State, as: 'state', attributes: ['id', 'name'] }]
+        },
         { model: Pharmacy, as: 'pharmacy', attributes: ['id'] }
       ],
       attributes: {
@@ -246,17 +250,9 @@ export class DelegationsService implements DelegationsServiceInterface {
 
     if (!delegation) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
-    const formatDelegation = {
-      id: delegation.id,
-      name: delegation.name,
-      municipality: delegation.municipality,
-      createdAt: delegation.get('createdAt') as Date,
-      updatedAt: delegation.get('updatedAt') as Date,
-    }
-
     return {
       success: true,
-      data: formatDelegation
+      data: delegation
     }
   }
 

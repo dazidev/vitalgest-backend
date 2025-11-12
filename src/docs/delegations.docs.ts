@@ -207,14 +207,16 @@
  *                   data: 
  *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                       name: "Delegación Ameca, Jalisco"
- *                       state:
- *                         id: 1
- *                         name: "Jalisco"   
+ *                       "createdAt": "2025-11-07T19:43:15.000Z",
+ *                       "updatedAt": "2025-11-07T19:43:15.000Z", 
  *                       municipality:
  *                         id: 1
  *                         name: "Ameca"
+ *                         state:
+ *                           id: 1
+ *                           name: "Jalisco"
  *                       pharmacy:
- *                         id: 1
+ *                         id: "258a3b7d-782f-4615-a2f1-21c1f50e7255"
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -246,14 +248,16 @@
  *                   data: 
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Delegación Ameca, Jalisco"
- *                     state:
- *                       id: 1
- *                       name: "Jalisco"   
+ *                     "createdAt": "2025-11-07T19:43:15.000Z",
+ *                     "updatedAt": "2025-11-07T19:43:15.000Z", 
  *                     municipality:
  *                       id: 1
  *                       name: "Ameca"
+ *                       state:
+ *                         id: 1
+ *                         name: "Jalisco"
  *                     pharmacy:
- *                       id: 1
+ *                       id: "258a3b7d-782f-4615-a2f1-21c1f50e7255"
  *       400:
  *         description: Datos inválidos
  *         content:
