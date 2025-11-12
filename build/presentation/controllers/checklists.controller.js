@@ -59,6 +59,8 @@ class ChecklistsController {
                 .catch(err => next(application_1.CustomError.badRequest(err)));
         }
         catch (error) {
+            if (typeof error === 'string')
+                return next(application_1.CustomError.badRequest(error));
             return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.UNKNOWN_ERROR));
         }
     }
