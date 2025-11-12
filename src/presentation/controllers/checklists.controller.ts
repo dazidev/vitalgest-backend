@@ -37,7 +37,8 @@ export class ChecklistsController implements CheckListsControllerInterface {
     try {
       const { ambulanceId, shiftId, km, notes } = req.body
 
-      const files = req.files as {
+      // todo: habilitar después
+      /*const files = req.files as {
         [field: string]: Express.Multer.File[]
       } | undefined
 
@@ -47,15 +48,15 @@ export class ChecklistsController implements CheckListsControllerInterface {
 
       const gasFile = toWebFile(gasFileMf)
       const signOperatorFile = toWebFile(signOperatorFileMf)
-      const signRecipientFile = toWebFile(signRecipientFileMf)
+      const signRecipientFile = toWebFile(signRecipientFileMf)*/
 
       const payload = {
         ambulanceId,
         shiftId,
         km,
-        gasFile,
+        /*gasFile,
         signOperatorFile,
-        signRecipientFile,
+        signRecipientFile,*/
         notes,
       }
 

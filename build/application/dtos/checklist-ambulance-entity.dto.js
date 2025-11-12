@@ -7,7 +7,7 @@ class CheckListAmbulanceEntityDto {
     constructor(props) {
         Object.assign(this, props);
     }
-    static validateData(ambulanceId, shiftId, km, gasFile) {
+    static validateData(ambulanceId, shiftId, km) {
         if (!ambulanceId)
             return domain_1.ERROR_CODES.MISSING_AMBULANCE_ID;
         if (!infrastructure_1.regularExp.uuid.test(ambulanceId))
@@ -21,10 +21,9 @@ class CheckListAmbulanceEntityDto {
         const kmNum = typeof km === "number" ? km : Number(km);
         if (!Number.isFinite(kmNum) || kmNum <= 0)
             return domain_1.ERROR_CODES.INVALID_KM;
-        if (!gasFile)
-            return domain_1.ERROR_CODES.MISSING_GAS_FILE;
-        if (!(gasFile instanceof File))
-            return domain_1.ERROR_CODES.INVALID_GAS_FILE;
+        // todo: habilitar después
+        //if (!gasFile) return ERROR_CODES.MISSING_GAS_FILE
+        //if (!(gasFile instanceof File)) return ERROR_CODES.INVALID_GAS_FILE
         return true;
     }
     static validateSign(signOperatorFile, signRecipientFile) {
@@ -39,11 +38,11 @@ class CheckListAmbulanceEntityDto {
         return true;
     }
     static create(object) {
-        const { ambulanceId, shiftId, km, gasFile, notes } = object;
-        const error = this.validateData(ambulanceId, shiftId, km, gasFile);
+        const { ambulanceId, shiftId, km, /*gasFile,*/ notes } = object;
+        const error = this.validateData(ambulanceId, shiftId, km);
         if (!(error === true))
             return [error];
-        return [undefined, new CheckListAmbulanceEntityDto({ ambulanceId, shiftId, km, gasFile, notes })];
+        return [undefined, new CheckListAmbulanceEntityDto({ ambulanceId, shiftId, km, /*gasFile,*/ notes })];
     }
     static sign(object) {
         const { id, signOperatorFile, signRecipientFile } = object;
@@ -57,18 +56,18 @@ class CheckListAmbulanceEntityDto {
         return [undefined, new CheckListAmbulanceEntityDto({ id, signOperatorFile, signRecipientFile })];
     }
     static edit(object) {
-        const { id, ambulanceId, shiftId, km, gasFile, signOperatorFile, signRecipientFile, notes } = object;
+        const { id, ambulanceId, shiftId, km, /*gasFile,*/ signOperatorFile, signRecipientFile, notes } = object;
         if (!id)
             return [domain_1.ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID];
         if (!infrastructure_1.regularExp.uuid.test(id))
             return [domain_1.ERROR_CODES.INVALID_CHECKLIST_AMBULANCE_ID];
-        const error = this.validateData(ambulanceId, shiftId, km, gasFile);
+        const error = this.validateData(ambulanceId, shiftId, km);
         if (!(error === true))
             return [error];
         const errorSign = this.validateSign(signOperatorFile, signRecipientFile);
         if (!(errorSign === true))
             return [errorSign];
-        return [undefined, new CheckListAmbulanceEntityDto({ id, ambulanceId, shiftId, km, gasFile, signOperatorFile, signRecipientFile, notes })];
+        return [undefined, new CheckListAmbulanceEntityDto({ id, ambulanceId, shiftId, km, /*gasFile,*/ signOperatorFile, signRecipientFile, notes })];
     }
     static delete(object) {
         const { id } = object;

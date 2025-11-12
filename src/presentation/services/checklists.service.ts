@@ -28,12 +28,12 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
   //* AMBULANCE CHECKLIST
   async createAmbChecklist(checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto) {
-    const { ambulanceId, shiftId, km, gasFile, notes } = checkListAmbulanceEntityDto
+    const { ambulanceId, shiftId, km, /*gasFile,*/ notes } = checkListAmbulanceEntityDto
 
-    const baseDir = 'uploads/ambulance';
+    /*const baseDir = 'uploads/ambulance';
     const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
 
-    const saved: { absPath: string; relPath: string }[] = [];
+    const saved: { absPath: string; relPath: string }[] = [];*/
 
     let tx: Transaction | undefined
 
@@ -50,8 +50,8 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       })
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND
 
-      const gas = await saveWebFile(gasFile!, baseDir, subDir);
-      saved.push({ absPath: gas.absPath, relPath: gas.relPath });
+      /*const gas = await saveWebFile(gasFile!, baseDir, subDir);
+      saved.push({ absPath: gas.absPath, relPath: gas.relPath });*/
 
       const checklist = await ChecklistAmbulance.create({
         ambulance_id: ambulanceId!,
@@ -59,7 +59,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         time: getCurrentTime(),
         km: Number(km!),
         notes: notes ?? undefined,
-        gas_path: gas.relPath
+        gas_path: 'sin utilizar' /*gas.relPath*/
       }, { transaction: tx })
 
       await tx?.commit()
@@ -69,7 +69,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         data: checklist
       }
     } catch (error) {
-      await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
+      // await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
       await tx?.rollback()
       if (typeof error === 'string') throw error
       throw error //! todo: cambiar
@@ -152,8 +152,6 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       tx?.rollback()
       throw ERROR_CODES.DELETE_FAILED
     }
-
-
   }
 
   async getAmbChecklist(id: string) {

@@ -7,6 +7,21 @@ import { ERROR_CODES, UserEntity } from "../../domain";
 import bcrypt from 'bcrypt'
 import { Transaction } from "sequelize";
 
+const mapUserRow = (r: any): object => ({
+  id: r.id,
+  name: r.name,
+  lastname: r.lastname,
+  email: r.email,
+  status: r.status,
+  role: r.role,
+  position: r.position,
+  delegation: {
+    id: r.delegation_id
+  },
+  createdAt: r.createdAt,
+  updatedAt: r.updatedAt
+})
+
 
 export class AdmService implements AdmServiceInterface {
 
@@ -135,9 +150,11 @@ export class AdmService implements AdmServiceInterface {
 
       const users = await User.findAll(options)
 
+      const data = users.map(mapUserRow)
+
       return {
         success: true,
-        data: users
+        data
       }
 
     } catch (error) {
@@ -178,9 +195,11 @@ export class AdmService implements AdmServiceInterface {
       const user = await User.findOne({ where: { id }, attributes: { exclude: ['password'] } })
       if (!user) throw ERROR_CODES.USER_NOT_FOUND
 
+      const data = [user].map(mapUserRow)
+
       return {
         success: true,
-        data: user
+        data
       }
     } catch (error) {
       if (typeof error === 'string') throw error

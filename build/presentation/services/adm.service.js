@@ -8,6 +8,20 @@ const infrastructure_1 = require("../../infrastructure");
 const domain_1 = require("../../domain");
 // librerias externas
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const mapUserRow = (r) => ({
+    id: r.id,
+    name: r.name,
+    lastname: r.lastname,
+    email: r.email,
+    status: r.status,
+    role: r.role,
+    position: r.position,
+    delegation: {
+        id: r.delegation_id
+    },
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt
+});
 class AdmService {
     async createUser(userEntityDto) {
         let tx;
@@ -118,9 +132,10 @@ class AdmService {
             if (newAmount !== 'all')
                 options.limit = Number(newAmount);
             const users = await infrastructure_1.User.findAll(options);
+            const data = users.map(mapUserRow);
             return {
                 success: true,
-                data: users
+                data
             };
         }
         catch (error) {
@@ -155,9 +170,10 @@ class AdmService {
             const user = await infrastructure_1.User.findOne({ where: { id }, attributes: { exclude: ['password'] } });
             if (!user)
                 throw domain_1.ERROR_CODES.USER_NOT_FOUND;
+            const data = [user].map(mapUserRow);
             return {
                 success: true,
-                data: user
+                data
             };
         }
         catch (error) {

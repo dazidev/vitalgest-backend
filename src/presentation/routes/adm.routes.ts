@@ -40,7 +40,7 @@ admRoutes.put(
 
 admRoutes.get(
   '/get/user/:id',
-  [AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
   controller.getUserById.bind(controller)
 );
 
