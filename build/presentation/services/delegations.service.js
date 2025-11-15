@@ -3,6 +3,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DelegationsService = void 0;
 const error_codes_enum_1 = require("../../domain/enums/error-codes.enum");
 const infrastructure_1 = require("../../infrastructure");
+const mapDelegationRow = (r) => ({
+    id: r.id,
+    name: r.name,
+    municipality: {
+        id: r.municipality?.id,
+        name: r.municipality?.name
+    },
+    state: r.municipality?.state,
+    pharmacy: r.pharmacy,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt
+});
 class DelegationsService {
     async getDelegationName(municipalityId) {
         const municipality = await infrastructure_1.Municipality.findOne({
@@ -67,19 +79,11 @@ class DelegationsService {
                 name: name,
                 municipality_id: municipalityId
             }, { transaction: tx });
-            const pharmacy = await infrastructure_1.Pharmacy.create({
+            await infrastructure_1.Pharmacy.create({
                 delegation_id: delegation.id
             }, { transaction: tx });
             await tx.commit();
-            const formatDelegation = {
-                id: delegation.id,
-                name: delegation.name,
-                pharmacy: {
-                    id: pharmacy.id,
-                },
-                createdAt: delegation.get('createdAt'),
-                updatedAt: delegation.get('updatedAt'),
-            };
+            const formatDelegation = [delegation].map(mapDelegationRow);
             return {
                 success: true,
                 data: formatDelegation
@@ -157,36 +161,26 @@ class DelegationsService {
             newAmount = parseInt(amount);
         else
             newAmount = amount;
-        let delegations;
-        newAmount === 'all'
-            ? delegations = await infrastructure_1.Delegation.findAll({
-                include: [
-                    { model: infrastructure_1.Municipality, as: 'municipality', attributes: ['id', 'name'] },
-                    { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
-                ],
-                attributes: {
-                    exclude: ['municipality_id']
-                }
-            })
-            : delegations = await infrastructure_1.Delegation.findAll({
-                include: [
-                    { model: infrastructure_1.Municipality, as: 'municipality', attributes: ['id', 'name'] },
-                    { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
-                ],
-                attributes: {
-                    exclude: ['municipality_id']
+        const options = {
+            include: [
+                {
+                    model: infrastructure_1.Municipality,
+                    as: 'municipality',
+                    attributes: ['id', 'name'],
+                    include: [{ model: infrastructure_1.State, as: 'state', attributes: ['id', 'name'] }]
                 },
-                limit: newAmount
-            });
+                { model: infrastructure_1.Pharmacy, as: 'pharmacy', attributes: ['id'] }
+            ],
+            attributes: {
+                exclude: ['municipality_id']
+            }
+        };
+        if (newAmount !== 'all')
+            options.limit = Number(newAmount);
+        const delegations = await infrastructure_1.Delegation.findAll(options);
         if (delegations.length === 0)
             throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
-        const formatDelegations = delegations.map((delegation) => ({
-            id: delegation.id,
-            name: delegation.name,
-            municipality: delegation.municipality,
-            createdAt: delegation.get('createdAt'),
-            updatedAt: delegation.get('updatedAt'),
-        }));
+        const formatDelegations = delegations.map(mapDelegationRow);
         return {
             success: true,
             data: formatDelegations
@@ -210,9 +204,10 @@ class DelegationsService {
             .catch((_error) => { throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
         if (!delegation)
             throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
+        const formatDelegations = [delegation].map(mapDelegationRow);
         return {
             success: true,
-            data: delegation
+            data: formatDelegations
         };
     }
 }
