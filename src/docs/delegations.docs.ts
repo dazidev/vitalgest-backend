@@ -212,9 +212,9 @@
  *                       municipality:
  *                         id: 1
  *                         name: "Ameca"
- *                         state:
- *                           id: 1
- *                           name: "Jalisco"
+ *                       state:
+ *                         id: 1
+ *                         name: "Jalisco"
  *                       pharmacy:
  *                         id: "258a3b7d-782f-4615-a2f1-21c1f50e7255"
  *       400:
@@ -253,9 +253,9 @@
  *                     municipality:
  *                       id: 1
  *                       name: "Ameca"
- *                       state:
- *                         id: 1
- *                         name: "Jalisco"
+ *                     state:
+ *                       id: 1
+ *                       name: "Jalisco"
  *                     pharmacy:
  *                       id: "258a3b7d-782f-4615-a2f1-21c1f50e7255"
  *       400:

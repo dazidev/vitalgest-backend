@@ -5,6 +5,19 @@ import { DelegationEntity } from "../../domain/entities/delegation.entity";
 import { Municipality, Pharmacy, Delegation, sequelize, State } from "../../infrastructure";
 import { Transaction } from 'sequelize';
 
+const mapDelegationRow = (r: any): object => ({
+  id: r.id,
+  name: r.name,
+  municipality: {
+    id: r.municipality?.id,
+    name: r.municipality?.name
+  },
+  state: r.municipality?.state,
+  pharmacy: r.pharmacy,
+  createdAt: r.createdAt,
+  updatedAt: r.updatedAt
+})
+
 
 export class DelegationsService implements DelegationsServiceInterface {
 
@@ -87,21 +100,13 @@ export class DelegationsService implements DelegationsServiceInterface {
         municipality_id: municipalityId!
       }, { transaction: tx })
 
-      const pharmacy = await Pharmacy.create({
+      await Pharmacy.create({
         delegation_id: delegation.id
       }, { transaction: tx })
 
       await tx.commit()
 
-      const formatDelegation = {
-        id: delegation.id,
-        name: delegation.name,
-        pharmacy: {
-          id: pharmacy.id,
-        },
-        createdAt: delegation.get('createdAt') as Date,
-        updatedAt: delegation.get('updatedAt') as Date,
-      }
+      const formatDelegation = [delegation].map(mapDelegationRow)
 
       return {
         success: true,
@@ -192,38 +197,28 @@ export class DelegationsService implements DelegationsServiceInterface {
     if (amount !== 'all') newAmount = parseInt(amount)
     else newAmount = amount
 
-    let delegations
-
-    newAmount === 'all'
-      ? delegations = await Delegation.findAll({
-        include: [
-          { model: Municipality, as: 'municipality', attributes: ['id', 'name'] },
-          { model: Pharmacy, as: 'pharmacy', attributes: ['id'] }
-        ],
-        attributes: {
-          exclude: ['municipality_id']
-        }
-      })
-      : delegations = await Delegation.findAll({
-        include: [
-          { model: Municipality, as: 'municipality', attributes: ['id', 'name'] },
-          { model: Pharmacy, as: 'pharmacy', attributes: ['id'] }
-        ],
-        attributes: {
-          exclude: ['municipality_id']
+    const options: any = {
+      include: [
+        {
+          model: Municipality,
+          as: 'municipality',
+          attributes: ['id', 'name'],
+          include: [{ model: State, as: 'state', attributes: ['id', 'name'] }]
         },
-        limit: newAmount as number
-      })
+        { model: Pharmacy, as: 'pharmacy', attributes: ['id'] }
+      ],
+      attributes: {
+        exclude: ['municipality_id']
+      }
+    }
+
+    if (newAmount !== 'all') options.limit = Number(newAmount)
+
+    const delegations = await Delegation.findAll(options);
 
     if (delegations.length === 0) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
-    const formatDelegations = delegations.map((delegation) => ({
-      id: delegation.id,
-      name: delegation.name,
-      municipality: delegation.municipality,
-      createdAt: delegation.get('createdAt') as Date,
-      updatedAt: delegation.get('updatedAt') as Date,
-    }))
+    const formatDelegations = delegations.map(mapDelegationRow)
 
     return {
       success: true,
@@ -234,7 +229,7 @@ export class DelegationsService implements DelegationsServiceInterface {
   async getDelegation(id: string): Promise<object> {
     const delegation = await Delegation.findByPk(id, {
       include: [
-        { 
+        {
           model: Municipality,
           as: 'municipality',
           attributes: ['id', 'name'],
@@ -250,9 +245,11 @@ export class DelegationsService implements DelegationsServiceInterface {
 
     if (!delegation) throw ERROR_CODES.DELEGATION_NOT_FOUND
 
+    const formatDelegations = [delegation].map(mapDelegationRow)
+
     return {
       success: true,
-      data: delegation
+      data: formatDelegations
     }
   }
 
