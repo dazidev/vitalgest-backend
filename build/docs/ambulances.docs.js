@@ -189,4 +189,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+/**
+ * @openapi
+ * /api/ambulances/areas:
+ *   get:
+ *     summary: Obtener areas de ambulancia
+ *     tags: ['ENDPOINTS Gestión de ambulancias']
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Areas obtenidas
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     - id: 1
+ *                       name: "EQUIPO DE COMUNICACIÓN Y SEÑALIZACIÓN"
+ *                       section: "GENERAL"
+ *                       order: 1
+ *                       createdAt: "2025-11-07T19:43:16.000Z"
+ *                       updatedAt: "2025-11-07T19:43:16.000Z"
+ *                     - id: 2
+ *                       name: "ÁREA DE TRANSPORTE Y SEGURIDAD"
+ *                       section: "GENERAL"
+ *                       order: 2
+ *                       createdAt: "2025-11-07T19:43:16.000Z"
+ *                       updatedAt: "2025-11-07T19:43:16.000Z"
+ *
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */ 
