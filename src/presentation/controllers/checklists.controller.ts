@@ -60,6 +60,8 @@ export class ChecklistsController implements CheckListsControllerInterface {
         notes,
       }
 
+      console.log(payload)
+
       const [error, checkListAmbulanceEntityDto] = CheckListAmbulanceEntityDto.create(payload)
       if (error) throw CustomError.badRequest(error)
 

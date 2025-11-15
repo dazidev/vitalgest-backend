@@ -1,6 +1,7 @@
 import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model, NonAttribute, UUIDV4 } from 'sequelize';
 import { sequelize } from '../../../config/sequelize.adapter';
 import type Municipality from './municipality-model.store';
+import Pharmacy from './pharmacy-model.store';
 
 
 class Delegation extends Model<
@@ -11,6 +12,7 @@ class Delegation extends Model<
   declare name: string
   declare municipality_id: ForeignKey<Municipality['id']>
   declare municipality?: NonAttribute<Municipality>
+  declare pharmacy?: NonAttribute<Pharmacy>
 }
 
 Delegation.init(

@@ -8,6 +8,11 @@ class AmbulancesController {
     constructor(ambulancesService) {
         this.ambulancesService = ambulancesService;
     }
+    getAreas(_req, res, next) {
+        this.ambulancesService.getAreas()
+            .then(response => res.json(response))
+            .catch(err => next(application_1.CustomError.badRequest(err)));
+    }
     createAmbulance(req, res, next) {
         const [error, ambulanceEntityDto] = application_1.AmbulanceEntityDto.create(req.body);
         if (error)

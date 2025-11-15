@@ -27,6 +27,7 @@ class ChecklistsService {
         const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
     
         const saved: { absPath: string; relPath: string }[] = [];*/
+        console.log(checkListAmbulanceEntityDto);
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();

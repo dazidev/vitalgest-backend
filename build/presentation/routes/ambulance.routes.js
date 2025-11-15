@@ -15,6 +15,7 @@ AmbulanceRoutes.delete('/delete/:id', controller.deleteAmbulance.bind(controller
 AmbulanceRoutes.get('/many/:amount', controller.getAmbulances.bind(controller));
 AmbulanceRoutes.get('/one/:id', controller.getOneAmbulance.bind(controller));
 //* SUPPLIES
+AmbulanceRoutes.get('/areas', controller.getAreas.bind(controller));
 AmbulanceRoutes.post('/supplies/create/:id', controller.addSupply.bind(controller));
 AmbulanceRoutes.put('/supplies/edit/:id', controller.editSupply.bind(controller));
 AmbulanceRoutes.delete('/supplies/delete/:id', controller.deleteSupply.bind(controller));

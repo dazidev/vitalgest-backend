@@ -4,6 +4,15 @@ exports.AmbulancesService = void 0;
 const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
 class AmbulancesService {
+    async getAreas() {
+        const areas = await infrastructure_1.AreaAmbulance.findAll();
+        if (!areas)
+            throw domain_1.ERROR_CODES.AREAS_NOT_FOUND;
+        return {
+            success: true,
+            data: areas
+        };
+    }
     async createAmbulance(ambulanceEntityDto) {
         const { delegationId, number } = ambulanceEntityDto;
         const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })

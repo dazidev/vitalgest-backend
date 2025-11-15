@@ -35,6 +35,8 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
     const saved: { absPath: string; relPath: string }[] = [];*/
 
+    console.log(checkListAmbulanceEntityDto)
+
     let tx: Transaction | undefined
 
     try {

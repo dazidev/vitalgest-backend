@@ -1,10 +1,20 @@
 import { Transaction } from 'sequelize';
 import { AmbulanceEntityDto, SupplyAmbEntityDto } from "../../application";
 import { AmbulanceEntity, AmbulancesServiceInterface, ERROR_CODES } from "../../domain";
-import { Ambulance, Delegation, sequelize, Supply, SupplyAmbulance } from "../../infrastructure";
+import { Ambulance, AreaAmbulance, Delegation, sequelize, Supply, SupplyAmbulance } from "../../infrastructure";
 
 
 export class AmbulancesService implements AmbulancesServiceInterface {
+
+  async getAreas(): Promise<object> {
+    const areas = await AreaAmbulance.findAll();
+    if (!areas) throw ERROR_CODES.AREAS_NOT_FOUND;
+
+    return {
+      success: true,
+      data: areas
+    }
+  }
 
   async createAmbulance(ambulanceEntityDto: AmbulanceEntityDto): Promise<object> {
     const { delegationId, number } = ambulanceEntityDto

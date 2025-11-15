@@ -51,6 +51,7 @@ class ChecklistsController {
                 signRecipientFile,*/
                 notes,
             };
+            console.log(payload);
             const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.create(payload);
             if (error)
                 throw application_1.CustomError.badRequest(error);

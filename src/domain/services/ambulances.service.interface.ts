@@ -15,4 +15,5 @@ export interface AmbulancesServiceInterface {
   deleteSupply(supplyAmbEntityDto: SupplyAmbEntityDto): Promise<object>
   getAmbSupplies(ambulanceId: string): Promise<object>
   getOneAmbSupply(supplyAmbEntityDto: SupplyAmbEntityDto): Promise<object>
+  getAreas(): Promise<object>;
 };

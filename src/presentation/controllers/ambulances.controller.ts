@@ -12,6 +12,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
     public readonly ambulancesService: AmbulancesService
   ) { }
 
+  getAreas(_req: Request, res: Response, next: NextFunction): void {
+    this.ambulancesService.getAreas()
+      .then(response => res.json(response))
+      .catch(err => next(CustomError.badRequest(err)))
+  }
+
   createAmbulance(req: Request, res: Response, next: NextFunction): void {
     const [error, ambulanceEntityDto] = AmbulanceEntityDto.create(req.body)
     if (error) throw CustomError.badRequest(error)
