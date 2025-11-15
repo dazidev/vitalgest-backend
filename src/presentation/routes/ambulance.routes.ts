@@ -34,6 +34,11 @@ AmbulanceRoutes.get(
 );
 
 //* SUPPLIES
+AmbulanceRoutes.get(
+  '/areas',
+  controller.getAreas.bind(controller)
+);
+
 AmbulanceRoutes.post(
   '/supplies/create/:id',
   controller.addSupply.bind(controller)

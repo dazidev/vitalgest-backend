@@ -100,7 +100,7 @@
  *               response:
  *                 value:
  *                   success: true
- *                   data: 
+ *                   data:
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Delegación Ameca, Jalisco"
  *                     state:
@@ -207,8 +207,8 @@
  *                   data: 
  *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                       name: "Delegación Ameca, Jalisco"
- *                       "createdAt": "2025-11-07T19:43:15.000Z",
- *                       "updatedAt": "2025-11-07T19:43:15.000Z", 
+ *                       createdAt: "2025-11-07T19:43:15.000Z"
+ *                       updatedAt: "2025-11-07T19:43:15.000Z"
  *                       municipality:
  *                         id: 1
  *                         name: "Ameca"
@@ -248,8 +248,8 @@
  *                   data: 
  *                     id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                     name: "Delegación Ameca, Jalisco"
- *                     "createdAt": "2025-11-07T19:43:15.000Z",
- *                     "updatedAt": "2025-11-07T19:43:15.000Z", 
+ *                     createdAt: "2025-11-07T19:43:15.000Z"
+ *                     updatedAt: "2025-11-07T19:43:15.000Z"
  *                     municipality:
  *                       id: 1
  *                       name: "Ameca"

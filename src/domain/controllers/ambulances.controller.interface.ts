@@ -14,4 +14,5 @@ export interface AmbulancesControllerInterface {
   deleteSupply(req: Request, res: Response, next: NextFunction): void
   getAmbSupplies(req: Request, res: Response, next: NextFunction): void
   getOneAmbSupply (req: Request, res: Response, next: NextFunction): void
+  getAreas (req: Request, res: Response, next: NextFunction): void
 };
