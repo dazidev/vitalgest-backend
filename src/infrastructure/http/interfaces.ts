@@ -12,3 +12,20 @@ export interface RequestAnswerInterface {
   checklistAmbulanceId: string
   answers: AnswerComponentInterface[]
 }
+
+export interface AnswerSupInterface {
+  category: string
+  specification: string
+  avaibleQuantity: number
+  minQuantity: number
+  requiredQuantity: number
+  measurementUnit: string
+  areaId: string
+}
+
+export interface RequestAnswerSupInterface {
+  checklistId: string
+  answers: AnswerSupInterface[]
+}
+
+

@@ -8,6 +8,25 @@ import { toWebFile } from "../../infrastructure";
 export class ChecklistsController implements CheckListsControllerInterface {
 
   constructor(public readonly checklistsService: ChecklistsService) { }
+  createSupChecklist(req: Request, res: Response, next: NextFunction): void {
+    throw new Error("Method not implemented.");
+  }
+
+  signSupChecklist(req: Request, res: Response, next: NextFunction): void {
+    throw new Error("Method not implemented.");
+  }
+
+  deleteSupChecklist(req: Request, res: Response, next: NextFunction): void {
+    throw new Error("Method not implemented.");
+  }
+
+  getSupChecklist(req: Request, res: Response, next: NextFunction): void {
+    throw new Error("Method not implemented.");
+  }
+  
+  putSupAnserws(req: Request, res: Response, next: NextFunction): void {
+    throw new Error("Method not implemented.");
+  }
 
   getAmbQuestions(req: Request, res: Response, next: NextFunction): void {
 
@@ -60,10 +79,8 @@ export class ChecklistsController implements CheckListsControllerInterface {
         notes,
       }
 
-      console.log(payload)
-
       const [error, checkListAmbulanceEntityDto] = CheckListAmbulanceEntityDto.create(payload)
-      if (error) throw CustomError.badRequest(error)
+      if (error) throw next(CustomError.badRequest(error))
 
       this.checklistsService.createAmbChecklist(checkListAmbulanceEntityDto!)
         .then(response => res.json(response))

@@ -15,6 +15,7 @@ import AnswerComponent from "./sequelize/checklist/answer-component-model.store"
 import Supply from "./sequelize/supplies/supply-model.store";
 import SupplyAmbulance from "./sequelize/supplies/supply-ambulance-model.store";
 import AreaAmbulance from "./sequelize/supplies/area-ambulance-model.store";
+import AnswerSupply from "./sequelize/checklist/answer-supply-model.store";
 
 
 // Definicion de asociaciones 
@@ -77,6 +78,9 @@ ChecklistAmbulance.hasMany(Answer, { foreignKey: 'checklist_ambulance_id', as: '
 AnswerComponent.belongsTo(Answer, { foreignKey: 'answer_id', as: 'answer' })
 Answer.hasOne(AnswerComponent, { foreignKey: 'answer_id', as: 'components' }) //! solo una.
 
+AnswerSupply.belongsTo(ChecklistSupply, { foreignKey: 'checklist_supply_id', as: 'checklistSupply' });
+ChecklistSupply.hasMany(AnswerSupply, { foreignKey: 'checklist_supply_id', as: 'answers' });
+
 // insumos
 Supply.belongsTo(Pharmacy, { foreignKey: 'pharmacy_id', as: 'pharmacy' })
 Pharmacy.hasMany(Supply, { foreignKey: 'pharmacy_id', as: 'supplies' })
@@ -100,6 +104,7 @@ export {
   Shift,
   ChecklistAmbulance,
   ChecklistSupply,
+  AnswerSupply,
   Question,
   Answer,
   AnswerComponent,

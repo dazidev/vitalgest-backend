@@ -1,13 +1,111 @@
 import { promises as fs } from 'fs';
 
 import { ChecklistsServiceInterface, ERROR_CODES } from "../../domain";
-import { Ambulance, Answer, AnswerComponent, ChecklistAmbulance, getCurrentTime, Question, relToAbs, saveWebFile, sequelize, Shift } from "../../infrastructure";
-import { CheckListAmbulanceEntityDto } from '../../application';
+import { Ambulance, Answer, AnswerComponent, AnswerSupply, AreaAmbulance, ChecklistAmbulance, ChecklistSupply, getCurrentTime, Question, relToAbs, saveWebFile, sequelize, Shift } from "../../infrastructure";
+import { CheckListAmbulanceEntityDto, CheckListSupplyEntityDto } from '../../application';
 import { Transaction } from 'sequelize';
 import { RequestAnswerInterface } from '../../infrastructure/http/interfaces';
 
 
 export class ChecklistsService implements ChecklistsServiceInterface {
+  //* SUPPLIES CHECKLIST
+  async createSupChecklist(checkListSupplyEntityDto: CheckListSupplyEntityDto): Promise<object> {
+    const { shiftId } = checkListSupplyEntityDto;
+
+    let tx: Transaction | undefined;
+
+    try {
+      tx = await sequelize.transaction();
+
+      const exists = await ChecklistSupply.findOne({ where: { shift_id: shiftId }, transaction: tx });
+      if (exists) throw ERROR_CODES.CHECKLIST_ALREADY_EXISTS;
+
+      const checklist = await ChecklistSupply.create({
+        shift_id: shiftId,
+      }, { transaction: tx });
+
+      await tx.commit()
+
+      return {
+        success: true,
+        data: checklist
+      };
+
+    } catch (error) {
+      await tx?.rollback();
+      if (typeof error === 'string') throw error;
+      throw ERROR_CODES.INSERT_FAILED;
+    };
+  }
+
+  async signSupChecklist(_checkListSupplyEntityDto: CheckListSupplyEntityDto): Promise<object> {
+    throw new Error('Method not implemented.');
+  }
+
+  async deleteSupChecklist(checkListSupplyEntityDto: CheckListSupplyEntityDto): Promise<object> {
+    const { id } = checkListSupplyEntityDto;
+
+    let tx: Transaction | undefined;
+
+    try {
+      tx = await sequelize.transaction()
+
+      const exist = await ChecklistSupply.findOne({ where: { id }, transaction: tx });
+      if (!exist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+
+      const row = await ChecklistSupply.destroy({ where: { id }, transaction: tx });
+      if (row === 0) throw ERROR_CODES.DELETE_FAILED;
+
+      await tx.commit()
+
+      return {
+        success: true
+      };
+
+    } catch (error) {
+      await tx?.rollback();
+      if (typeof error === 'string') throw error;
+      throw ERROR_CODES.DELETE_FAILED;
+    }
+  }
+
+  async getSupChecklist(id: string): Promise<object> {
+    try {
+      const checklist = await ChecklistSupply.findByPk(id, {
+        include: [
+          { model: Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
+          { 
+            model: AnswerSupply,
+            as: 'answers',
+            include: [
+              { model: AreaAmbulance, as: 'area' }
+            ] 
+          }
+        ],
+        order: [
+          [
+            { model: AnswerSupply, as: 'answers' },
+            { model: AreaAmbulance, as: 'area' },
+            'order',
+            'ASC',
+          ],
+        ],
+      });
+      if (!checklist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+
+      return {
+        success: true,
+        data: checklist
+      };
+    } catch (error) {
+      if (typeof error === 'string') throw error;
+      throw ERROR_CODES.UNKNOWN_DB_ERROR;
+    }
+  }
+
+  async putSupAnserws(_object: any): Promise<object> {
+    throw new Error('Method not implemented.');
+  }
 
   //* QUESTIONS
   async getAmbQuestions(): Promise<object> {
@@ -34,8 +132,6 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
 
     const saved: { absPath: string; relPath: string }[] = [];*/
-
-    console.log(checkListAmbulanceEntityDto)
 
     let tx: Transaction | undefined
 

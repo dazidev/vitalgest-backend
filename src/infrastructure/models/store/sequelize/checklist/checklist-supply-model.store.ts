@@ -9,8 +9,8 @@ class ChecklistSupply extends Model<
   InferCreationAttributes<ChecklistSupply>
 > {
   declare id: CreationOptional<string>
-  declare ambulance_id: ForeignKey<Ambulance['id']>
   declare shift_id: ForeignKey<Shift['id']>
+  declare notes?: string
 
   declare ambulance?: NonAttribute<Ambulance>
   declare shift?: NonAttribute<Shift>
@@ -19,13 +19,6 @@ class ChecklistSupply extends Model<
 ChecklistSupply.init(
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
-    ambulance_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: { model: 'ambulances', key: 'id' },
-      onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
-    },
     shift_id: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -33,6 +26,7 @@ ChecklistSupply.init(
       onUpdate: 'CASCADE', // actualiza si el padre cambia de id
       onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     },
+    notes: { type: DataTypes.STRING, allowNull: true }
   },
 
   {
