@@ -2,6 +2,7 @@ import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreation
 import { sequelize } from '../../../../config/sequelize.adapter';
 import Shift from '../shift-model.store';
 import Ambulance from '../ambulance-model.store';
+import User from '../user-model.store';
 
 
 class ChecklistAmbulance extends Model<
@@ -15,11 +16,13 @@ class ChecklistAmbulance extends Model<
   declare km: number
   declare gas_path: string
   declare sign_operator_path?: string
+  declare recipient_id?: ForeignKey<User['id']>
   declare sign_recipient_path?: string
   declare notes?: string
 
   declare ambulance?: NonAttribute<Ambulance>
   declare shift?: NonAttribute<Shift>
+  declare recipient?: NonAttribute<User>
 
 }
 
@@ -44,6 +47,7 @@ ChecklistAmbulance.init(
     km: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     gas_path: { type: DataTypes.STRING, allowNull: false },
     sign_operator_path: { type: DataTypes.STRING, defaultValue: null, allowNull: true },
+    recipient_id: { type: DataTypes.UUID, allowNull: true },
     sign_recipient_path: { type: DataTypes.STRING, defaultValue: null, allowNull: true },
     notes: { type: DataTypes.TEXT, allowNull: true }
   },

@@ -71,8 +71,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *               - shiftId
  *               - km
  *               - gasFile
- *               - signOperatorFile
- *               - signRecipientFile
  *             properties:
  *               ambulanceId:
  *                 type: string
@@ -83,15 +81,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *               km:
  *                 type: number
  *                 minimum: 0
- *               notes:
- *                type: string
  *               gasFile:
- *                 type: string
- *                 format: binary
- *               signOperatorFile:
- *                 type: string
- *                 format: binary
- *               signRecipientFile:
  *                 type: string
  *                 format: binary
  *           encoding:
@@ -174,6 +164,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *               - signOperatorFile
  *               - signRecipientFile
  *             properties:
+ *               notes:
+ *                 type: string
+ *               recipientId:
+ *                 type: string
+ *                 formant: UUID
  *               signOperatorFile:
  *                 type: string
  *                 format: binary
@@ -317,8 +312,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *                   success: true
  *                   data:
  *                     id: "43a06473-2862-4d1a-90af-6051f20d8509"
- *                     ambulance_id: "2e0c0a4f-bc9f-4b59-9f21-5e6fbd123456"
- *                     shift_id: "e1f9f4a1-8b2c-4c4a-9e3b-0f5a9d789abc"
  *                     time: "12:25:26"
  *                     km: 12345
  *                     notes: "Observaciones generales del turno"
@@ -327,6 +320,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *                     sign_recipient_path: "uploads/ambulance/2025-11/2e0c0a4f-bc9f-4b59-9f21-5e6fbd123456/sign-recipient.png"
  *                     createdAt: "2025-10-27T23:49:38.000Z"
  *                     updatedAt: "2025-10-27T23:49:38.000Z"
+ *                     ambulance:
+ *                       id: "e1b3f9cb-55ee-4937-bfff-e6a7f7f6b047"
+ *                     shift:
+ *                       id: "ed4a552f-f1aa-44fc-a293-80537c3750cc"
+ *                     recipient:
+ *                       id: "5b1874e8-fbec-40bb-b1f8-84b1fb4a761b"
+ *                       name: "Jefe Guardia"
+ *                       lastname: "Seed"
  *                     answers:
  *                       - id: "11111111-2222-3333-4444-555555555555"
  *                         checklist_ambulance_id: "43a06473-2862-4d1a-90af-6051f20d8509"

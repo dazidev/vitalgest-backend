@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChecklistsController = void 0;
 const domain_1 = require("../../domain");
 const application_1 = require("../../application");
-const infrastructure_1 = require("../../infrastructure");
 class ChecklistsController {
     constructor(checklistsService) {
         this.checklistsService = checklistsService;
@@ -29,7 +28,7 @@ class ChecklistsController {
     }
     createAmbChecklist(req, res, next) {
         try {
-            const { ambulanceId, shiftId, km, notes } = req.body;
+            const { ambulanceId, shiftId, km } = req.body;
             // todo: habilitar después
             /*const files = req.files as {
               [field: string]: Express.Multer.File[]
@@ -49,9 +48,7 @@ class ChecklistsController {
                 /*gasFile,
                 signOperatorFile,
                 signRecipientFile,*/
-                notes,
             };
-            console.log(payload);
             const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.create(payload);
             if (error)
                 throw application_1.CustomError.badRequest(error);
@@ -68,24 +65,34 @@ class ChecklistsController {
     signAmbChecklist(req, res, next) {
         try {
             const { id } = req.params;
-            const files = req.files;
-            const signOperatorFileMf = files?.signOperatorFile?.[0];
-            const signRecipientFileMf = files?.signRecipientFile?.[0];
-            const signOperatorFile = (0, infrastructure_1.toWebFile)(signOperatorFileMf);
-            const signRecipientFile = (0, infrastructure_1.toWebFile)(signRecipientFileMf);
+            const { recipientId, notes } = req.body;
+            // todo: habilitar después
+            /*const files = req.files as {
+              [field: string]: Express.Multer.File[]
+            } | undefined
+      
+            const signOperatorFileMf = files?.signOperatorFile?.[0]
+            const signRecipientFileMf = files?.signRecipientFile?.[0]
+      
+            const signOperatorFile = toWebFile(signOperatorFileMf)
+            const signRecipientFile = toWebFile(signRecipientFileMf)*/
             const payload = {
                 id,
-                signOperatorFile,
-                signRecipientFile,
+                recipientId,
+                notes
+                // signOperatorFile,
+                // signRecipientFile,
             };
             const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.sign(payload);
             if (error)
-                throw application_1.CustomError.badRequest(error);
+                return next(application_1.CustomError.badRequest(error));
             this.checklistsService.signAmbChecklist(checkListAmbulanceEntityDto)
                 .then(response => res.json(response))
                 .catch(err => next(application_1.CustomError.badRequest(err)));
         }
         catch (error) {
+            if (typeof error === 'string')
+                return next(application_1.CustomError.badRequest(error));
             return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.UNKNOWN_ERROR));
         }
     }

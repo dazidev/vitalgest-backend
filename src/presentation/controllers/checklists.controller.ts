@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { CheckListsControllerInterface, ERROR_CODES } from "../../domain";
 import { ChecklistsService } from "../services/checklists.service";
 import { AmbAnswersDto, CheckListAmbulanceEntityDto, CustomError } from "../../application";
-import { toWebFile } from "../../infrastructure";
 
 
 export class ChecklistsController implements CheckListsControllerInterface {
@@ -35,7 +34,7 @@ export class ChecklistsController implements CheckListsControllerInterface {
 
   createAmbChecklist(req: Request, res: Response, next: NextFunction): void {
     try {
-      const { ambulanceId, shiftId, km, notes } = req.body
+      const { ambulanceId, shiftId, km } = req.body
 
       // todo: habilitar después
       /*const files = req.files as {
@@ -57,10 +56,7 @@ export class ChecklistsController implements CheckListsControllerInterface {
         /*gasFile,
         signOperatorFile,
         signRecipientFile,*/
-        notes,
       }
-
-      console.log(payload)
 
       const [error, checkListAmbulanceEntityDto] = CheckListAmbulanceEntityDto.create(payload)
       if (error) throw CustomError.badRequest(error)
@@ -78,8 +74,10 @@ export class ChecklistsController implements CheckListsControllerInterface {
   signAmbChecklist(req: Request, res: Response, next: NextFunction): void {
     try {
       const { id } = req.params
+      const { recipientId, notes } = req.body
 
-      const files = req.files as {
+      // todo: habilitar después
+      /*const files = req.files as {
         [field: string]: Express.Multer.File[]
       } | undefined
 
@@ -87,22 +85,25 @@ export class ChecklistsController implements CheckListsControllerInterface {
       const signRecipientFileMf = files?.signRecipientFile?.[0]
 
       const signOperatorFile = toWebFile(signOperatorFileMf)
-      const signRecipientFile = toWebFile(signRecipientFileMf)
+      const signRecipientFile = toWebFile(signRecipientFileMf)*/
 
       const payload = {
         id,
-        signOperatorFile,
-        signRecipientFile,
+        recipientId,
+        notes
+        // signOperatorFile,
+        // signRecipientFile,
       }
 
       const [error, checkListAmbulanceEntityDto] = CheckListAmbulanceEntityDto.sign(payload)
-      if (error) throw CustomError.badRequest(error)
+      if (error) return next(CustomError.badRequest(error))
 
       this.checklistsService.signAmbChecklist(checkListAmbulanceEntityDto!)
         .then(response => res.json(response))
         .catch(err => next(CustomError.badRequest(err)))
 
     } catch (error) {
+      if (typeof error === 'string') return next(CustomError.badRequest(error))
       return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR))
     }
   }
