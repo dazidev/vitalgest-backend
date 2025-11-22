@@ -22,12 +22,11 @@ class ChecklistsService {
     }
     //* AMBULANCE CHECKLIST
     async createAmbChecklist(checkListAmbulanceEntityDto) {
-        const { ambulanceId, shiftId, km, /*gasFile,*/ notes } = checkListAmbulanceEntityDto;
+        const { ambulanceId, shiftId, km, /*gasFile,*/ } = checkListAmbulanceEntityDto;
         /*const baseDir = 'uploads/ambulance';
         const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
     
         const saved: { absPath: string; relPath: string }[] = [];*/
-        console.log(checkListAmbulanceEntityDto);
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -56,7 +55,6 @@ class ChecklistsService {
                 shift_id: shiftId,
                 time: (0, infrastructure_1.getCurrentTime)(),
                 km: Number(km),
-                notes: notes ?? undefined,
                 gas_path: 'sin utilizar' /*gas.relPath*/
             }, { transaction: tx });
             await tx?.commit();
@@ -74,36 +72,37 @@ class ChecklistsService {
         }
     }
     async signAmbChecklist(checkListAmbulanceEntityDto) {
-        const { id, signOperatorFile, signRecipientFile } = checkListAmbulanceEntityDto;
+        const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } = checkListAmbulanceEntityDto;
         const checklist = await infrastructure_1.ChecklistAmbulance.findOne({ where: { id }, attributes: ['ambulance_id'] });
         if (!checklist)
             throw domain_1.ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
-        const { ambulance_id: ambulanceId } = checklist;
+        /*const { ambulance_id: ambulanceId } = checklist
+    
         const baseDir = 'uploads/ambulance';
         const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
-        const saved = [];
+    
+        const saved: { absPath: string; relPath: string }[] = [];*/
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const signOp = await (0, infrastructure_1.saveWebFile)(signOperatorFile, baseDir, subDir);
+            /*const signOp = await saveWebFile(signOperatorFile!, baseDir, subDir);
             saved.push({ absPath: signOp.absPath, relPath: signOp.relPath });
-            const signRec = await (0, infrastructure_1.saveWebFile)(signRecipientFile, baseDir, subDir);
-            saved.push({ absPath: signRec.absPath, relPath: signRec.relPath });
+      
+            const signRec = await saveWebFile(signRecipientFile!, baseDir, subDir);
+            saved.push({ absPath: signRec.absPath, relPath: signRec.relPath });*/
             await infrastructure_1.ChecklistAmbulance.update({
-                sign_operator_path: signOp.relPath,
-                sign_recipient_path: signRec.relPath
+                /*sign_operator_path: signOp.relPath,
+                sign_recipient_path: signRec.relPath*/
+                recipient_id: recipientId,
+                notes: notes ?? undefined,
             }, { where: { id }, transaction: tx });
             await tx?.commit();
             return {
-                success: true,
-                data: {
-                    signOperatorPath: signOp.relPath,
-                    signRecipientPath: signRec.relPath
-                }
+                success: true
             };
         }
         catch (err) {
-            await Promise.allSettled(saved.map(f => fs_1.promises.unlink(f.absPath)));
+            // await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
             await tx?.rollback();
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
@@ -140,38 +139,44 @@ class ChecklistsService {
     async getAmbChecklist(id) {
         try {
             const checklist = await infrastructure_1.ChecklistAmbulance.findByPk(id, {
-                include: {
-                    model: infrastructure_1.Answer,
-                    as: 'answers',
-                    attributes: ['id'],
-                    include: [
-                        {
-                            model: infrastructure_1.Question,
-                            as: 'question',
-                            attributes: [
-                                'id',
-                                'question',
-                                'name_category',
-                                'order_category',
-                                'order_question_category',
-                                'name_subcategory',
-                                'order_subcategory',
-                                'type_response'
-                            ]
-                        },
-                        {
-                            model: infrastructure_1.AnswerComponent,
-                            as: 'components',
-                            attributes: [
-                                'id',
-                                'type',
-                                'value_bool',
-                                'value_option',
-                                'value_text'
-                            ]
-                        },
-                    ]
-                },
+                attributes: { exclude: ['ambulance_id', 'shift_id', 'recipient_id'] },
+                include: [
+                    { model: infrastructure_1.Ambulance, as: 'ambulance', attributes: ['id'] },
+                    { model: infrastructure_1.Shift, as: 'shift', attributes: ['id'] },
+                    { model: infrastructure_1.User, as: 'recipient', attributes: ['id', 'name', 'lastname'] },
+                    {
+                        model: infrastructure_1.Answer,
+                        as: 'answers',
+                        attributes: ['id'],
+                        include: [
+                            {
+                                model: infrastructure_1.Question,
+                                as: 'question',
+                                attributes: [
+                                    'id',
+                                    'question',
+                                    'name_category',
+                                    'order_category',
+                                    'order_question_category',
+                                    'name_subcategory',
+                                    'order_subcategory',
+                                    'type_response'
+                                ]
+                            },
+                            {
+                                model: infrastructure_1.AnswerComponent,
+                                as: 'components',
+                                attributes: [
+                                    'id',
+                                    'type',
+                                    'value_bool',
+                                    'value_option',
+                                    'value_text'
+                                ]
+                            },
+                        ]
+                    },
+                ],
                 order: [
                     [
                         { model: infrastructure_1.Answer, as: 'answers' },
@@ -233,7 +238,7 @@ class ChecklistsService {
             await tx?.rollback();
             if (typeof error === 'string')
                 throw error;
-            throw domain_1.ERROR_CODES.INSERT_FAILED;
+            throw error;
         }
     }
 }

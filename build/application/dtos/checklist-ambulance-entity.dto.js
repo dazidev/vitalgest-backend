@@ -26,34 +26,35 @@ class CheckListAmbulanceEntityDto {
         //if (!(gasFile instanceof File)) return ERROR_CODES.INVALID_GAS_FILE
         return true;
     }
-    static validateSign(signOperatorFile, signRecipientFile) {
-        if (!signOperatorFile)
-            return domain_1.ERROR_CODES.MISSING_SIGN_OPERATOR_FILE;
-        if (!(signOperatorFile instanceof File))
-            return domain_1.ERROR_CODES.INVALID_SIGN_OPERATOR_FILE;
-        if (!signRecipientFile)
-            return domain_1.ERROR_CODES.MISSING_SIGN_RECIPIENT_FILE;
-        if (!(signRecipientFile instanceof File))
-            return domain_1.ERROR_CODES.INVALID_SIGN_RECIPIENT_FILE;
-        return true;
-    }
+    /*private static validateSign (signOperatorFile: File, signRecipientFile: File) {
+      if (!signOperatorFile) return ERROR_CODES.MISSING_SIGN_OPERATOR_FILE
+      if (!(signOperatorFile instanceof File)) return ERROR_CODES.INVALID_SIGN_OPERATOR_FILE
+  
+      if (!signRecipientFile) return ERROR_CODES.MISSING_SIGN_RECIPIENT_FILE
+      if (!(signRecipientFile instanceof File)) return ERROR_CODES.INVALID_SIGN_RECIPIENT_FILE
+  
+      return true
+    }*/
     static create(object) {
-        const { ambulanceId, shiftId, km, /*gasFile,*/ notes } = object;
+        const { ambulanceId, shiftId, km, /*gasFile,*/ } = object;
         const error = this.validateData(ambulanceId, shiftId, km);
         if (!(error === true))
             return [error];
-        return [undefined, new CheckListAmbulanceEntityDto({ ambulanceId, shiftId, km, /*gasFile,*/ notes })];
+        return [undefined, new CheckListAmbulanceEntityDto({ ambulanceId, shiftId, km, /*gasFile,*/ })];
     }
     static sign(object) {
-        const { id, signOperatorFile, signRecipientFile } = object;
+        const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } = object;
         if (!id)
             return [domain_1.ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID];
         if (!infrastructure_1.regularExp.uuid.test(id))
             return [domain_1.ERROR_CODES.INVALID_CHECKLIST_AMBULANCE_ID];
-        const error = this.validateSign(signOperatorFile, signRecipientFile);
-        if (!(error === true))
-            return [error];
-        return [undefined, new CheckListAmbulanceEntityDto({ id, signOperatorFile, signRecipientFile })];
+        if (!recipientId)
+            return [domain_1.ERROR_CODES.MISSING_RECIPIENT_ID];
+        if (!infrastructure_1.regularExp.uuid.test(recipientId))
+            return [domain_1.ERROR_CODES.INVALID_RECIPIENT_ID];
+        /*const error = this.validateSign(signOperatorFile, signRecipientFile)
+        if (!(error === true)) return [error]*/
+        return [undefined, new CheckListAmbulanceEntityDto({ id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes })];
     }
     /*static edit(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
       const { id, ambulanceId, shiftId, km, /*gasFile,*/ /*signOperatorFile, signRecipientFile, notes } = object
