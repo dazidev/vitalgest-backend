@@ -329,8 +329,8 @@
  *                     shift:
  *                       id: "ed4a552f-f1aa-44fc-a293-80537c3750cc"
  *                     recipient:
- *                       id: "5b1874e8-fbec-40bb-b1f8-84b1fb4a761b",
- *                       name: "Jefe Guardia",
+ *                       id: "5b1874e8-fbec-40bb-b1f8-84b1fb4a761b"
+ *                       name: "Jefe Guardia"
  *                       lastname: "Seed"
  *                     answers:
  *                       - id: "11111111-2222-3333-4444-555555555555"
