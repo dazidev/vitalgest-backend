@@ -71,8 +71,6 @@
  *               - shiftId
  *               - km
  *               - gasFile
- *               - signOperatorFile
- *               - signRecipientFile
  *             properties:
  *               ambulanceId:
  *                 type: string
@@ -83,15 +81,7 @@
  *               km:
  *                 type: number
  *                 minimum: 0
- *               notes:
- *                type: string
  *               gasFile:
- *                 type: string
- *                 format: binary
- *               signOperatorFile:
- *                 type: string
- *                 format: binary
- *               signRecipientFile:
  *                 type: string
  *                 format: binary
  *           encoding:
@@ -176,6 +166,11 @@
  *               - signOperatorFile
  *               - signRecipientFile
  *             properties:
+ *               notes:
+ *                 type: string
+ *               recipientId:
+ *                 type: string
+ *                 formant: UUID
  *               signOperatorFile:
  *                 type: string
  *                 format: binary
