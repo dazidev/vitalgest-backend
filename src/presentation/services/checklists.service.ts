@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
-
 import { ChecklistsServiceInterface, ERROR_CODES } from "../../domain";
+
 import {
   Ambulance,
   Answer,
@@ -16,10 +16,12 @@ import {
   Shift,
   User,
 } from "../../infrastructure";
+
 import {
   CheckListAmbulanceEntityDto,
   CheckListSupplyEntityDto,
 } from "../../application";
+
 import { Transaction } from "sequelize";
 import { RequestAnswerInterface } from "../../infrastructure/http/interfaces";
 

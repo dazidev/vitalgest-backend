@@ -110,6 +110,17 @@ Shift.hasOne(ChecklistSupply, {
   as: "checklistSupplies",
 });
 
+ChecklistSupply.belongsTo(User, {
+  foreignKey: "recipient_id",
+  as: "recipient",
+});
+User.hasMany(ChecklistSupply, {
+  foreignKey: "recipient_id",
+  as: "checklistSupplies",
+});
+
+// answers
+
 Answer.belongsTo(Question, { foreignKey: "question_id", as: "question" });
 Question.hasMany(Answer, { foreignKey: "question_id", as: "answers" });
 
