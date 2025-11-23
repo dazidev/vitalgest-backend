@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { CustomError } from '../../application';
+import { Request, Response, NextFunction } from "express";
+import { CustomError } from "../../application";
 
 export const errorHandler = (
   err: Error,
@@ -12,12 +12,12 @@ export const errorHandler = (
       success: false,
       error: err.message,
     });
-  };
+  }
 
-  console.error('[INTERNAL ERROR]', err);
+  console.error("[INTERNAL ERROR]", err);
 
   return res.status(500).json({
     success: false,
-    error: 'INTERNAL_SERVER_ERROR',
+    error: "INTERNAL_SERVER_ERROR",
   });
 };

@@ -1,8 +1,7 @@
-import express from 'express';
-import { ChecklistsService } from '../services/checklists.service';
-import { ChecklistsController } from '../controllers/checklists.controller';
-import { checklistGasFile, checklistSignFiles } from '../../infrastructure';
-
+import express from "express";
+import { ChecklistsService } from "../services/checklists.service";
+import { ChecklistsController } from "../controllers/checklists.controller";
+import { checklistGasFile, checklistSignFiles } from "../../infrastructure";
 
 const checklistsRoutes = express.Router();
 
@@ -10,41 +9,38 @@ const checklistsService = new ChecklistsService();
 const controller = new ChecklistsController(checklistsService);
 
 checklistsRoutes.get(
-  '/ambulance/questions',
+  "/ambulance/questions",
   controller.getAmbQuestions.bind(controller)
-)
+);
 
 checklistsRoutes.post(
-  '/ambulance/create',
+  "/ambulance/create",
   checklistGasFile,
   controller.createAmbChecklist.bind(controller)
-)
+);
 
 checklistsRoutes.put(
-  '/ambulance/:id/sign',
+  "/ambulance/:id/sign",
   checklistSignFiles,
   controller.signAmbChecklist.bind(controller)
-)
+);
 
 checklistsRoutes.delete(
-  '/ambulance/delete/:id',
+  "/ambulance/delete/:id",
   controller.deleteAmbChecklist.bind(controller)
-)
+);
 
 checklistsRoutes.put(
-  '/ambulance/answers/:id',
+  "/ambulance/answers/:id",
   controller.putAmbAnswers.bind(controller)
-)
+);
 
 checklistsRoutes.get(
-  '/ambulance/:id',
+  "/ambulance/:id",
   controller.getAmbChecklist.bind(controller)
-)
-
+);
 
 export default checklistsRoutes;
-
-
 
 /*
 const fd = new FormData()

@@ -1,7 +1,6 @@
 import { ERROR_CODES, ROLE_LIST } from "../../domain";
 import { regularExp } from "../../infrastructure";
 
-
 type UserDtoProps = {
   id?: string;
   name?: string;
@@ -13,7 +12,6 @@ type UserDtoProps = {
   delegationId?: string;
   status?: boolean;
 };
-
 
 export class UserEntityDto {
   readonly id?: string;
@@ -28,65 +26,109 @@ export class UserEntityDto {
 
   private constructor(props: UserDtoProps) {
     Object.assign(this, props);
-  };
+  }
 
-  private static validateData = (object: any, type: 'create' | 'edit' | 'password'): null | [string] => {
-    const { id, name, lastname, email, password, role, position, delegationId, status } = object;
+  private static validateData = (
+    object: any,
+    type: "create" | "edit" | "password"
+  ): null | [string] => {
+    const {
+      id,
+      name,
+      lastname,
+      email,
+      password,
+      role,
+      position,
+      delegationId,
+      status,
+    } = object;
 
-    if (type === 'password') {
+    if (type === "password") {
       if (!email) return [ERROR_CODES.MISSING_EMAIL];
-      if (!regularExp.email.test(email)) return [ERROR_CODES.INVALID_EMAIL_FORMAT];
+      if (!regularExp.email.test(email))
+        return [ERROR_CODES.INVALID_EMAIL_FORMAT];
       if (!password) return [ERROR_CODES.MISSING_PASSWORD];
-      if (!regularExp.password.test(password)) return [ERROR_CODES.INVALID_PASSWORD_FORMAT];
-      return null
+      if (!regularExp.password.test(password))
+        return [ERROR_CODES.INVALID_PASSWORD_FORMAT];
+      return null;
     }
 
-    if (type === 'edit') {
+    if (type === "edit") {
       if (!id) return [ERROR_CODES.MISSING_USER_ID];
-      if (!status) return [ERROR_CODES.MISSING_STATUS]
+      if (!status) return [ERROR_CODES.MISSING_STATUS];
     }
     if (!name) return [ERROR_CODES.MISSING_NAME];
     if (!lastname) return [ERROR_CODES.MISSING_LASTNAME];
     if (!email) return [ERROR_CODES.MISSING_EMAIL];
-    if (!regularExp.email.test(email)) return [ERROR_CODES.INVALID_EMAIL_FORMAT];
-    
-    if (type === 'create') {
+    if (!regularExp.email.test(email))
+      return [ERROR_CODES.INVALID_EMAIL_FORMAT];
+
+    if (type === "create") {
       if (!password) return [ERROR_CODES.MISSING_PASSWORD];
-      if (!regularExp.password.test(password)) return [ERROR_CODES.INVALID_PASSWORD_FORMAT];
+      if (!regularExp.password.test(password))
+        return [ERROR_CODES.INVALID_PASSWORD_FORMAT];
     }
     if (!role) return [ERROR_CODES.MISSING_ROLE];
-    if (!position) return [ERROR_CODES.MISSING_POSITION]
+    if (!position) return [ERROR_CODES.MISSING_POSITION];
     if (!ROLE_LIST.includes(role)) return [ERROR_CODES.INVALID_ROLE];
-    if (!delegationId) return [ERROR_CODES.MISSING_DELEGATION_ID]
+    if (!delegationId) return [ERROR_CODES.MISSING_DELEGATION_ID];
 
-    return null
+    return null;
   };
 
   static create(object: { [key: string]: any }): [string?, UserEntityDto?] {
-    const { name, lastname, email, password, role, position, delegationId } = object;
+    const { name, lastname, email, password, role, position, delegationId } =
+      object;
 
-    const validate = this.validateData(object, 'create');
+    const validate = this.validateData(object, "create");
     if (validate !== null) return validate;
 
-    return [undefined, new UserEntityDto({ name, lastname, email: email.toLowerCase(), password, role, position, delegationId })];
-  };
+    return [
+      undefined,
+      new UserEntityDto({
+        name,
+        lastname,
+        email: email.toLowerCase(),
+        password,
+        role,
+        position,
+        delegationId,
+      }),
+    ];
+  }
 
   static edit(object: { [key: string]: any }): [string?, UserEntityDto?] {
-    const { id, name, lastname, email, role, position, delegationId, status } = object;
+    const { id, name, lastname, email, role, position, delegationId, status } =
+      object;
 
-    const validate = this.validateData(object, 'edit');
+    const validate = this.validateData(object, "edit");
     if (validate !== null) return validate;
 
-    return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position, delegationId, status })];
-  };
+    return [
+      undefined,
+      new UserEntityDto({
+        id,
+        name,
+        lastname,
+        email: email.toLowerCase(),
+        role,
+        position,
+        delegationId,
+        status,
+      }),
+    ];
+  }
 
   static login(object: { [key: string]: any }): [string?, UserEntityDto?] {
     const { email, password } = object;
 
-    const validate = this.validateData(object, 'password');
+    const validate = this.validateData(object, "password");
     if (validate !== null) return validate;
 
-    return [undefined, new UserEntityDto({ email: email.toLowerCase(), password })];
-  };
-};
-
+    return [
+      undefined,
+      new UserEntityDto({ email: email.toLowerCase(), password }),
+    ];
+  }
+}

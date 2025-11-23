@@ -1,13 +1,12 @@
-
 export class DelegationEntity {
-  constructor (
+  constructor(
     public id?: string,
     public municipalityId?: number,
-    public pharmacyId?: string,
+    public pharmacyId?: string
   ) {}
 
-  static fromObject (object: {[key: string]: any}) {
-    const {id, municipalityId, pharmacyId} = object;
+  static fromObject(object: { [key: string]: any }) {
+    const { id, municipalityId, pharmacyId } = object;
     return new DelegationEntity(id, municipalityId, pharmacyId);
   }
 }

@@ -1,8 +1,6 @@
-
 import { Request, Response, NextFunction } from "express";
 
 export interface CheckListsControllerInterface {
-
   //* CheckList Ambulance
   getAmbQuestions(req: Request, res: Response, next: NextFunction): void;
 
@@ -18,5 +16,4 @@ export interface CheckListsControllerInterface {
   deleteSupChecklist(req: Request, res: Response, next: NextFunction): void;
   getSupChecklist(req: Request, res: Response, next: NextFunction): void;
   putSupAnserws(req: Request, res: Response, next: NextFunction): void;
-
-};
+}

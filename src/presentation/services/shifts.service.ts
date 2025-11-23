@@ -3,137 +3,172 @@ import { ShiftEntityDto } from "../../application";
 import { ERROR_CODES, ShiftEntity, ShiftsServiceInterface } from "../../domain";
 import { Ambulance, Guard, sequelize, Shift, User } from "../../infrastructure";
 
-
 export class ShiftsService implements ShiftsServiceInterface {
-
-  private validateData = async (ambulanceId: string, guardId: string, paramedicalId: string, driverId: string) => {
+  private validateData = async (
+    ambulanceId: string,
+    guardId: string,
+    paramedicalId: string,
+    driverId: string
+  ) => {
     const [amb, grd, prm, drv] = await Promise.all([
-      Ambulance.findByPk(ambulanceId, { attributes: ['id'], raw: true }),
-      Guard.findByPk(guardId, { attributes: ['id'], raw: true }),
-      User.findByPk(paramedicalId, { attributes: ['id'], raw: true }),
-      User.findByPk(driverId, { attributes: ['id'], raw: true }),
-    ])
+      Ambulance.findByPk(ambulanceId, { attributes: ["id"], raw: true }),
+      Guard.findByPk(guardId, { attributes: ["id"], raw: true }),
+      User.findByPk(paramedicalId, { attributes: ["id"], raw: true }),
+      User.findByPk(driverId, { attributes: ["id"], raw: true }),
+    ]);
 
-    if (!amb) return ERROR_CODES.AMBULANCE_NOT_FOUND
-    if (!grd) return ERROR_CODES.GUARD_NOT_FOUND
-    if (!prm) return ERROR_CODES.PARAMEDICAL_NOT_FOUND
-    if (!drv) return ERROR_CODES.DRIVER_NOT_FOUND
-    return true
-  }
+    if (!amb) return ERROR_CODES.AMBULANCE_NOT_FOUND;
+    if (!grd) return ERROR_CODES.GUARD_NOT_FOUND;
+    if (!prm) return ERROR_CODES.PARAMEDICAL_NOT_FOUND;
+    if (!drv) return ERROR_CODES.DRIVER_NOT_FOUND;
+    return true;
+  };
 
   async createShift(shiftEntityDto: ShiftEntityDto): Promise<object> {
     //! todo: verificar que no existe una con el mismo día y misma ambulancia
-    const { ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto
+    const { ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto;
 
-    const ok = await this.validateData(ambulanceId!, guardId!, paramedicalId!, driverId!)
-    if (typeof ok !== 'boolean') throw ok
+    const ok = await this.validateData(
+      ambulanceId!,
+      guardId!,
+      paramedicalId!,
+      driverId!
+    );
+    if (typeof ok !== "boolean") throw ok;
 
-    let tx: Transaction | undefined
+    let tx: Transaction | undefined;
     try {
-      tx = await sequelize.transaction()
+      tx = await sequelize.transaction();
 
-      const ambulance = await Ambulance.findOne({ where: { id: ambulanceId }, attributes: ['number'] })
+      const ambulance = await Ambulance.findOne({
+        where: { id: ambulanceId },
+        attributes: ["number"],
+      });
 
-      const entity = ShiftEntity.create({ ambulanceId, guardId, paramedicalId, driverId })
+      const entity = ShiftEntity.create({
+        ambulanceId,
+        guardId,
+        paramedicalId,
+        driverId,
+      });
 
-      const shift = await Shift.create({
-        name: `Turno ${ambulance!.number}`,
-        ambulance_id: entity.ambulanceId,
-        guard_id: entity.guardId,
-        paramedical_id: entity.paramedicalId,
-        driver_id: entity.driverId
-      }, { transaction: tx })
+      const shift = await Shift.create(
+        {
+          name: `Turno ${ambulance!.number}`,
+          ambulance_id: entity.ambulanceId,
+          guard_id: entity.guardId,
+          paramedical_id: entity.paramedicalId,
+          driver_id: entity.driverId,
+        },
+        { transaction: tx }
+      );
 
-      await tx.commit()
+      await tx.commit();
 
       const formatShift = {
         id: shift.id,
         name: shift.name,
         ambulance: {
-          id: shift.ambulance_id
+          id: shift.ambulance_id,
         },
         guard: {
-          id: shift.guard_id
+          id: shift.guard_id,
         },
         paramedical: {
-          id: shift.paramedical_id
+          id: shift.paramedical_id,
         },
         driver: {
-          id: shift.driver_id
+          id: shift.driver_id,
         },
-        createdAt: shift.get('createdAt') as Date,
-        updatedAt: shift.get('updatedAt') as Date,
-      }
+        createdAt: shift.get("createdAt") as Date,
+        updatedAt: shift.get("updatedAt") as Date,
+      };
 
       return {
         success: true,
-        data: formatShift
-      }
-
+        data: formatShift,
+      };
     } catch (error) {
-      tx?.rollback()
-      if (typeof error === 'string') throw error
-      throw ERROR_CODES.INSERT_FAILED
+      tx?.rollback();
+      if (typeof error === "string") throw error;
+      throw ERROR_CODES.INSERT_FAILED;
     }
   }
 
   async editShift(shiftEntityDto: ShiftEntityDto): Promise<object> {
-    const { id, name, ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto
+    const { id, name, ambulanceId, guardId, paramedicalId, driverId } =
+      shiftEntityDto;
 
-    const shiftExists = await Shift.findOne({ where: { id } })
-    if (!shiftExists) throw ERROR_CODES.SHIFT_NOT_FOUND
+    const shiftExists = await Shift.findOne({ where: { id } });
+    if (!shiftExists) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
-    const ok = await this.validateData(ambulanceId!, guardId!, paramedicalId!, driverId!)
-    if (typeof ok !== 'boolean') throw ok
+    const ok = await this.validateData(
+      ambulanceId!,
+      guardId!,
+      paramedicalId!,
+      driverId!
+    );
+    if (typeof ok !== "boolean") throw ok;
 
-    let tx: Transaction | undefined
+    let tx: Transaction | undefined;
 
     try {
-      tx = await sequelize.transaction()
-      const entity = ShiftEntity.create({ ambulanceId, guardId, paramedicalId, driverId })
+      tx = await sequelize.transaction();
+      const entity = ShiftEntity.create({
+        ambulanceId,
+        guardId,
+        paramedicalId,
+        driverId,
+      });
 
-      await Shift.update({
-        name: name,
-        ambulance_id: entity.ambulanceId,
-        guard_id: entity.guardId,
-        paramedical_id: entity.paramedicalId,
-        driver_id: entity.driverId
-      }, { where: { id }, transaction: tx })
+      await Shift.update(
+        {
+          name: name,
+          ambulance_id: entity.ambulanceId,
+          guard_id: entity.guardId,
+          paramedical_id: entity.paramedicalId,
+          driver_id: entity.driverId,
+        },
+        { where: { id }, transaction: tx }
+      );
 
-      await tx.commit()
+      await tx.commit();
 
-      return { success: true }
-
+      return { success: true };
     } catch (error) {
-      tx?.rollback()
-      if (typeof error === 'string') throw error
-      throw ERROR_CODES.UPDATE_FAILED
+      tx?.rollback();
+      if (typeof error === "string") throw error;
+      throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
   async deleteShift(shiftEntityDto: ShiftEntityDto): Promise<object> {
-    const { id } = shiftEntityDto
+    const { id } = shiftEntityDto;
 
-    const count = await Shift.destroy({ where: { id } })
+    const count = await Shift.destroy({ where: { id } });
 
-    if (count === 0) throw ERROR_CODES.SHIFT_NOT_FOUND
+    if (count === 0) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
-    return { success: true }
+    return { success: true };
   }
 
   async getShifts(guardId: string): Promise<object> {
-
-    const shifts = await Shift.findAll({ 
+    const shifts = await Shift.findAll({
       where: { guard_id: guardId },
       include: [
-        { model: Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
-        { model: User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
-        { model: User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
-      ]
-    })
-      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
+        { model: Ambulance, as: "ambulance", attributes: ["id", "number"] },
+        {
+          model: User,
+          as: "paramedical",
+          attributes: ["id", "name", "lastname"],
+        },
+        { model: User, as: "driver", attributes: ["id", "name", "lastname"] },
+      ],
+    }).catch(() => {
+      throw ERROR_CODES.UNKNOWN_DB_ERROR;
+    });
 
-    if (shifts.length === 0) throw ERROR_CODES.SHIFT_NOT_FOUND
+    if (shifts.length === 0) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
     const formatShifts = shifts.map((shift) => ({
       id: shift.id,
@@ -142,42 +177,57 @@ export class ShiftsService implements ShiftsServiceInterface {
       guard: shift.guard,
       paramedical: shift.paramedical,
       driver: shift.driver,
-      createdAt: shift.get('createdAt') as Date,
-      updatedAt: shift.get('updatedAt') as Date,
-    }))
+      createdAt: shift.get("createdAt") as Date,
+      updatedAt: shift.get("updatedAt") as Date,
+    }));
 
     return {
       success: true,
-      data: formatShifts
-    }
+      data: formatShifts,
+    };
   }
 
   async getOneShift(id: string): Promise<object> {
-    const shift = await Shift.findOne({ 
+    const shift = await Shift.findOne({
       where: { id },
-      attributes: ['id', 'name', 'created_at', 'updated_at'],
+      attributes: ["id", "name", "created_at", "updated_at"],
       include: [
-        { model: Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
-        { model: User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
-        { model: User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
-        { 
+        { model: Ambulance, as: "ambulance", attributes: ["id", "number"] },
+        {
+          model: User,
+          as: "paramedical",
+          attributes: ["id", "name", "lastname"],
+        },
+        { model: User, as: "driver", attributes: ["id", "name", "lastname"] },
+        {
           model: Guard,
-          as: 'guard',
-          attributes: ['id', 'date', 'state', 'delegation_id', 'created_at', 'updated_at'],
+          as: "guard",
+          attributes: [
+            "id",
+            "date",
+            "state",
+            "delegation_id",
+            "created_at",
+            "updated_at",
+          ],
           include: [
-            { model: User, as: 'guardChief', attributes: ['id', 'name', 'lastname'] }
-          ]
-        }
-      ]
-    })
-      .catch(() => { throw ERROR_CODES.UNKNOWN_DB_ERROR })
+            {
+              model: User,
+              as: "guardChief",
+              attributes: ["id", "name", "lastname"],
+            },
+          ],
+        },
+      ],
+    }).catch(() => {
+      throw ERROR_CODES.UNKNOWN_DB_ERROR;
+    });
 
-    if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND
+    if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
     return {
       success: true,
-      data: shift
-    }
+      data: shift,
+    };
   }
-
 }

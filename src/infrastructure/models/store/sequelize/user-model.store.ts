@@ -1,10 +1,16 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model, UUIDV4 } from 'sequelize';
-import { sequelize } from '../../../config/sequelize.adapter';
-
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  UUIDV4,
+} from "sequelize";
+import { sequelize } from "../../../config/sequelize.adapter";
 
 class User extends Model<
-  InferAttributes<User>,          // lo que tiene una fila ya persistida
-  InferCreationAttributes<User>   // lo que es requerido para crear
+  InferAttributes<User>, // lo que tiene una fila ya persistida
+  InferCreationAttributes<User> // lo que es requerido para crear
 > {
   declare id: CreationOptional<string>;
   declare name: string;
@@ -19,10 +25,15 @@ class User extends Model<
 
 User.init(
   {
-    id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: UUIDV4,
+      allowNull: false,
+    },
     name: { type: DataTypes.STRING(100), allowNull: false },
     lastname: { type: DataTypes.STRING(100), allowNull: false },
-    email: { type: DataTypes.STRING(150), allowNull: false, /*unique: true*/ },
+    email: { type: DataTypes.STRING(150), allowNull: false /*unique: true*/ },
     password: { type: DataTypes.STRING(255), allowNull: false },
     status: { type: DataTypes.BOOLEAN, allowNull: false },
     role: { type: DataTypes.STRING(100), allowNull: false },
@@ -31,13 +42,13 @@ User.init(
   },
   {
     sequelize,
-    modelName: 'User',
-    tableName: 'users',
+    modelName: "User",
+    tableName: "users",
     timestamps: true,
     underscored: true,
-    indexes: [{ unique: true, fields: ['email'], name: 'uq_users_email' }]
+    indexes: [{ unique: true, fields: ["email"], name: "uq_users_email" }],
     // paranoid: true //* activa borrado lógico
-  },
+  }
 );
 
 export default User;

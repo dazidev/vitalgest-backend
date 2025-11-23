@@ -1,49 +1,60 @@
-import './types/express-augment';
-import './docs/swagger'
-import './docs/adm.docs'
+import "./types/express-augment";
+import "./docs/swagger";
+import "./docs/adm.docs";
 // import 'undici';
-import express from 'express';
-import cors from 'cors';
-import { config } from 'dotenv';
-import cookieParser from 'cookie-parser';
-import path from 'path';
-import fs from 'node:fs';
+import express from "express";
+import cors from "cors";
+import { config } from "dotenv";
+import cookieParser from "cookie-parser";
+import path from "path";
+import fs from "node:fs";
 //import list from 'express-list-endpoints';
 
 // documentación
-import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './docs/swagger';
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/swagger";
 
 // se importan las rutas
-import { authRoutes, admRoutes, delegationsRoutes, guardsRoutes, devRoutes, ambulancesRoutes, shiftRoutes, checklistsRoutes, suppliesRoutes } from './presentation';
-import { errorHandler } from './infrastructure';
-
+import {
+  authRoutes,
+  admRoutes,
+  delegationsRoutes,
+  guardsRoutes,
+  devRoutes,
+  ambulancesRoutes,
+  shiftRoutes,
+  checklistsRoutes,
+  suppliesRoutes,
+} from "./presentation";
+import { errorHandler } from "./infrastructure";
 
 // se llama a las varibles de entorno
 config();
 
 // se inicia la aplicación de express
 const app = express();
-app.use(cookieParser(process.env.COOKIE_SECRET))
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
-app.disable('x-powered-by');
+app.disable("x-powered-by");
 
 // modificar el origen de las solicitudes
 const ACCEPTED_ORIGINS = [
-  'http://127.0.0.1:5500',
-  'http://localhost:5500',
-  /\.vercel\.app$/,             // cualquier subdominio de vercel.app
+  "http://127.0.0.1:5500",
+  "http://localhost:5500",
+  /\.vercel\.app$/, // cualquier subdominio de vercel.app
   /\.vitalgest-backend\.vercel\.app$/,
 ];
 
-app.use(cors({
-  origin: ACCEPTED_ORIGINS,
-}));
+app.use(
+  cors({
+    origin: ACCEPTED_ORIGINS,
+  })
+);
 
 // documentación
-app.use('/api/docs', swaggerUi.serve);
-app.get('/api/docs', (_req, res) => {
-  res.type('html').send(`<!doctype html>
+app.use("/api/docs", swaggerUi.serve);
+app.get("/api/docs", (_req, res) => {
+  res.type("html").send(`<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -74,44 +85,45 @@ app.get('/api/docs', (_req, res) => {
 });
 
 // Endpoint del JSON
-app.get('/api/docs.json', (_req, res) => {
-  res.setHeader('Content-Type', 'application/json');
+app.get("/api/docs.json", (_req, res) => {
+  res.setHeader("Content-Type", "application/json");
   res.json(swaggerSpec);
 });
 
-app.get('/api/docs.debug', (_req, res) => {
-  const f = path.resolve('build/docs/adm.docs.js');
+app.get("/api/docs.debug", (_req, res) => {
+  const f = path.resolve("build/docs/adm.docs.js");
   res.json({
     cwd: process.cwd(),
     exists: fs.existsSync(f),
-    file: f
+    file: f,
   });
 });
 
-
 // las rutas que estará escuchando el servidor
-app.use('/api/adm', admRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/delegations', delegationsRoutes);
-app.use('/api/guards', guardsRoutes);
-app.use('/api/ambulances', ambulancesRoutes);
-app.use('/api/shifts', shiftRoutes);
-app.use('/api/checklists', checklistsRoutes);
-app.use('/api/supplies', suppliesRoutes);
+app.use("/api/adm", admRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/delegations", delegationsRoutes);
+app.use("/api/guards", guardsRoutes);
+app.use("/api/ambulances", ambulancesRoutes);
+app.use("/api/shifts", shiftRoutes);
+app.use("/api/checklists", checklistsRoutes);
+app.use("/api/supplies", suppliesRoutes);
 
 // para ver las imagenes
-app.use('/uploads', express.static(path.resolve('uploads'), {
-  // cache opcional
-  maxAge: '7d',
-  etag: true,
-  setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=604800')
-}));
-
-
+app.use(
+  "/uploads",
+  express.static(path.resolve("uploads"), {
+    // cache opcional
+    maxAge: "7d",
+    etag: true,
+    setHeaders: (res) =>
+      res.setHeader("Cache-Control", "public, max-age=604800"),
+  })
+);
 
 // rutas que funcionan solo en desarrollo
-if (process.env.NODE_ENV === 'development'){
-  app.use('/api/dev', devRoutes);
+if (process.env.NODE_ENV === "development") {
+  app.use("/api/dev", devRoutes);
 }
 
 // middlewares
@@ -122,6 +134,8 @@ export default app;
 if (!process.env.VERCEL) {
   const PORT = process.env.PORT ?? 3000;
   app.listen(PORT, () => {
-    console.log(`API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`);
+    console.log(
+      `API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`
+    );
   });
 }

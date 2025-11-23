@@ -1,72 +1,92 @@
-import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model, NonAttribute, UUIDV4 } from 'sequelize';
-import { sequelize } from '../../../../config/sequelize.adapter';
-import Shift from '../shift-model.store';
-import Ambulance from '../ambulance-model.store';
-import User from '../user-model.store';
-
+import {
+  CreationOptional,
+  DataTypes,
+  ForeignKey,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  NonAttribute,
+  UUIDV4,
+} from "sequelize";
+import { sequelize } from "../../../../config/sequelize.adapter";
+import Shift from "../shift-model.store";
+import Ambulance from "../ambulance-model.store";
+import User from "../user-model.store";
 
 class ChecklistAmbulance extends Model<
   InferAttributes<ChecklistAmbulance>,
   InferCreationAttributes<ChecklistAmbulance>
 > {
-  declare id: CreationOptional<string>
-  declare ambulance_id: ForeignKey<Ambulance['id']>
-  declare shift_id: ForeignKey<Shift['id']>
-  declare time: string
-  declare km: number
-  declare gas_path: string
-  declare sign_operator_path?: string
-  declare recipient_id?: ForeignKey<User['id']>
-  declare sign_recipient_path?: string
-  declare notes?: string
+  declare id: CreationOptional<string>;
+  declare ambulance_id: ForeignKey<Ambulance["id"]>;
+  declare shift_id: ForeignKey<Shift["id"]>;
+  declare time: string;
+  declare km: number;
+  declare gas_path: string;
+  declare sign_operator_path?: string;
+  declare recipient_id?: ForeignKey<User["id"]>;
+  declare sign_recipient_path?: string;
+  declare notes?: string;
 
-  declare ambulance?: NonAttribute<Ambulance>
-  declare shift?: NonAttribute<Shift>
-  declare recipient?: NonAttribute<User>
-
+  declare ambulance?: NonAttribute<Ambulance>;
+  declare shift?: NonAttribute<Shift>;
+  declare recipient?: NonAttribute<User>;
 }
 
 ChecklistAmbulance.init(
   {
-    id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4, allowNull: false },
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: UUIDV4,
+      allowNull: false,
+    },
     ambulance_id: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: { model: 'ambulances', key: 'id' },
-      onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
+      references: { model: "ambulances", key: "id" },
+      onUpdate: "CASCADE", // actualiza si el padre cambia de id
+      onDelete: "CASCADE", // impide eliminar al padre si tiene hijos
     },
     shift_id: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: { model: 'shifts', key: 'id' },
-      onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-      onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
+      references: { model: "shifts", key: "id" },
+      onUpdate: "CASCADE", // actualiza si el padre cambia de id
+      onDelete: "CASCADE", // impide eliminar al padre si tiene hijos
     },
     time: { type: DataTypes.TIME, allowNull: false },
     km: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     gas_path: { type: DataTypes.STRING, allowNull: false },
-    sign_operator_path: { type: DataTypes.STRING, defaultValue: null, allowNull: true },
+    sign_operator_path: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+      allowNull: true,
+    },
     recipient_id: { type: DataTypes.UUID, allowNull: true },
-    sign_recipient_path: { type: DataTypes.STRING, defaultValue: null, allowNull: true },
-    notes: { type: DataTypes.TEXT, allowNull: true }
+    sign_recipient_path: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+      allowNull: true,
+    },
+    notes: { type: DataTypes.TEXT, allowNull: true },
   },
   {
     sequelize,
-    modelName: 'ChecklistAmbulance',
-    tableName: 'checklist_ambulances',
+    modelName: "ChecklistAmbulance",
+    tableName: "checklist_ambulances",
     timestamps: true,
     underscored: true,
     indexes: [
-      { fields: ['ambulance_id'] },
+      { fields: ["ambulance_id"] },
       {
         unique: true,
-        fields: ['shift_id'],
-        name: 'checklist_ambulance_shift_id',
+        fields: ["shift_id"],
+        name: "checklist_ambulance_shift_id",
       },
     ],
     // paranoid: true //* activa borrado lógico
-  },
+  }
 );
 
 export default ChecklistAmbulance;
