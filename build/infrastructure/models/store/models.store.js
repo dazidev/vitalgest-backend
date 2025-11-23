@@ -69,6 +69,8 @@ checklist_ambulance_model_store_1.default.belongsTo(ambulance_model_store_1.defa
 ambulance_model_store_1.default.hasMany(checklist_ambulance_model_store_1.default, { foreignKey: 'ambulance_id', as: 'checklistsAmbulance' });
 checklist_ambulance_model_store_1.default.belongsTo(shift_model_store_1.default, { foreignKey: 'shift_id', as: 'shift' });
 shift_model_store_1.default.hasOne(checklist_ambulance_model_store_1.default, { foreignKey: 'shift_id', as: 'checklistAmbulance' });
+checklist_ambulance_model_store_1.default.belongsTo(user_model_store_1.default, { foreignKey: 'recipient_id', as: 'recipient' });
+user_model_store_1.default.hasMany(checklist_ambulance_model_store_1.default, { foreignKey: 'recipient_id', as: 'checklistAmbulance' });
 // supplies
 checklist_supply_model_store_1.default.belongsTo(ambulance_model_store_1.default, { foreignKey: 'ambulance_id', as: 'ambulance' });
 ambulance_model_store_1.default.hasMany(checklist_supply_model_store_1.default, { foreignKey: 'ambulance_id', as: 'checklistsSupplies' });

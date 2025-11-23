@@ -62,6 +62,9 @@ Ambulance.hasMany(ChecklistAmbulance, { foreignKey: 'ambulance_id', as: 'checkli
 
 ChecklistAmbulance.belongsTo(Shift, { foreignKey: 'shift_id', as: 'shift' })
 Shift.hasOne(ChecklistAmbulance, { foreignKey: 'shift_id', as: 'checklistAmbulance' })
+
+ChecklistAmbulance.belongsTo(User, { foreignKey: 'recipient_id', as: 'recipient' })
+User.hasMany(ChecklistAmbulance, { foreignKey: 'recipient_id', as: 'checklistAmbulance' })
 // supplies
 ChecklistSupply.belongsTo(Ambulance, { foreignKey: 'ambulance_id', as: 'ambulance' })
 Ambulance.hasMany(ChecklistSupply, { foreignKey: 'ambulance_id', as: 'checklistsSupplies' })

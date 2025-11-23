@@ -9,6 +9,7 @@ type CheckListAmbulanceDtoProps = {
   km?: string
   gasFile?: File
   signOperatorFile?: File
+  recipientId?: string
   signRecipientFile?: File
   notes?: string
 }
@@ -20,6 +21,7 @@ export class CheckListAmbulanceEntityDto {
   readonly km?: string
   readonly gasFile?: File
   readonly signOperatorFile?: File
+  readonly recipientId?: string
   readonly signRecipientFile?: File
   readonly notes?: string
 
@@ -46,7 +48,7 @@ export class CheckListAmbulanceEntityDto {
     return true
   }
 
-  private static validateSign (signOperatorFile: File, signRecipientFile: File) {
+  /*private static validateSign (signOperatorFile: File, signRecipientFile: File) {
     if (!signOperatorFile) return ERROR_CODES.MISSING_SIGN_OPERATOR_FILE
     if (!(signOperatorFile instanceof File)) return ERROR_CODES.INVALID_SIGN_OPERATOR_FILE
 
@@ -54,27 +56,29 @@ export class CheckListAmbulanceEntityDto {
     if (!(signRecipientFile instanceof File)) return ERROR_CODES.INVALID_SIGN_RECIPIENT_FILE
 
     return true
-  }
+  }*/
 
   static create(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
-    const { ambulanceId, shiftId, km, /*gasFile,*/ notes } = object
+    const { ambulanceId, shiftId, km, /*gasFile,*/  } = object
     
     const error = this.validateData(ambulanceId, shiftId, km, /*gasFile*/)
     if (!(error === true)) return [error]
 
-    return [undefined, new CheckListAmbulanceEntityDto({ambulanceId, shiftId, km, /*gasFile,*/ notes})]
+    return [undefined, new CheckListAmbulanceEntityDto({ambulanceId, shiftId, km, /*gasFile,*/ })]
   }
 
   static sign(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
-    const { id, signOperatorFile, signRecipientFile } = object
+    const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } = object
     
     if (!id) return [ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID]
     if (!regularExp.uuid.test(id)) return [ERROR_CODES.INVALID_CHECKLIST_AMBULANCE_ID]
+    if (!recipientId) return [ERROR_CODES.MISSING_RECIPIENT_ID]
+    if (!regularExp.uuid.test(recipientId)) return [ERROR_CODES.INVALID_RECIPIENT_ID]
 
-    const error = this.validateSign(signOperatorFile, signRecipientFile)
-    if (!(error === true)) return [error]
+    /*const error = this.validateSign(signOperatorFile, signRecipientFile)
+    if (!(error === true)) return [error]*/
 
-    return [undefined, new CheckListAmbulanceEntityDto({id, signOperatorFile, signRecipientFile})]
+    return [undefined, new CheckListAmbulanceEntityDto({id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes})]
   }
 
   /*static edit(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {

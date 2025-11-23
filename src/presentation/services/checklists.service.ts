@@ -1,8 +1,13 @@
 import { promises as fs } from 'fs';
 
 import { ChecklistsServiceInterface, ERROR_CODES } from "../../domain";
+<<<<<<< HEAD
 import { Ambulance, Answer, AnswerComponent, AnswerSupply, AreaAmbulance, ChecklistAmbulance, ChecklistSupply, getCurrentTime, Question, relToAbs, saveWebFile, sequelize, Shift } from "../../infrastructure";
 import { CheckListAmbulanceEntityDto, CheckListSupplyEntityDto } from '../../application';
+=======
+import { Ambulance, Answer, AnswerComponent, ChecklistAmbulance, getCurrentTime, Question, relToAbs, sequelize, Shift, User } from "../../infrastructure";
+import { CheckListAmbulanceEntityDto } from '../../application';
+>>>>>>> b9b69a14c53eea5b0a475796a25c3839769c62ee
 import { Transaction } from 'sequelize';
 import { RequestAnswerInterface } from '../../infrastructure/http/interfaces';
 
@@ -126,7 +131,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
   //* AMBULANCE CHECKLIST
   async createAmbChecklist(checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto) {
-    const { ambulanceId, shiftId, km, /*gasFile,*/ notes } = checkListAmbulanceEntityDto
+    const { ambulanceId, shiftId, km, /*gasFile,*/ } = checkListAmbulanceEntityDto
 
     /*const baseDir = 'uploads/ambulance';
     const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
@@ -164,7 +169,6 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         shift_id: shiftId!,
         time: getCurrentTime(),
         km: Number(km!),
-        notes: notes ?? undefined,
         gas_path: 'sin utilizar' /*gas.relPath*/
       }, { transaction: tx })
 
@@ -183,45 +187,43 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async signAmbChecklist(checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto) {
-    const { id, signOperatorFile, signRecipientFile } = checkListAmbulanceEntityDto
+    const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } = checkListAmbulanceEntityDto
 
     const checklist = await ChecklistAmbulance.findOne({ where: { id }, attributes: ['ambulance_id'] })
     if (!checklist) throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND
 
-    const { ambulance_id: ambulanceId } = checklist
+    /*const { ambulance_id: ambulanceId } = checklist
 
     const baseDir = 'uploads/ambulance';
     const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
 
-    const saved: { absPath: string; relPath: string }[] = [];
+    const saved: { absPath: string; relPath: string }[] = [];*/
 
     let tx: Transaction | undefined
 
     try {
       tx = await sequelize.transaction()
 
-      const signOp = await saveWebFile(signOperatorFile!, baseDir, subDir);
+      /*const signOp = await saveWebFile(signOperatorFile!, baseDir, subDir);
       saved.push({ absPath: signOp.absPath, relPath: signOp.relPath });
 
       const signRec = await saveWebFile(signRecipientFile!, baseDir, subDir);
-      saved.push({ absPath: signRec.absPath, relPath: signRec.relPath });
+      saved.push({ absPath: signRec.absPath, relPath: signRec.relPath });*/
 
       await ChecklistAmbulance.update({
-        sign_operator_path: signOp.relPath,
-        sign_recipient_path: signRec.relPath
+        /*sign_operator_path: signOp.relPath,
+        sign_recipient_path: signRec.relPath*/
+        recipient_id: recipientId,
+        notes: notes ?? undefined,
       }, { where: { id }, transaction: tx })
 
       await tx?.commit()
 
       return {
-        success: true,
-        data: {
-          signOperatorPath: signOp.relPath,
-          signRecipientPath: signRec.relPath
-        }
+        success: true
       }
     } catch (err) {
-      await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
+      // await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
       await tx?.rollback()
       throw ERROR_CODES.UPDATE_FAILED
     }
@@ -263,38 +265,44 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   async getAmbChecklist(id: string) {
     try {
       const checklist = await ChecklistAmbulance.findByPk(id, {
-        include: {
-          model: Answer,
-          as: 'answers',
-          attributes: ['id'],
-          include: [
-            {
-              model: Question,
-              as: 'question',
-              attributes: [
-                'id',
-                'question',
-                'name_category',
-                'order_category',
-                'order_question_category',
-                'name_subcategory',
-                'order_subcategory',
-                'type_response'
-              ]
-            },
-            {
-              model: AnswerComponent,
-              as: 'components',
-              attributes: [
-                'id',
-                'type',
-                'value_bool',
-                'value_option',
-                'value_text'
-              ]
-            },
-          ]
-        },
+        attributes: { exclude: ['ambulance_id', 'shift_id', 'recipient_id'] },
+        include: [
+          { model: Ambulance, as: 'ambulance', attributes: ['id'] },
+          { model: Shift, as: 'shift', attributes: ['id'] },
+          { model: User, as: 'recipient', attributes: ['id', 'name', 'lastname'] },
+          {
+            model: Answer,
+            as: 'answers',
+            attributes: ['id'],
+            include: [
+              {
+                model: Question,
+                as: 'question',
+                attributes: [
+                  'id',
+                  'question',
+                  'name_category',
+                  'order_category',
+                  'order_question_category',
+                  'name_subcategory',
+                  'order_subcategory',
+                  'type_response'
+                ]
+              },
+              {
+                model: AnswerComponent,
+                as: 'components',
+                attributes: [
+                  'id',
+                  'type',
+                  'value_bool',
+                  'value_option',
+                  'value_text'
+                ]
+              },
+            ]
+          },
+        ],
         order: [
           [
             { model: Answer, as: 'answers' },
@@ -359,7 +367,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     } catch (error) {
       await tx?.rollback()
       if (typeof error === 'string') throw error
-      throw ERROR_CODES.INSERT_FAILED
+      throw error
     }
   }
 }
