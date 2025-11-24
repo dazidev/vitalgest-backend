@@ -4,7 +4,8 @@ import { regularExp } from "../../infrastructure";
 type CheckListSupplyDtoProps = {
   id?: string;
   shiftId?: string;
-  signOperatorFile?: File;
+  signParamedicalFile?: File;
+  recipientId?: string;
   signRecipientFile?: File;
   notes?: string;
 };
@@ -12,7 +13,8 @@ type CheckListSupplyDtoProps = {
 export class CheckListSupplyEntityDto {
   readonly id?: string;
   readonly shiftId?: string;
-  readonly signOperatorFile?: File;
+  readonly signParamedicalFile?: File;
+  readonly recipientId?: string;
   readonly signRecipientFile?: File;
   readonly notes?: string;
 
@@ -20,9 +22,9 @@ export class CheckListSupplyEntityDto {
     Object.assign(this, props);
   }
 
-  private static validateSign(signOperatorFile: File, signRecipientFile: File) {
-    if (!signOperatorFile) return ERROR_CODES.MISSING_SIGN_OPERATOR_FILE;
-    if (!(signOperatorFile instanceof File))
+  /*private static validateSign(signParamedicalFile: File, signRecipientFile: File) {
+    if (!signParamedicalFile) return ERROR_CODES.MISSING_SIGN_OPERATOR_FILE;
+    if (!(signParamedicalFile instanceof File))
       return ERROR_CODES.INVALID_SIGN_OPERATOR_FILE;
 
     if (!signRecipientFile) return ERROR_CODES.MISSING_SIGN_RECIPIENT_FILE;
@@ -30,7 +32,7 @@ export class CheckListSupplyEntityDto {
       return ERROR_CODES.INVALID_SIGN_RECIPIENT_FILE;
 
     return true;
-  }
+  }*/
 
   static create(object: {
     [key: string]: any;
@@ -46,18 +48,27 @@ export class CheckListSupplyEntityDto {
   static sign(object: {
     [key: string]: any;
   }): [string?, CheckListSupplyEntityDto?] {
-    const { id, signOperatorFile, signRecipientFile } = object;
+    const { id, /*signOperatorFile, signRecipientFile*/ recipientId, notes } =
+      object;
 
     if (!id) return [ERROR_CODES.MISSING_CHECKLIST_SUPPLY_ID];
     if (!regularExp.uuid.test(id))
       return [ERROR_CODES.INVALID_CHECKLIST_SUPPLY_ID];
 
-    const error = this.validateSign(signOperatorFile, signRecipientFile);
-    if (!(error === true)) return [error];
+    if (!recipientId) return [ERROR_CODES.MISSING_RECIPIENT_ID];
+    if (!regularExp.uuid.test(recipientId))
+      return [ERROR_CODES.INVALID_RECIPIENT_ID];
+
+    //const error = this.validateSign(signOperatorFile, signRecipientFile);
+    //if (!(error === true)) return [error];
 
     return [
       undefined,
-      new CheckListSupplyEntityDto({ id, signOperatorFile, signRecipientFile }),
+      new CheckListSupplyEntityDto({
+        id,
+        /*signOperatorFile, signRecipientFile*/ recipientId,
+        notes,
+      }),
     ];
   }
 

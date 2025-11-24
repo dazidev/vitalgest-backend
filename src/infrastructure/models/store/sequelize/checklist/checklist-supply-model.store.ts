@@ -25,7 +25,7 @@ class ChecklistSupply extends Model<
   declare sign_recipient_path?: string;
   declare notes?: string;
 
-  declare ambulance?: NonAttribute<Ambulance>;
+  declare ambulance?: NonAttribute<Ambulance>; //! Esto esta generando una campo en la base de datos, o sólo es para declarar la relación?
   declare shift?: NonAttribute<Shift>;
   declare recipient?: NonAttribute<User>;
 }

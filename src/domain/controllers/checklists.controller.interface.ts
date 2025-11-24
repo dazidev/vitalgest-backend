@@ -15,5 +15,5 @@ export interface CheckListsControllerInterface {
   signSupChecklist(req: Request, res: Response, next: NextFunction): void;
   deleteSupChecklist(req: Request, res: Response, next: NextFunction): void;
   getSupChecklist(req: Request, res: Response, next: NextFunction): void;
-  putSupAnserws(req: Request, res: Response, next: NextFunction): void;
+  putSupAnswers(req: Request, res: Response, next: NextFunction): void;
 }

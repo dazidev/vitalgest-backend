@@ -1,6 +1,7 @@
 import { Request } from "express";
 import {
   AnswerSupInterface,
+  regularExp,
   RequestAnswerSupInterface,
 } from "../../infrastructure";
 import { ERROR_CODES } from "../../domain";
@@ -19,32 +20,13 @@ export class SupAnswersDto {
     for (let i = 0; i < answers.length; i++) {
       const a = answers[i] ?? {};
 
-      const category = String(a.category ?? "").trim();
-      const specification = String(a.specification ?? "").trim();
-      const avaibleQuantity = String(a.avaibleQuantity ?? "").trim();
-      const minQuantity = String(a.minQuantity ?? "").trim();
+      const supplyId = String(a.supplyId ?? "").trim();
       const requiredQuantity = String(a.requiredQuantity ?? "").trim();
-      const measurementUnit = String(a.measurementUnit ?? "").trim();
-      const areaId = String(a.areaId ?? "").trim();
 
-      if (!category) return [ERROR_CODES.MISSING_CATEGORY];
-      if (!avaibleQuantity) return [ERROR_CODES.MISSING_QUANTITY];
-      if (!minQuantity) return [ERROR_CODES.MISSING_MIN_QUANTITY];
+      if (!supplyId) return [ERROR_CODES.MISSING_SUPPLY_ID];
+      if (!regularExp.uuid.test(supplyId))
+        return [ERROR_CODES.INVALID_SUPPLY_ID];
       if (!requiredQuantity) return [ERROR_CODES.MISSING_REQUIRED_QUANTITY];
-      if (!measurementUnit) return [ERROR_CODES.MISSING_MEASUREMENT_UNIT];
-      if (!areaId) return [ERROR_CODES.MISSING_AREA_ID];
-
-      const avaQuaNum =
-        typeof avaibleQuantity === "number"
-          ? avaibleQuantity
-          : Number(avaibleQuantity);
-      if (!Number.isFinite(avaQuaNum) || avaQuaNum < 0)
-        return [ERROR_CODES.INVALID_AVAIBLE_QUANTITY];
-
-      const minQuaNum =
-        typeof minQuantity === "number" ? minQuantity : Number(minQuantity);
-      if (!Number.isFinite(minQuaNum) || minQuaNum < 0)
-        return [ERROR_CODES.INVALID_MIN_QUANTITY];
 
       const reqQuaNum =
         typeof requiredQuantity === "number"
@@ -54,13 +36,8 @@ export class SupAnswersDto {
         return [ERROR_CODES.INVALID_REQUIRED_QUANTITY];
 
       out.push({
-        category,
-        specification,
-        avaibleQuantity: avaQuaNum,
-        minQuantity: minQuaNum,
+        supplyId,
         requiredQuantity: reqQuaNum,
-        measurementUnit,
-        areaId,
       });
     }
 

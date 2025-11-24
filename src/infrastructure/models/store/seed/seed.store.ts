@@ -9,6 +9,8 @@ import {
   Pharmacy,
   Shift,
   State,
+  Supply,
+  SupplyAmbulance,
   User,
 } from "../models.store";
 import { config } from "dotenv";
@@ -80,7 +82,7 @@ export const createSeed = async () => {
     );
 
     //* Pharmacia
-    await Pharmacy.create(
+    const pharmacy = await Pharmacy.create(
       { delegation_id: delegation.id },
       { transaction: tx }
     );
@@ -196,7 +198,7 @@ export const createSeed = async () => {
     );
 
     //* Areas de ambulancia semilla
-    await AreaAmbulance.bulkCreate(
+    const areas = await AreaAmbulance.bulkCreate(
       [
         {
           id: 1,
@@ -239,6 +241,92 @@ export const createSeed = async () => {
           name: "BOTIQUIN",
           section: "VARIOS",
           order: 7,
+        },
+      ],
+      { transaction: tx }
+    );
+
+    //* Suministros semilla
+    const supplies = await Supply.bulkCreate(
+      [
+        {
+          pharmacy_id: pharmacy.id,
+          category: "Estetoscopio",
+          specification: "Pediatrico",
+          avaible_quantity: 10,
+          expiration_date: new Date("2027-10-10"),
+          measurement_unit: "unit",
+        },
+        {
+          pharmacy_id: pharmacy.id,
+          category: "Esfigmomanometro",
+          specification: "Adulto",
+          avaible_quantity: 10,
+          expiration_date: new Date("2027-10-10"),
+          measurement_unit: "unit",
+        },
+        {
+          pharmacy_id: pharmacy.id,
+          category: "Bolsa de válvula - mascarilla (BVM)",
+          specification: "Adulto",
+          avaible_quantity: 10,
+          expiration_date: new Date("2027-10-10"),
+          measurement_unit: "unit",
+        },
+        {
+          pharmacy_id: pharmacy.id,
+          category: "Mascarilla con reservorio",
+          specification: "Adulto",
+          avaible_quantity: 10,
+          expiration_date: new Date("2027-10-10"),
+          measurement_unit: "unit",
+        },
+      ],
+      { transaction: tx }
+    );
+
+    //* Suministros a ambulancia
+    await SupplyAmbulance.bulkCreate(
+      [
+        {
+          ambulance_id: ambulance.id,
+          category: supplies[0].category,
+          specification: supplies[0].specification,
+          avaible_quantity: 5,
+          min_quantity: 3,
+          area_id: areas[0].id,
+          expiration_date: supplies[0].expiration_date,
+          measurement_unit: supplies[0].measurement_unit,
+        },
+        {
+          ambulance_id: ambulance.id,
+          category: supplies[1].category,
+          specification: supplies[1].specification,
+          avaible_quantity: 5,
+          min_quantity: 2,
+          area_id: areas[1].id,
+          expiration_date: supplies[1].expiration_date,
+          measurement_unit: supplies[1].measurement_unit,
+        },
+        {
+          ambulance_id: ambulance.id,
+          category: supplies[2].category,
+          specification: supplies[2].specification,
+          avaible_quantity: 4,
+          min_quantity: 2,
+          area_id: areas[2].id,
+          expiration_date: supplies[2].expiration_date,
+          measurement_unit: supplies[2].measurement_unit,
+        },
+        {
+          ambulance_id: ambulance.id,
+          category: supplies[3].category,
+          specification: supplies[3].specification,
+          avaible_quantity: 3,
+          min_quantity: 1,
+          area_id: areas[3].id,
+          expiration_date: supplies[3].expiration_date,
+          measurement_unit: supplies[3].measurement_unit,
         },
       ],
       { transaction: tx }

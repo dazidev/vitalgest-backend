@@ -2,7 +2,10 @@ import {
   CheckListAmbulanceEntityDto,
   CheckListSupplyEntityDto,
 } from "../../application";
-import { RequestAnswerInterface } from "../../infrastructure";
+import {
+  RequestAnswerInterface,
+  RequestAnswerSupInterface,
+} from "../../infrastructure";
 
 export interface ChecklistsServiceInterface {
   //* Checklist ambulances
@@ -32,5 +35,5 @@ export interface ChecklistsServiceInterface {
     checkListSupplyEntityDto: CheckListSupplyEntityDto
   ): Promise<object>;
   getSupChecklist(id: string): Promise<object>;
-  putSupAnserws(object: any): Promise<object>; // todo: tipear mejor.
+  putSupAnswers(object: RequestAnswerSupInterface): Promise<object>;
 }

@@ -18,7 +18,7 @@ class SupplyAmbulance extends Model<
 > {
   declare id: CreationOptional<string>;
   declare category: string;
-  declare specification: string;
+  declare specification?: string;
   declare avaible_quantity: number;
   declare min_quantity: number;
   declare expiration_date: Date;
@@ -40,7 +40,7 @@ SupplyAmbulance.init(
       allowNull: false,
     },
     category: { type: DataTypes.STRING, allowNull: false },
-    specification: { type: DataTypes.STRING, allowNull: false },
+    specification: { type: DataTypes.STRING, allowNull: true },
     avaible_quantity: { type: DataTypes.INTEGER, allowNull: false },
     min_quantity: { type: DataTypes.INTEGER, allowNull: false },
     expiration_date: { type: DataTypes.DATE, allowNull: false },

@@ -21,13 +21,8 @@ export interface RequestAnswerInterface {
 }
 
 export interface AnswerSupInterface {
-  category: string;
-  specification: string;
-  avaibleQuantity: number;
-  minQuantity: number;
+  supplyId: string;
   requiredQuantity: number;
-  measurementUnit: string;
-  areaId: string;
 }
 
 export interface RequestAnswerSupInterface {

@@ -137,13 +137,16 @@ AnswerComponent.belongsTo(Answer, { foreignKey: "answer_id", as: "answer" });
 Answer.hasOne(AnswerComponent, { foreignKey: "answer_id", as: "components" }); //! solo una.
 
 AnswerSupply.belongsTo(ChecklistSupply, {
-  foreignKey: "checklist_supply_id",
+  foreignKey: "checklist_id",
   as: "checklistSupply",
 });
 ChecklistSupply.hasMany(AnswerSupply, {
-  foreignKey: "checklist_supply_id",
+  foreignKey: "checklist_id",
   as: "answers",
 });
+
+AnswerSupply.belongsTo(AreaAmbulance, { foreignKey: "area_id", as: "area" });
+AreaAmbulance.hasMany(AnswerSupply, { foreignKey: "area_id", as: "answers" });
 
 // insumos
 Supply.belongsTo(Pharmacy, { foreignKey: "pharmacy_id", as: "pharmacy" });

@@ -1,32 +1,129 @@
 import { Request, Response, NextFunction } from "express";
 import { CheckListsControllerInterface, ERROR_CODES } from "../../domain";
 import { ChecklistsService } from "../services/checklists.service";
+import { CheckListSupplyEntityDto } from "../../application/dtos/checklist-supply-entity.dto";
 import {
   AmbAnswersDto,
   CheckListAmbulanceEntityDto,
   CustomError,
+  SupAnswersDto,
 } from "../../application";
 
 export class ChecklistsController implements CheckListsControllerInterface {
   constructor(public readonly checklistsService: ChecklistsService) {}
   createSupChecklist(req: Request, res: Response, next: NextFunction): void {
-    throw new Error("Method not implemented.");
+    try {
+      const { shiftId } = req.body;
+
+      // todo: habilitar después
+      /*const files = req.files as {
+        [field: string]: Express.Multer.File[]
+      } | undefined
+
+      const gasFileMf = files?.gasFile?.[0]
+      const signOperatorFileMf = files?.signOperatorFile?.[0]
+      const signRecipientFileMf = files?.signRecipientFile?.[0]
+
+      const gasFile = toWebFile(gasFileMf)
+      const signOperatorFile = toWebFile(signOperatorFileMf)
+      const signRecipientFile = toWebFile(signRecipientFileMf)*/
+
+      const payload = {
+        shiftId,
+        /*signOperatorFile,
+        signRecipientFile,*/
+      };
+
+      const [error, checkListSupplyEntityDto] =
+        CheckListSupplyEntityDto.create(payload);
+      if (error) throw next(CustomError.badRequest(error));
+
+      this.checklistsService
+        .createSupChecklist(checkListSupplyEntityDto!)
+        .then((response) => res.json(response))
+        .catch((err) => next(CustomError.badRequest(err)));
+    } catch (error) {
+      if (typeof error === "string") return next(CustomError.badRequest(error));
+      return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR));
+    }
   }
 
   signSupChecklist(req: Request, res: Response, next: NextFunction): void {
-    throw new Error("Method not implemented.");
+    try {
+      const { id } = req.params;
+      const { recipientId, notes } = req.body;
+
+      // todo: habilitar después
+      /*const files = req.files as {
+        [field: string]: Express.Multer.File[]
+      } | undefined
+
+      const signOperatorFileMf = files?.signOperatorFile?.[0]
+      const signRecipientFileMf = files?.signRecipientFile?.[0]
+
+      const signOperatorFile = toWebFile(signOperatorFileMf)
+      const signRecipientFile = toWebFile(signRecipientFileMf)*/
+
+      const payload = {
+        id,
+        recipientId,
+        notes,
+        // signOperatorFile,
+        // signRecipientFile,
+      };
+
+      const [error, checkListSupplyEntityDto] =
+        CheckListSupplyEntityDto.sign(payload);
+      if (error) return next(CustomError.badRequest(error));
+
+      this.checklistsService
+        .signSupChecklist(checkListSupplyEntityDto!)
+        .then((response) => res.json(response))
+        .catch((err) => next(CustomError.badRequest(err)));
+    } catch (error) {
+      if (typeof error === "string") return next(CustomError.badRequest(error));
+      return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR));
+    }
   }
 
   deleteSupChecklist(req: Request, res: Response, next: NextFunction): void {
-    throw new Error("Method not implemented.");
+    const { id } = req.params;
+
+    const [error, checkListSupplyEntityDto] = CheckListSupplyEntityDto.delete({
+      id,
+    });
+    if (error) throw CustomError.badRequest(error);
+
+    this.checklistsService
+      .deleteSupChecklist(checkListSupplyEntityDto!)
+      .then((response) => res.json(response))
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
   getSupChecklist(req: Request, res: Response, next: NextFunction): void {
-    throw new Error("Method not implemented.");
+    const { id } = req.params;
+
+    const [error, checkListSupplyEntityDto] = CheckListSupplyEntityDto.delete({
+      id,
+    });
+    if (error) throw CustomError.badRequest(error);
+
+    const { id: idv } = checkListSupplyEntityDto!;
+
+    this.checklistsService
+      .getSupChecklist(idv!)
+      .then((response) => res.json(response))
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
-  putSupAnserws(req: Request, res: Response, next: NextFunction): void {
-    throw new Error("Method not implemented.");
+  putSupAnswers(req: Request, res: Response, next: NextFunction): void {
+    const [error, dto] = SupAnswersDto.fromRequest(req);
+    if (error) return next(CustomError.badRequest(error));
+
+    this.checklistsService
+      .putSupAnswers(dto!)
+      .then((response) => res.json(response))
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
   getAmbQuestions(req: Request, res: Response, next: NextFunction): void {

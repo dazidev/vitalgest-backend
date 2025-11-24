@@ -6,6 +6,7 @@ export * from "./dtos/shift-entity.dto";
 export * from "./dtos/checklist-ambulance-entity.dto";
 export * from "./dtos/checklist-supply-entity.dto";
 export * from "./dtos/amb-answers.dto";
+export * from "./dtos/sup-answers.dto";
 export * from "./dtos/supply-entity.dto";
 export * from "./dtos/supply-ambulance-entity.dto";
 export * from "./errors/custom.error";
