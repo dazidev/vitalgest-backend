@@ -26,11 +26,11 @@ const infrastructure_1 = require("./infrastructure");
 const app = (0, express_1.default)();
 app.use((0, cookie_parser_1.default)(process.env.COOKIE_SECRET));
 app.use(express_1.default.json());
-app.disable('x-powered-by');
+app.disable("x-powered-by");
 // modificar el origen de las solicitudes
 const ACCEPTED_ORIGINS = [
-    'http://127.0.0.1:5500',
-    'http://localhost:5500',
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
     /\.vercel\.app$/, // cualquier subdominio de vercel.app
     /\.vitalgest-backend\.vercel\.app$/,
 ];
@@ -38,9 +38,9 @@ app.use((0, cors_1.default)({
     origin: ACCEPTED_ORIGINS,
 }));
 // documentación
-app.use('/api/docs', swagger_ui_express_1.default.serve);
-app.get('/api/docs', (_req, res) => {
-    res.type('html').send(`<!doctype html>
+app.use("/api/docs", swagger_ui_express_1.default.serve);
+app.get("/api/docs", (_req, res) => {
+    res.type("html").send(`<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
@@ -70,37 +70,37 @@ app.get('/api/docs', (_req, res) => {
 </html>`);
 });
 // Endpoint del JSON
-app.get('/api/docs.json', (_req, res) => {
-    res.setHeader('Content-Type', 'application/json');
+app.get("/api/docs.json", (_req, res) => {
+    res.setHeader("Content-Type", "application/json");
     res.json(swagger_1.swaggerSpec);
 });
-app.get('/api/docs.debug', (_req, res) => {
-    const f = path_1.default.resolve('build/docs/adm.docs.js');
+app.get("/api/docs.debug", (_req, res) => {
+    const f = path_1.default.resolve("build/docs/adm.docs.js");
     res.json({
         cwd: process.cwd(),
         exists: node_fs_1.default.existsSync(f),
-        file: f
+        file: f,
     });
 });
 // las rutas que estará escuchando el servidor
-app.use('/api/adm', presentation_1.admRoutes);
-app.use('/api/auth', presentation_1.authRoutes);
-app.use('/api/delegations', presentation_1.delegationsRoutes);
-app.use('/api/guards', presentation_1.guardsRoutes);
-app.use('/api/ambulances', presentation_1.ambulancesRoutes);
-app.use('/api/shifts', presentation_1.shiftRoutes);
-app.use('/api/checklists', presentation_1.checklistsRoutes);
-app.use('/api/supplies', presentation_1.suppliesRoutes);
+app.use("/api/adm", presentation_1.admRoutes);
+app.use("/api/auth", presentation_1.authRoutes);
+app.use("/api/delegations", presentation_1.delegationsRoutes);
+app.use("/api/guards", presentation_1.guardsRoutes);
+app.use("/api/ambulances", presentation_1.ambulancesRoutes);
+app.use("/api/shifts", presentation_1.shiftRoutes);
+app.use("/api/checklists", presentation_1.checklistsRoutes);
+app.use("/api/supplies", presentation_1.suppliesRoutes);
 // para ver las imagenes
-app.use('/uploads', express_1.default.static(path_1.default.resolve('uploads'), {
+app.use("/uploads", express_1.default.static(path_1.default.resolve("uploads"), {
     // cache opcional
-    maxAge: '7d',
+    maxAge: "7d",
     etag: true,
-    setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=604800')
+    setHeaders: (res) => res.setHeader("Cache-Control", "public, max-age=604800"),
 }));
 // rutas que funcionan solo en desarrollo
-if (process.env.NODE_ENV === 'development') {
-    app.use('/api/dev', presentation_1.devRoutes);
+if (process.env.NODE_ENV === "development") {
+    app.use("/api/dev", presentation_1.devRoutes);
 }
 // middlewares
 app.use(infrastructure_1.errorHandler);

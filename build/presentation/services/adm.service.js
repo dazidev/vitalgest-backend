@@ -17,25 +17,38 @@ const mapUserRow = (r) => ({
     role: r.role,
     position: r.position,
     delegation: {
-        id: r.delegation_id
+        id: r.delegation_id,
     },
     createdAt: r.createdAt,
-    updatedAt: r.updatedAt
+    updatedAt: r.updatedAt,
 });
 class AdmService {
     async createUser(userEntityDto) {
         let tx;
-        const { name, lastname, email, password, role, position, delegationId: delegation_id } = userEntityDto;
+        const { name, lastname, email, password, role, position, delegationId: delegation_id, } = userEntityDto;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const exists = await infrastructure_1.User.findOne({ where: { email: email }, transaction: tx });
+            const exists = await infrastructure_1.User.findOne({
+                where: { email: email },
+                transaction: tx,
+            });
             if (exists)
                 throw domain_1.ERROR_CODES.EMAIL_ALREADY_REGISTERED;
-            const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegation_id } });
+            const existsDelegation = await infrastructure_1.Delegation.findOne({
+                where: { id: delegation_id },
+            });
             if (!existsDelegation)
                 throw domain_1.ERROR_CODES.INVALID_DELEGATION_ID;
             const hashedPassword = await bcrypt_1.default.hash(password, 10);
-            const UserHashed = { name, lastname, email, hashedPassword, role, position, delegation_id };
+            const UserHashed = {
+                name,
+                lastname,
+                email,
+                hashedPassword,
+                role,
+                position,
+                delegation_id,
+            };
             const userEntity = domain_1.UserEntity.create(UserHashed);
             const user = await infrastructure_1.User.create({
                 name: userEntity.name,
@@ -49,16 +62,16 @@ class AdmService {
             }, { transaction: tx });
             await tx.commit();
             const userSafe = await infrastructure_1.User.findByPk(user.id, {
-                attributes: { exclude: ['password'] }
+                attributes: { exclude: ["password"] },
             });
             return {
                 success: true,
-                data: userSafe
+                data: userSafe,
             };
         }
         catch (error) {
             await tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
@@ -71,7 +84,9 @@ class AdmService {
             const exists = await infrastructure_1.User.findOne({ where: { id }, transaction: tx });
             if (!exists)
                 throw domain_1.ERROR_CODES.USER_NOT_FOUND;
-            const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } });
+            const existsDelegation = await infrastructure_1.Delegation.findOne({
+                where: { id: delegationId },
+            });
             if (!existsDelegation)
                 throw domain_1.ERROR_CODES.INVALID_DELEGATION_ID;
             await infrastructure_1.User.update({
@@ -81,20 +96,20 @@ class AdmService {
                 role,
                 position,
                 delegation_id: delegationId,
-                status: status
+                status: status,
             }, { where: { id }, transaction: tx });
             await tx.commit();
             const userSafe = await infrastructure_1.User.findByPk(id, {
-                attributes: { exclude: ['password'] }
+                attributes: { exclude: ["password"] },
             });
             return {
                 success: true,
-                data: userSafe
+                data: userSafe,
             };
         }
         catch (error) {
             await tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
@@ -112,34 +127,34 @@ class AdmService {
         }
         catch (error) {
             await tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.DELETE_FAILED;
         }
     }
     async getAllUsers(amount, role) {
         let newAmount;
-        if (amount !== 'all')
+        if (amount !== "all")
             newAmount = parseInt(amount);
         else
             newAmount = amount;
         try {
             const options = {
-                attributes: { exclude: ['password'] },
+                attributes: { exclude: ["password"] },
             };
             if (role)
                 options.where = { role };
-            if (newAmount !== 'all')
+            if (newAmount !== "all")
                 options.limit = Number(newAmount);
             const users = await infrastructure_1.User.findAll(options);
             const data = users.map(mapUserRow);
             return {
                 success: true,
-                data
+                data,
             };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -155,31 +170,34 @@ class AdmService {
             await infrastructure_1.User.update({ password: hashedPassword }, { where: { id }, transaction: tx });
             await tx.commit();
             return {
-                success: true
+                success: true,
             };
         }
         catch (error) {
             await tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
     }
     async getUserById(id) {
         try {
-            const user = await infrastructure_1.User.findOne({ where: { id }, attributes: { exclude: ['password'] } });
+            const user = await infrastructure_1.User.findOne({
+                where: { id },
+                attributes: { exclude: ["password"] },
+            });
             if (!user)
                 throw domain_1.ERROR_CODES.USER_NOT_FOUND;
             const data = [user].map(mapUserRow);
             return {
                 success: true,
-                data
+                data,
             };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
-            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; // todo: cambiar a error en la busqueda 
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; // todo: cambiar a error en la busqueda
         }
     }
 }

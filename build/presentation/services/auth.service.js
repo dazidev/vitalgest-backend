@@ -9,27 +9,32 @@ const infrastructure_1 = require("../../infrastructure");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 class AuthService {
     async handleTokensByUser(id) {
-        const user = await infrastructure_1.User.findOne({ where: { id }, attributes: { exclude: ['password'] } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const user = await infrastructure_1.User.findOne({
+            where: { id },
+            attributes: { exclude: ["password"] },
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!user)
             throw domain_1.ERROR_CODES.USER_NOT_FOUND;
         const { ...userEntity } = domain_1.UserEntity.payloadToken(user);
         const payload = {
-            ...userEntity
+            ...userEntity,
         };
-        const accessToken = await infrastructure_1.JwtAdapter.generateToken(payload, '2h', 'ACCESS');
-        const refreshToken = await infrastructure_1.JwtAdapter.generateToken(payload, '7d', 'REFRESH');
+        const accessToken = await infrastructure_1.JwtAdapter.generateToken(payload, "2h", "ACCESS");
+        const refreshToken = await infrastructure_1.JwtAdapter.generateToken(payload, "7d", "REFRESH");
         if (!accessToken && !refreshToken)
             throw domain_1.ERROR_CODES.TOKENS_NOT_GENERATED;
         return {
             accessToken: accessToken,
-            refreshToken: refreshToken
+            refreshToken: refreshToken,
         };
     }
     async loginUser(userEntityDto) {
         const { email, password } = userEntityDto;
-        const user = await infrastructure_1.User.findOne({ where: { email } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const user = await infrastructure_1.User.findOne({ where: { email } }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!user)
             throw domain_1.ERROR_CODES.USER_NOT_FOUND;
         const isMatching = await bcrypt_1.default.compare(password, user.password);
@@ -39,23 +44,23 @@ class AuthService {
         if (user.status === false)
             throw domain_1.ERROR_CODES.USER_NOT_ACTIVE;
         const payload = {
-            ...userEntity
+            ...userEntity,
         };
-        const tokenAccess = await infrastructure_1.JwtAdapter.generateToken(payload, '8h', 'ACCESS');
-        const tokenRefresh = await infrastructure_1.JwtAdapter.generateToken(payload, '7d', 'REFRESH');
+        const tokenAccess = await infrastructure_1.JwtAdapter.generateToken(payload, "8h", "ACCESS");
+        const tokenRefresh = await infrastructure_1.JwtAdapter.generateToken(payload, "7d", "REFRESH");
         if (!tokenAccess && !tokenRefresh)
             throw domain_1.ERROR_CODES.TOKENS_NOT_GENERATED;
         return {
             success: true,
             data: { ...userEntity, delegationId },
             accessToken: tokenAccess,
-            refreshToken: tokenRefresh
+            refreshToken: tokenRefresh,
         };
     }
     async newAccessToken(refreshTokenReq) {
         const result = await infrastructure_1.JwtAdapter.validateRefreshToken(refreshTokenReq);
         if (!result.success) {
-            if (result.reason === 'expired')
+            if (result.reason === "expired")
                 throw domain_1.ERROR_CODES.TOKEN_EXPIRED;
             throw domain_1.ERROR_CODES.INVALID_TOKEN;
         }

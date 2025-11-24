@@ -7,10 +7,10 @@ class ShiftsService {
     constructor() {
         this.validateData = async (ambulanceId, guardId, paramedicalId, driverId) => {
             const [amb, grd, prm, drv] = await Promise.all([
-                infrastructure_1.Ambulance.findByPk(ambulanceId, { attributes: ['id'], raw: true }),
-                infrastructure_1.Guard.findByPk(guardId, { attributes: ['id'], raw: true }),
-                infrastructure_1.User.findByPk(paramedicalId, { attributes: ['id'], raw: true }),
-                infrastructure_1.User.findByPk(driverId, { attributes: ['id'], raw: true }),
+                infrastructure_1.Ambulance.findByPk(ambulanceId, { attributes: ["id"], raw: true }),
+                infrastructure_1.Guard.findByPk(guardId, { attributes: ["id"], raw: true }),
+                infrastructure_1.User.findByPk(paramedicalId, { attributes: ["id"], raw: true }),
+                infrastructure_1.User.findByPk(driverId, { attributes: ["id"], raw: true }),
             ]);
             if (!amb)
                 return domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
@@ -27,47 +27,55 @@ class ShiftsService {
         //! todo: verificar que no existe una con el mismo día y misma ambulancia
         const { ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto;
         const ok = await this.validateData(ambulanceId, guardId, paramedicalId, driverId);
-        if (typeof ok !== 'boolean')
+        if (typeof ok !== "boolean")
             throw ok;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const ambulance = await infrastructure_1.Ambulance.findOne({ where: { id: ambulanceId }, attributes: ['number'] });
-            const entity = domain_1.ShiftEntity.create({ ambulanceId, guardId, paramedicalId, driverId });
+            const ambulance = await infrastructure_1.Ambulance.findOne({
+                where: { id: ambulanceId },
+                attributes: ["number"],
+            });
+            const entity = domain_1.ShiftEntity.create({
+                ambulanceId,
+                guardId,
+                paramedicalId,
+                driverId,
+            });
             const shift = await infrastructure_1.Shift.create({
                 name: `Turno ${ambulance.number}`,
                 ambulance_id: entity.ambulanceId,
                 guard_id: entity.guardId,
                 paramedical_id: entity.paramedicalId,
-                driver_id: entity.driverId
+                driver_id: entity.driverId,
             }, { transaction: tx });
             await tx.commit();
             const formatShift = {
                 id: shift.id,
                 name: shift.name,
                 ambulance: {
-                    id: shift.ambulance_id
+                    id: shift.ambulance_id,
                 },
                 guard: {
-                    id: shift.guard_id
+                    id: shift.guard_id,
                 },
                 paramedical: {
-                    id: shift.paramedical_id
+                    id: shift.paramedical_id,
                 },
                 driver: {
-                    id: shift.driver_id
+                    id: shift.driver_id,
                 },
-                createdAt: shift.get('createdAt'),
-                updatedAt: shift.get('updatedAt'),
+                createdAt: shift.get("createdAt"),
+                updatedAt: shift.get("updatedAt"),
             };
             return {
                 success: true,
-                data: formatShift
+                data: formatShift,
             };
         }
         catch (error) {
             tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
@@ -78,25 +86,30 @@ class ShiftsService {
         if (!shiftExists)
             throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         const ok = await this.validateData(ambulanceId, guardId, paramedicalId, driverId);
-        if (typeof ok !== 'boolean')
+        if (typeof ok !== "boolean")
             throw ok;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const entity = domain_1.ShiftEntity.create({ ambulanceId, guardId, paramedicalId, driverId });
+            const entity = domain_1.ShiftEntity.create({
+                ambulanceId,
+                guardId,
+                paramedicalId,
+                driverId,
+            });
             await infrastructure_1.Shift.update({
                 name: name,
                 ambulance_id: entity.ambulanceId,
                 guard_id: entity.guardId,
                 paramedical_id: entity.paramedicalId,
-                driver_id: entity.driverId
+                driver_id: entity.driverId,
             }, { where: { id }, transaction: tx });
             await tx.commit();
             return { success: true };
         }
         catch (error) {
             tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
@@ -112,12 +125,17 @@ class ShiftsService {
         const shifts = await infrastructure_1.Shift.findAll({
             where: { guard_id: guardId },
             include: [
-                { model: infrastructure_1.Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
-                { model: infrastructure_1.User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
-                { model: infrastructure_1.User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
-            ]
-        })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+                { model: infrastructure_1.Ambulance, as: "ambulance", attributes: ["id", "number"] },
+                {
+                    model: infrastructure_1.User,
+                    as: "paramedical",
+                    attributes: ["id", "name", "lastname"],
+                },
+                { model: infrastructure_1.User, as: "driver", attributes: ["id", "name", "lastname"] },
+            ],
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (shifts.length === 0)
             throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         const formatShifts = shifts.map((shift) => ({
@@ -127,38 +145,54 @@ class ShiftsService {
             guard: shift.guard,
             paramedical: shift.paramedical,
             driver: shift.driver,
-            createdAt: shift.get('createdAt'),
-            updatedAt: shift.get('updatedAt'),
+            createdAt: shift.get("createdAt"),
+            updatedAt: shift.get("updatedAt"),
         }));
         return {
             success: true,
-            data: formatShifts
+            data: formatShifts,
         };
     }
     async getOneShift(id) {
         const shift = await infrastructure_1.Shift.findOne({
             where: { id },
-            attributes: ['id', 'name', 'created_at', 'updated_at'],
+            attributes: ["id", "name", "created_at", "updated_at"],
             include: [
-                { model: infrastructure_1.Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
-                { model: infrastructure_1.User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
-                { model: infrastructure_1.User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
+                { model: infrastructure_1.Ambulance, as: "ambulance", attributes: ["id", "number"] },
+                {
+                    model: infrastructure_1.User,
+                    as: "paramedical",
+                    attributes: ["id", "name", "lastname"],
+                },
+                { model: infrastructure_1.User, as: "driver", attributes: ["id", "name", "lastname"] },
                 {
                     model: infrastructure_1.Guard,
-                    as: 'guard',
-                    attributes: ['id', 'date', 'state', 'delegation_id', 'created_at', 'updated_at'],
+                    as: "guard",
+                    attributes: [
+                        "id",
+                        "date",
+                        "state",
+                        "delegation_id",
+                        "created_at",
+                        "updated_at",
+                    ],
                     include: [
-                        { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname'] }
-                    ]
-                }
-            ]
-        })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+                        {
+                            model: infrastructure_1.User,
+                            as: "guardChief",
+                            attributes: ["id", "name", "lastname"],
+                        },
+                    ],
+                },
+            ],
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!shift)
             throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         return {
             success: true,
-            data: shift
+            data: shift,
         };
     }
 }

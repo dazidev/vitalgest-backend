@@ -68,11 +68,11 @@ class JwtAdapter {
     }
 }
 exports.JwtAdapter = JwtAdapter;
-JwtAdapter.generateToken = (payload, duration = '2h', type) => {
+JwtAdapter.generateToken = (payload, duration = "2h", type) => {
     return new Promise((resolve) => {
         const options = { expiresIn: duration };
         const newPayload = { ...payload, type };
-        jsonwebtoken_1.default.sign(newPayload, type === 'ACCESS' ? ACCESS_SECRET : REFRESH_SECRET, options, (err, token) => {
+        jsonwebtoken_1.default.sign(newPayload, type === "ACCESS" ? ACCESS_SECRET : REFRESH_SECRET, options, (err, token) => {
             if (err || !token)
                 return resolve(null);
             resolve(token);

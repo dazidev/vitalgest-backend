@@ -5,11 +5,14 @@ const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
 class SuppliesService {
     async createSupply(supplyEntityDto) {
-        const { category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId } = supplyEntityDto;
+        const { category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId, } = supplyEntityDto;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const pharmacy = await infrastructure_1.Pharmacy.findOne({ where: { id: pharmacyId }, transaction: tx });
+            const pharmacy = await infrastructure_1.Pharmacy.findOne({
+                where: { id: pharmacyId },
+                transaction: tx,
+            });
             if (!pharmacy)
                 throw domain_1.ERROR_CODES.PHARMACY_NOT_FOUND;
             const supply = await infrastructure_1.Supply.create({
@@ -18,23 +21,23 @@ class SuppliesService {
                 avaible_quantity: Number(avaibleQuantity),
                 expiration_date: new Date(expirationDate),
                 measurement_unit: measurementUnit,
-                pharmacy_id: pharmacyId
+                pharmacy_id: pharmacyId,
             }, { transaction: tx });
             await tx.commit();
             return {
                 success: true,
-                data: supply
+                data: supply,
             };
         }
         catch (error) {
             await tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
     }
     async editSupply(supplyEntityDto) {
-        const { id, category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId } = supplyEntityDto;
+        const { id, category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId, } = supplyEntityDto;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -47,14 +50,14 @@ class SuppliesService {
                 avaible_quantity: Number(avaibleQuantity),
                 expiration_date: expirationDate,
                 measurement_unit: measurementUnit,
-                pharmacy_id: pharmacyId
+                pharmacy_id: pharmacyId,
             }, { where: { id }, transaction: tx });
             await tx.commit();
             return { success: true };
         }
         catch (error) {
             await tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -63,7 +66,7 @@ class SuppliesService {
         const { id } = supplyEntityDto;
         try {
             const supply = await infrastructure_1.Supply.findOne({
-                where: { id }
+                where: { id },
             });
             if (!supply)
                 throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
@@ -73,7 +76,7 @@ class SuppliesService {
             return { success: true };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -84,16 +87,18 @@ class SuppliesService {
             const pharmacy = infrastructure_1.Pharmacy.findOne({ where: { id: pharmacyId } });
             if (!pharmacy)
                 throw domain_1.ERROR_CODES.PHARMACY_NOT_FOUND;
-            const supplies = await infrastructure_1.Supply.findAll({ where: { pharmacy_id: pharmacyId } });
+            const supplies = await infrastructure_1.Supply.findAll({
+                where: { pharmacy_id: pharmacyId },
+            });
             if (supplies.length === 0)
                 throw domain_1.ERROR_CODES.SUPPLIES_NOT_FOUND;
             return {
                 success: true,
-                data: supplies
+                data: supplies,
             };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -105,11 +110,11 @@ class SuppliesService {
                 throw domain_1.ERROR_CODES.SUPPLIES_NOT_FOUND;
             return {
                 success: true,
-                data: supply
+                data: supply,
             };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }

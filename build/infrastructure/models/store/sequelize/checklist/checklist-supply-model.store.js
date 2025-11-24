@@ -5,33 +5,43 @@ const sequelize_adapter_1 = require("../../../../config/sequelize.adapter");
 class ChecklistSupply extends sequelize_1.Model {
 }
 ChecklistSupply.init({
-    id: { type: sequelize_1.DataTypes.UUID, primaryKey: true, defaultValue: sequelize_1.UUIDV4, allowNull: false },
-    ambulance_id: {
+    id: {
         type: sequelize_1.DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: sequelize_1.UUIDV4,
         allowNull: false,
-        references: { model: 'ambulances', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
     },
     shift_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
-        references: { model: 'shifts', key: 'id' },
-        onUpdate: 'CASCADE', // actualiza si el padre cambia de id
-        onDelete: 'CASCADE', // impide eliminar al padre si tiene hijos
+        references: { model: "shifts", key: "id" },
+        onUpdate: "CASCADE", // actualiza si el padre cambia de id
+        onDelete: "CASCADE", // impide eliminar al padre si tiene hijos
     },
+    sign_paramedical_path: {
+        type: sequelize_1.DataTypes.STRING,
+        defaultValue: null,
+        allowNull: true,
+    },
+    recipient_id: { type: sequelize_1.DataTypes.UUID, allowNull: true },
+    sign_recipient_path: {
+        type: sequelize_1.DataTypes.STRING,
+        defaultValue: null,
+        allowNull: true,
+    },
+    notes: { type: sequelize_1.DataTypes.STRING, allowNull: true },
 }, {
     sequelize: sequelize_adapter_1.sequelize,
-    modelName: 'ChecklistSupply',
-    tableName: 'checklist_supplies',
+    modelName: "ChecklistSupply",
+    tableName: "checklist_supplies",
     timestamps: true,
     underscored: true,
     indexes: [
-        { fields: ['ambulance_id'] },
+        { fields: ["ambulance_id"] },
         {
             unique: true,
-            fields: ['shift_id'],
-            name: 'checklist_supplies_shift_id',
+            fields: ["shift_id"],
+            name: "checklist_supplies_shift_id",
         },
     ],
     // paranoid: true //* activa borrado lógico

@@ -5,19 +5,27 @@ const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
 class GuardsService {
     async existsGuard(date, delegationId) {
-        const exists = await infrastructure_1.Guard.findOne({ where: { delegation_id: delegationId, date } });
+        const exists = await infrastructure_1.Guard.findOne({
+            where: { delegation_id: delegationId, date },
+        });
         if (exists)
             return true;
         return false;
     }
     async createGuard(guardEntityDto) {
         const { guardChief, delegationId, date } = guardEntityDto;
-        const existsGuardChief = await infrastructure_1.User.findOne({ where: { id: guardChief, role: 'head_guard' } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const existsGuardChief = await infrastructure_1.User.findOne({
+            where: { id: guardChief, role: "head_guard" },
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!existsGuardChief)
             throw domain_1.ERROR_CODES.USER_NOT_GUARD_CHIEF;
-        const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const existsDelegation = await infrastructure_1.Delegation.findOne({
+            where: { id: delegationId },
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!existsDelegation)
             throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const exists = await this.existsGuard(date, delegationId);
@@ -29,7 +37,7 @@ class GuardsService {
             const guard = await infrastructure_1.Guard.create({
                 date: new Date(date),
                 guard_chief: guardChief,
-                state: 'Nueva',
+                state: "Nueva",
                 delegation_id: delegationId,
             }, { transaction: tx });
             await tx.commit();
@@ -40,29 +48,35 @@ class GuardsService {
                 },
                 date: guard.date,
                 delegation: {
-                    id: guard.delegation_id
-                }
+                    id: guard.delegation_id,
+                },
             };
             return {
                 success: true,
-                data: formatGuard
+                data: formatGuard,
             };
         }
         catch (error) {
             tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw { code: domain_1.ERROR_CODES.INSERT_FAILED };
         }
     }
     async editGuard(guardEntityDto) {
         const { id, guardChief, date, delegationId, state } = guardEntityDto;
-        const existsGuardChief = await infrastructure_1.User.findOne({ where: { id: guardChief, role: 'head_guard' } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const existsGuardChief = await infrastructure_1.User.findOne({
+            where: { id: guardChief, role: "head_guard" },
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!existsGuardChief)
             throw domain_1.ERROR_CODES.USER_NOT_GUARD_CHIEF;
-        const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const existsDelegation = await infrastructure_1.Delegation.findOne({
+            where: { id: delegationId },
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!existsDelegation)
             throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         let tx;
@@ -72,14 +86,14 @@ class GuardsService {
                 guard_chief: guardChief,
                 delegation_id: delegationId,
                 date: new Date(date),
-                state: state
+                state: state,
             }, { where: { id }, transaction: tx });
             await tx.commit();
             return { success: true };
         }
         catch (error) {
             tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
@@ -88,11 +102,11 @@ class GuardsService {
         try {
             const guard = await infrastructure_1.Guard.findOne({
                 where: { id },
-                attributes: ['state']
+                attributes: ["state"],
             });
             if (!guard?.state)
                 throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
-            if (guard.state !== 'Nueva')
+            if (guard.state !== "Nueva")
                 throw domain_1.ERROR_CODES.STATE_NOT_ALLOWED;
             const row = await infrastructure_1.Guard.destroy({ where: { id } });
             if (row === 0)
@@ -100,62 +114,87 @@ class GuardsService {
             return { success: true };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_ERROR;
         }
     }
     async getGuards(amount) {
         let formatAmount;
-        if (!(amount === 'all'))
+        if (!(amount === "all"))
             formatAmount = parseInt(amount);
         else
             formatAmount = amount;
         let guards;
-        formatAmount === 'all'
-            ? guards = await infrastructure_1.Guard.findAll({
-                attributes: ['id', 'date', 'state', 'created_at', 'updated_at'],
+        formatAmount === "all"
+            ? (guards = await infrastructure_1.Guard.findAll({
+                attributes: ["id", "date", "state", "created_at", "updated_at"],
                 include: [
-                    { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
-                    { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                    {
+                        model: infrastructure_1.User,
+                        as: "guardChief",
+                        attributes: ["id", "name", "lastname", "email"],
+                    },
+                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
                     {
                         model: infrastructure_1.Shift,
-                        as: 'shifts',
-                        attributes: ['id', 'name', 'created_at', 'updated_at'],
+                        as: "shifts",
+                        attributes: ["id", "name", "created_at", "updated_at"],
                         include: [
-                            { model: infrastructure_1.Ambulance, as: 'ambulance', attributes: ['id', 'number'] },
-                            { model: infrastructure_1.User, as: 'paramedical', attributes: ['id', 'name', 'lastname'] },
-                            { model: infrastructure_1.User, as: 'driver', attributes: ['id', 'name', 'lastname'] },
-                            { model: infrastructure_1.ChecklistAmbulance, as: 'checklistAmbulance' },
-                            { model: infrastructure_1.ChecklistSupply, as: 'checklistSupplies' },
-                        ]
+                            {
+                                model: infrastructure_1.Ambulance,
+                                as: "ambulance",
+                                attributes: ["id", "number"],
+                            },
+                            {
+                                model: infrastructure_1.User,
+                                as: "paramedical",
+                                attributes: ["id", "name", "lastname"],
+                            },
+                            {
+                                model: infrastructure_1.User,
+                                as: "driver",
+                                attributes: ["id", "name", "lastname"],
+                            },
+                            { model: infrastructure_1.ChecklistAmbulance, as: "checklistAmbulance" },
+                            { model: infrastructure_1.ChecklistSupply, as: "checklistSupplies" },
+                        ],
                     },
                 ],
-            })
-            : guards = await infrastructure_1.Guard.findAll({
-                attributes: ['id', 'date', 'state', 'created_at', 'updated_at'],
+            }))
+            : (guards = await infrastructure_1.Guard.findAll({
+                attributes: ["id", "date", "state", "created_at", "updated_at"],
                 include: [
-                    { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
-                    { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                    {
+                        model: infrastructure_1.User,
+                        as: "guardChief",
+                        attributes: ["id", "name", "lastname", "email"],
+                    },
+                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
                 ],
-                limit: formatAmount
-            });
+                limit: formatAmount,
+            }));
         if (guards.length === 0)
             throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
         return {
             success: true,
-            data: guards
+            data: guards,
         };
     }
     async getOneGuard(id) {
         const guard = await infrastructure_1.Guard.findOne({
             where: { id },
             include: [
-                { model: infrastructure_1.User, as: 'guardChief', attributes: ['id', 'name', 'lastname', 'email'] },
-                { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                {
+                    model: infrastructure_1.User,
+                    as: "guardChief",
+                    attributes: ["id", "name", "lastname", "email"],
+                },
+                { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
             ],
-        })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!guard)
             throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
         const formatGuard = {
@@ -171,11 +210,11 @@ class GuardsService {
             delegation: {
                 id: guard.delegation?.id,
                 name: guard.delegation?.name,
-            }
+            },
         };
         return {
             success: true,
-            data: formatGuard
+            data: formatGuard,
         };
     }
 }

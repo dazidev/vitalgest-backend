@@ -25,14 +25,24 @@ class SupplyEntityDto {
         return true;
     }
     static create(object) {
-        const { category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId } = object;
+        const { category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId, } = object;
         const error = this.validateData(category, avaibleQuantity, expirationDate, measurementUnit, pharmacyId);
         if (!(error === true))
             return [error];
-        return [undefined, new SupplyEntityDto({ category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId })];
+        return [
+            undefined,
+            new SupplyEntityDto({
+                category,
+                specification,
+                avaibleQuantity,
+                expirationDate,
+                measurementUnit,
+                pharmacyId,
+            }),
+        ];
     }
     static edit(object) {
-        const { id, category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId } = object;
+        const { id, category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId, } = object;
         if (!id)
             return [domain_1.ERROR_CODES.MISSING_SUPPLY_ID];
         if (!infrastructure_1.regularExp.uuid.test(id))
@@ -40,7 +50,18 @@ class SupplyEntityDto {
         const error = this.validateData(category, avaibleQuantity, expirationDate, measurementUnit, pharmacyId);
         if (!(error === true))
             return [error];
-        return [undefined, new SupplyEntityDto({ id, category, specification, avaibleQuantity, expirationDate, measurementUnit, pharmacyId })];
+        return [
+            undefined,
+            new SupplyEntityDto({
+                id,
+                category,
+                specification,
+                avaibleQuantity,
+                expirationDate,
+                measurementUnit,
+                pharmacyId,
+            }),
+        ];
     }
     static id(object) {
         const { id } = object;

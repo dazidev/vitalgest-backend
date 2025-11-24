@@ -8,8 +8,8 @@ const infrastructure_1 = require("../../../infrastructure");
 const application_1 = require("../../../application");
 const domain_1 = require("../../../domain");
 const devRoutes = express_1.default.Router();
-devRoutes.post('/seed', 
-//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')], 
+devRoutes.post("/seed", 
+//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
 async (_req, res, next) => {
     try {
         const seed = await (0, infrastructure_1.createSeed)();
@@ -21,8 +21,8 @@ async (_req, res, next) => {
         return next(application_1.CustomError.badRequest(domain_1.ERROR_CODES.UNKNOWN_DB_ERROR));
     }
 });
-devRoutes.post('/seed-questions', 
-//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')], 
+devRoutes.post("/seed-questions", 
+//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
 async (_req, res, next) => {
     try {
         const seed = await (0, infrastructure_1.createQuestionsSeed)();

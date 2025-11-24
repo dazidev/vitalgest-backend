@@ -8,9 +8,9 @@ const multer_1 = __importDefault(require("multer"));
 const application_1 = require("../../application");
 const domain_1 = require("../../domain");
 exports.ALLOWED_MIME = new Set([
-    'image/jpeg',
-    'image/png',
-    'application/pdf',
+    "image/jpeg",
+    "image/png",
+    "application/pdf",
 ]);
 exports.upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
@@ -23,9 +23,9 @@ exports.upload = (0, multer_1.default)({
     },
 });
 exports.checklistGasFile = exports.upload.fields([
-    { name: 'gasFile', maxCount: 1 },
+    { name: "gasFile", maxCount: 1 },
 ]);
 exports.checklistSignFiles = exports.upload.fields([
-    { name: 'signOperatorFile', maxCount: 1 },
-    { name: 'signRecipientFile', maxCount: 1 },
+    { name: "signOperatorFile", maxCount: 1 },
+    { name: "signRecipientFile", maxCount: 1 },
 ]);

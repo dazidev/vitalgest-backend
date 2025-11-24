@@ -26,7 +26,10 @@ class GuardsEntityDto {
         if (!infrastructure_1.regularExp.uuid.test(delegationId))
             return [domain_1.ERROR_CODES.INVALID_DELEGATION_ID];
         const id = (0, uuid_1.v4)();
-        return [undefined, new GuardsEntityDto({ id, guardChief, date, delegationId })];
+        return [
+            undefined,
+            new GuardsEntityDto({ id, guardChief, date, delegationId }),
+        ];
     }
     static edit(object) {
         const { id, guardChief, date, delegationId, state } = object;
@@ -49,7 +52,10 @@ class GuardsEntityDto {
             return [domain_1.ERROR_CODES.INVALID_DELEGATION_ID];
         if (!state)
             return [domain_1.ERROR_CODES.MISSING_STATE];
-        return [undefined, new GuardsEntityDto({ id, guardChief, date, delegationId, state })];
+        return [
+            undefined,
+            new GuardsEntityDto({ id, guardChief, date, delegationId, state }),
+        ];
     }
     static delete(object) {
         const { id } = object;

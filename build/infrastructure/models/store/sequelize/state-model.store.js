@@ -5,12 +5,17 @@ const sequelize_adapter_1 = require("../../../config/sequelize.adapter");
 class State extends sequelize_1.Model {
 }
 State.init({
-    id: { type: sequelize_1.DataTypes.BIGINT.UNSIGNED, primaryKey: true, allowNull: false, autoIncrement: true },
+    id: {
+        type: sequelize_1.DataTypes.BIGINT.UNSIGNED,
+        primaryKey: true,
+        allowNull: false,
+        autoIncrement: true,
+    },
     name: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
 }, {
     sequelize: sequelize_adapter_1.sequelize,
-    modelName: 'State',
-    tableName: 'states',
+    modelName: "State",
+    tableName: "states",
     timestamps: true,
     underscored: true,
     // paranoid: true //* activa borrado lógico

@@ -14,7 +14,7 @@ class UserEntity {
         this.delegation_id = delegation_id;
     }
     static create(object) {
-        const { name, lastname, email, hashedPassword, role, position, delegation_id } = object;
+        const { name, lastname, email, hashedPassword, role, position, delegation_id, } = object;
         return new UserEntity(undefined, name, lastname, email, hashedPassword, undefined, role, position, delegation_id);
     }
     static payloadToken(object) {

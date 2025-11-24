@@ -7,7 +7,7 @@ class CheckListAmbulanceEntityDto {
     constructor(props) {
         Object.assign(this, props);
     }
-    static validateData(ambulanceId, shiftId, km) {
+    static validateData(ambulanceId, shiftId, km /*gasFile: File*/) {
         if (!ambulanceId)
             return domain_1.ERROR_CODES.MISSING_AMBULANCE_ID;
         if (!infrastructure_1.regularExp.uuid.test(ambulanceId))
@@ -36,11 +36,18 @@ class CheckListAmbulanceEntityDto {
       return true
     }*/
     static create(object) {
-        const { ambulanceId, shiftId, km, /*gasFile,*/ } = object;
-        const error = this.validateData(ambulanceId, shiftId, km);
+        const { ambulanceId, shiftId, km /*gasFile,*/ } = object;
+        const error = this.validateData(ambulanceId, shiftId, km /*gasFile*/);
         if (!(error === true))
             return [error];
-        return [undefined, new CheckListAmbulanceEntityDto({ ambulanceId, shiftId, km, /*gasFile,*/ })];
+        return [
+            undefined,
+            new CheckListAmbulanceEntityDto({
+                ambulanceId,
+                shiftId,
+                km /*gasFile,*/,
+            }),
+        ];
     }
     static sign(object) {
         const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } = object;
@@ -54,7 +61,14 @@ class CheckListAmbulanceEntityDto {
             return [domain_1.ERROR_CODES.INVALID_RECIPIENT_ID];
         /*const error = this.validateSign(signOperatorFile, signRecipientFile)
         if (!(error === true)) return [error]*/
-        return [undefined, new CheckListAmbulanceEntityDto({ id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes })];
+        return [
+            undefined,
+            new CheckListAmbulanceEntityDto({
+                id,
+                /*signOperatorFile, signRecipientFile,*/ recipientId,
+                notes,
+            }),
+        ];
     }
     /*static edit(object: {[key: string]: any}): [string?, CheckListAmbulanceEntityDto?] {
       const { id, ambulanceId, shiftId, km, /*gasFile,*/ /*signOperatorFile, signRecipientFile, notes } = object

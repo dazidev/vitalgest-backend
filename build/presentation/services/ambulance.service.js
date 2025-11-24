@@ -10,19 +10,23 @@ class AmbulancesService {
             throw domain_1.ERROR_CODES.AREAS_NOT_FOUND;
         return {
             success: true,
-            data: areas
+            data: areas,
         };
     }
     async createAmbulance(ambulanceEntityDto) {
         const { delegationId, number } = ambulanceEntityDto;
-        const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const existsDelegation = await infrastructure_1.Delegation.findOne({
+            where: { id: delegationId },
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!existsDelegation)
             throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
-        const exists = await infrastructure_1.Ambulance.findOne({ where: { number: number } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const exists = await infrastructure_1.Ambulance.findOne({ where: { number: number } }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (exists)
-            throw 'AMBULANCE_EXISTS';
+            throw "AMBULANCE_EXISTS";
         const ambulanceEntity = domain_1.AmbulanceEntity.create(ambulanceEntityDto);
         if (!ambulanceEntity)
             throw domain_1.ERROR_CODES.INSERT_FAILED;
@@ -42,17 +46,17 @@ class AmbulancesService {
                 brand: ambulance.brand,
                 model: ambulance.model,
                 delegation: {
-                    id: ambulance.delegation_id
-                }
+                    id: ambulance.delegation_id,
+                },
             };
             return {
                 success: true,
-                data: formatAmbulance
+                data: formatAmbulance,
             };
         }
         catch (error) {
             tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.INSERT_FAILED;
         }
@@ -62,8 +66,11 @@ class AmbulancesService {
         const exists = await infrastructure_1.Ambulance.findOne({ where: { id } });
         if (!exists)
             throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
-        const existsDelegation = await infrastructure_1.Delegation.findOne({ where: { id: delegationId } })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        const existsDelegation = await infrastructure_1.Delegation.findOne({
+            where: { id: delegationId },
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!existsDelegation)
             throw domain_1.ERROR_CODES.DELEGATION_NOT_FOUND;
         const ambulanceEntity = domain_1.AmbulanceEntity.edit(ambulanceEntityDto);
@@ -83,7 +90,7 @@ class AmbulancesService {
         }
         catch (error) {
             tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
@@ -97,23 +104,23 @@ class AmbulancesService {
     }
     async getAmbulances(amount) {
         let formatAmount;
-        if (!(amount === 'all'))
+        if (!(amount === "all"))
             formatAmount = parseInt(amount);
         else
             formatAmount = amount;
         let ambulances;
-        formatAmount === 'all'
-            ? ambulances = await infrastructure_1.Ambulance.findAll({
+        formatAmount === "all"
+            ? (ambulances = await infrastructure_1.Ambulance.findAll({
                 include: [
-                    { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
                 ],
-            })
-            : ambulances = await infrastructure_1.Ambulance.findAll({
+            }))
+            : (ambulances = await infrastructure_1.Ambulance.findAll({
                 include: [
-                    { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
                 ],
-                limit: formatAmount
-            });
+                limit: formatAmount,
+            }));
         if (ambulances.length === 0)
             throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
         const formatAmbulances = ambulances.map((ambulance) => ({
@@ -124,21 +131,22 @@ class AmbulancesService {
             delegation: {
                 id: ambulance.delegation?.id,
                 name: ambulance.delegation?.name,
-            }
+            },
         }));
         return {
             success: true,
-            data: formatAmbulances
+            data: formatAmbulances,
         };
     }
     async getOneAmbulance(id) {
         const ambulance = await infrastructure_1.Ambulance.findOne({
             where: { id },
             include: [
-                { model: infrastructure_1.Delegation, as: 'delegation', attributes: ['id', 'name'] },
+                { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
             ],
-        })
-            .catch(() => { throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR; });
+        }).catch(() => {
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        });
         if (!ambulance)
             throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
         const formatAmbulance = {
@@ -149,11 +157,11 @@ class AmbulancesService {
             delegation: {
                 id: ambulance.delegation?.id,
                 name: ambulance.delegation?.name,
-            }
+            },
         };
         return {
             success: true,
-            data: formatAmbulance
+            data: formatAmbulance,
         };
     }
     async addSupply(supplyAmbEntityDto) {
@@ -161,7 +169,10 @@ class AmbulancesService {
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const supplyInfo = await infrastructure_1.Supply.findOne({ where: { id: supplyId }, transaction: tx });
+            const supplyInfo = await infrastructure_1.Supply.findOne({
+                where: { id: supplyId },
+                transaction: tx,
+            });
             if (!supplyInfo)
                 throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
             if (Number(avaibleQuantity) > supplyInfo.avaible_quantity)
@@ -183,12 +194,12 @@ class AmbulancesService {
             await tx.commit();
             return {
                 success: true,
-                data: supplyAmb
+                data: supplyAmb,
             };
         }
         catch (error) {
             tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -198,7 +209,10 @@ class AmbulancesService {
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const supply = await infrastructure_1.SupplyAmbulance.findOne({ where: { id }, transaction: tx });
+            const supply = await infrastructure_1.SupplyAmbulance.findOne({
+                where: { id },
+                transaction: tx,
+            });
             if (!supply)
                 throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
             await infrastructure_1.SupplyAmbulance.update({
@@ -212,7 +226,7 @@ class AmbulancesService {
         }
         catch (error) {
             await tx?.rollback();
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -221,7 +235,7 @@ class AmbulancesService {
         const { id } = supplyAmbEntityDto;
         try {
             const supply = await infrastructure_1.SupplyAmbulance.findOne({
-                where: { id }
+                where: { id },
             });
             if (!supply)
                 throw domain_1.ERROR_CODES.SUPPLY_NOT_FOUND;
@@ -231,7 +245,7 @@ class AmbulancesService {
             return { success: true };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -241,16 +255,18 @@ class AmbulancesService {
             const pharmacy = infrastructure_1.Ambulance.findOne({ where: { id: ambulanceId } });
             if (!pharmacy)
                 throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
-            const supplies = await infrastructure_1.SupplyAmbulance.findAll({ where: { ambulance_id: ambulanceId } });
+            const supplies = await infrastructure_1.SupplyAmbulance.findAll({
+                where: { ambulance_id: ambulanceId },
+            });
             if (supplies.length === 0)
                 throw domain_1.ERROR_CODES.SUPPLIES_NOT_FOUND;
             return {
                 success: true,
-                data: supplies
+                data: supplies,
             };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }
@@ -263,11 +279,11 @@ class AmbulancesService {
                 throw domain_1.ERROR_CODES.SUPPLIES_NOT_FOUND;
             return {
                 success: true,
-                data: supply
+                data: supply,
             };
         }
         catch (error) {
-            if (typeof error === 'string')
+            if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
         }

@@ -14,5 +14,5 @@ exports.mysqlConfig = {
     user: process.env.USER_NAME,
     password: process.env.PASSWORD,
     database: process.env.DATABASE,
-    ssl: { minVersion: 'TLSv1.2' }, // conexion cifrada
+    ssl: { minVersion: "TLSv1.2" }, // conexion cifrada
 };

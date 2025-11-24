@@ -7,27 +7,20 @@ class CustomError extends Error {
         this.statusCode = statusCode;
         this.message = message;
     }
-    ;
     static badRequest(message) {
         return new CustomError(400, message);
     }
-    ;
     static unauthorized(message) {
         return new CustomError(401, message);
     }
-    ;
     static notFound(message) {
         return new CustomError(404, message);
     }
-    ;
     static internalServer(message) {
         return new CustomError(500, message);
     }
-    ;
     static tooManyRequests(message) {
         return new CustomError(429, message);
     }
-    ;
 }
 exports.CustomError = CustomError;
-;

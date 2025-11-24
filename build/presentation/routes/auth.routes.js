@@ -9,6 +9,6 @@ const auth_service_1 = require("../services/auth.service");
 const authRoutes = express_1.default.Router();
 const authService = new auth_service_1.AuthService();
 const controller = new auth_controller_1.AuthController(authService);
-authRoutes.post('/login/user', controller.loginUser.bind(controller));
-authRoutes.post('/refresh/token', controller.newAccessToken.bind(controller));
+authRoutes.post("/login/user", controller.loginUser.bind(controller));
+authRoutes.post("/refresh/token", controller.newAccessToken.bind(controller));
 exports.default = authRoutes;
