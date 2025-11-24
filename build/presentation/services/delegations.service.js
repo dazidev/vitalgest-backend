@@ -220,7 +220,7 @@ class DelegationsService {
         const formatDelegations = [delegation].map(mapDelegationRow);
         return {
             success: true,
-            data: formatDelegations,
+            data: formatDelegations[0],
         };
     }
 }
