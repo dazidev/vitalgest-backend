@@ -17,7 +17,10 @@ class AmbulanceEntityDto {
             return [domain_1.ERROR_CODES.MISSING_MODEL];
         if (!delegationId)
             return [domain_1.ERROR_CODES.MISSING_DELEGATION_ID];
-        return [undefined, new AmbulanceEntityDto({ number, brand, model, delegationId })];
+        return [
+            undefined,
+            new AmbulanceEntityDto({ number, brand, model, delegationId }),
+        ];
     }
     static edit(object) {
         const { id, number, brand, model, delegationId } = object;
@@ -33,7 +36,10 @@ class AmbulanceEntityDto {
             return [domain_1.ERROR_CODES.MISSING_MODEL];
         if (!delegationId)
             return [domain_1.ERROR_CODES.MISSING_DELEGATION_ID];
-        return [undefined, new AmbulanceEntityDto({ id, number, brand, model, delegationId })];
+        return [
+            undefined,
+            new AmbulanceEntityDto({ id, number, brand, model, delegationId }),
+        ];
     }
     static delete(object) {
         const { id } = object;

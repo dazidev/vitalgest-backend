@@ -47,38 +47,38 @@ const crypto_1 = require("crypto");
 const undici = __importStar(require("undici"));
 const WebFile = globalThis.File ?? undici.File;
 const MIME_EXT = {
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-    'application/pdf': 'pdf',
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "application/pdf": "pdf",
 };
 function sanitizeName(name) {
-    const base = path_1.default.basename(name || 'file').replace(/\s+/g, '-');
-    return base.replace(/[^a-zA-Z0-9._-]/g, '');
+    const base = path_1.default.basename(name || "file").replace(/\s+/g, "-");
+    return base.replace(/[^a-zA-Z0-9._-]/g, "");
 }
 function getExt(file) {
     const byMime = MIME_EXT[file.type];
     if (byMime)
         return byMime;
-    const fromName = path_1.default.extname(file.name).replace('.', '');
-    return fromName || 'bin';
+    const fromName = path_1.default.extname(file.name).replace(".", "");
+    return fromName || "bin";
 }
 async function ensureDir(dir) {
     await fs_1.promises.mkdir(dir, { recursive: true });
 }
-async function saveWebFile(file, baseDir = 'uploads', subDir) {
+async function saveWebFile(file, baseDir = "uploads", subDir) {
     if (!WebFile) {
-        throw new Error('File API no disponible. Usa Node >= 18 o undici con File.');
+        throw new Error("File API no disponible. Usa Node >= 18 o undici con File.");
     }
     if (!(file instanceof WebFile)) {
-        throw new Error('INVALID_FILE_OBJECT');
+        throw new Error("INVALID_FILE_OBJECT");
     }
     //* crea la carpeta
     const absBase = path_1.default.resolve(baseDir);
     await ensureDir(absBase);
     //* crea subcarpeta
     const now = new Date();
-    const defaultSub = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const defaultSub = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const relSub = subDir ?? defaultSub;
     const absDir = path_1.default.join(absBase, relSub);
     const relDir = path_1.default.join(baseDir, relSub);
@@ -88,23 +88,31 @@ async function saveWebFile(file, baseDir = 'uploads', subDir) {
     const safeOriginal = sanitizeName(file.name || `file.${ext}`);
     const uuid = (0, crypto_1.randomUUID)();
     const hasExt = path_1.default.extname(safeOriginal).toLowerCase() === `.${ext.toLowerCase()}`;
-    const filename = hasExt ? `${uuid}-${safeOriginal}` : `${uuid}-${safeOriginal}.${ext}`;
+    const filename = hasExt
+        ? `${uuid}-${safeOriginal}`
+        : `${uuid}-${safeOriginal}.${ext}`;
     //* conf para escribir el archivo
     const buffer = Buffer.from(await file.arrayBuffer());
     const absPath = path_1.default.join(absDir, filename);
     const relPath = path_1.default.join(relDir, filename);
     try {
-        await fs_1.promises.writeFile(absPath, buffer, { flag: 'wx' });
+        await fs_1.promises.writeFile(absPath, buffer, { flag: "wx" });
     }
     catch (e) {
-        if (e?.code !== 'EEXIST')
+        if (e?.code !== "EEXIST")
             throw e;
         //* reintento raro si colisiona el nombre
-        const retryName = `${(0, crypto_1.randomUUID)()}-${safeOriginal}${hasExt ? '' : `.${ext}`}`;
+        const retryName = `${(0, crypto_1.randomUUID)()}-${safeOriginal}${hasExt ? "" : `.${ext}`}`;
         const retryAbs = path_1.default.join(absDir, retryName);
         const retryRel = path_1.default.join(relDir, retryName);
-        await fs_1.promises.writeFile(retryAbs, buffer, { flag: 'wx' });
-        return { relPath: retryRel, absPath: retryAbs, size: buffer.length, mime: file.type, filename: retryName };
+        await fs_1.promises.writeFile(retryAbs, buffer, { flag: "wx" });
+        return {
+            relPath: retryRel,
+            absPath: retryAbs,
+            size: buffer.length,
+            mime: file.type,
+            filename: retryName,
+        };
     }
     return { relPath, absPath, size: buffer.length, mime: file.type, filename };
 }
@@ -113,28 +121,31 @@ function toWebFile(mf) {
     if (!mf)
         return undefined;
     if (!WebFile) {
-        throw new Error('File API no disponible. Usa Node >= 18 o undici con File.');
+        throw new Error("File API no disponible. Usa Node >= 18 o undici con File.");
     }
     const part = new Uint8Array(mf.buffer.length);
     part.set(mf.buffer);
     return new WebFile([part], mf.originalname, { type: mf.mimetype });
 }
-const ABS_UPLOADS_ROOT = path_1.default.resolve('uploads');
+const ABS_UPLOADS_ROOT = path_1.default.resolve("uploads");
 function relToAbs(relPath) {
-    const normalized = relPath.replace(/\\/g, '/');
-    const withoutPrefix = normalized.replace(/^uploads\//, '');
+    const normalized = relPath.replace(/\\/g, "/");
+    const withoutPrefix = normalized.replace(/^uploads\//, "");
     const abs = path_1.default.resolve(ABS_UPLOADS_ROOT, withoutPrefix);
     if (!abs.startsWith(ABS_UPLOADS_ROOT + path_1.default.sep)) {
-        throw new Error('INVALID_PATH_TRAVERSAL');
+        throw new Error("INVALID_PATH_TRAVERSAL");
     }
     return abs;
 }
 function absToRel(absPath) {
-    const relFromRoot = path_1.default.relative(ABS_UPLOADS_ROOT, absPath).split(path_1.default.sep).join('/');
+    const relFromRoot = path_1.default
+        .relative(ABS_UPLOADS_ROOT, absPath)
+        .split(path_1.default.sep)
+        .join("/");
     return `uploads/${relFromRoot}`;
 }
 //* crea la carpeta raíz de uploads al iniciar el api
-async function ensureUploadsRoot(baseDir = 'uploads') {
+async function ensureUploadsRoot(baseDir = "uploads") {
     const absBase = path_1.default.resolve(baseDir);
     await ensureDir(absBase);
     return absBase;

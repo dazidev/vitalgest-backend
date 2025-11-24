@@ -1,8 +1,8 @@
-import mysql from 'mysql2/promise';
+import mysql from "mysql2/promise";
 
-import { config } from 'dotenv';
+import { config } from "dotenv";
 
-config()
+config();
 
 export const mysqlConfig: mysql.ConnectionOptions = {
   host: process.env.HOST,
@@ -10,7 +10,7 @@ export const mysqlConfig: mysql.ConnectionOptions = {
   user: process.env.USER_NAME,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
-  ssl: { minVersion: 'TLSv1.2' }, // conexion cifrada
-}
+  ssl: { minVersion: "TLSv1.2" }, // conexion cifrada
+};
 
-export { mysql }
+export { mysql };

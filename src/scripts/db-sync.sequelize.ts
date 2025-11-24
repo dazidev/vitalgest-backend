@@ -1,15 +1,17 @@
-import { sequelize } from '../infrastructure';
-import '../infrastructure/models/index'; // importa todos tus modelos
+import { sequelize } from "../infrastructure";
+import "../infrastructure/models/index"; // importa todos tus modelos
 // o un index que importe todos
 
 async function run() {
   await sequelize.authenticate();
-  await sequelize.drop(); 
+  await sequelize.drop();
   await sequelize.sync({ force: true });
-  console.log('Sync OK');
+  console.log("Sync OK");
   await sequelize.close();
 }
-run().catch((e) => { console.error(e); process.exit(1); });
-
+run().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
 
 //await sequelize.sync({ alter: true }); // en dev; en prod evita alter

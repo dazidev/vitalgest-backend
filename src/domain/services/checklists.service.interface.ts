@@ -1,14 +1,39 @@
-import { CheckListAmbulanceEntityDto } from "../../application";
-import { RequestAnswerInterface } from "../../infrastructure";
-
+import {
+  CheckListAmbulanceEntityDto,
+  CheckListSupplyEntityDto,
+} from "../../application";
+import {
+  RequestAnswerInterface,
+  RequestAnswerSupInterface,
+} from "../../infrastructure";
 
 export interface ChecklistsServiceInterface {
-  getAmbQuestions (): Promise<object>;
-  getAmbQuestionPerCategory (category: number): Promise<object>;
+  //* Checklist ambulances
+  getAmbQuestions(): Promise<object>;
+  getAmbQuestionPerCategory(category: number): Promise<object>;
 
-  createAmbChecklist (checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto): void
-  signAmbChecklist (checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto): void
-  deleteAmbChecklist (checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto): void
-  getAmbChecklist (id: string): void
-  putAmbAnswers (object: RequestAnswerInterface): void
-};
+  createAmbChecklist(
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+  ): Promise<object>;
+  signAmbChecklist(
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+  ): Promise<object>;
+  deleteAmbChecklist(
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+  ): Promise<object>;
+  getAmbChecklist(id: string): Promise<object>;
+  putAmbAnswers(object: RequestAnswerInterface): Promise<object>;
+
+  //* Checklist supplies
+  createSupChecklist(
+    checkListSupplyEntityDto: CheckListSupplyEntityDto
+  ): Promise<object>;
+  signSupChecklist(
+    checkListSupplyEntityDto: CheckListSupplyEntityDto
+  ): Promise<object>;
+  deleteSupChecklist(
+    checkListSupplyEntityDto: CheckListSupplyEntityDto
+  ): Promise<object>;
+  getSupChecklist(id: string): Promise<object>;
+  putSupAnswers(object: RequestAnswerSupInterface): Promise<object>;
+}

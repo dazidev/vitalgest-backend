@@ -15,38 +15,38 @@ const createSeed = async () => {
         tx = await sequelize_adapter_1.sequelize.transaction();
         //* Estados
         const states = await models_store_1.State.bulkCreate([
-            { name: 'Jalisco' },
-            { name: 'San Luis Potosí' },
-            { name: 'Guanajuato' },
+            { name: "Jalisco" },
+            { name: "San Luis Potosí" },
+            { name: "Guanajuato" },
         ], { transaction: tx });
         //* Municipios
         await states.map(async (state) => {
-            if (state.name === 'Jalisco') {
+            if (state.name === "Jalisco") {
                 await models_store_1.Municipality.bulkCreate([
-                    { name: 'Ameca', state_id: state.id },
-                    { name: 'Tala', state_id: state.id },
-                    { name: 'Guadalajara', state_id: state.id }
+                    { name: "Ameca", state_id: state.id },
+                    { name: "Tala", state_id: state.id },
+                    { name: "Guadalajara", state_id: state.id },
                 ], { transaction: tx });
             }
-            else if (state.name === 'San Luis Potosí') {
+            else if (state.name === "San Luis Potosí") {
                 await models_store_1.Municipality.bulkCreate([
-                    { name: 'San Luis Potosí', state_id: state.id },
-                    { name: 'Rio verde', state_id: state.id },
-                    { name: 'Matehuala', state_id: state.id }
+                    { name: "San Luis Potosí", state_id: state.id },
+                    { name: "Rio verde", state_id: state.id },
+                    { name: "Matehuala", state_id: state.id },
                 ], { transaction: tx });
             }
-            else if (state.name === 'Guanajuato') {
+            else if (state.name === "Guanajuato") {
                 await models_store_1.Municipality.bulkCreate([
-                    { name: 'Leon', state_id: state.id },
-                    { name: 'Abasolo', state_id: state.id },
-                    { name: 'San Miguel de Allende', state_id: state.id }
+                    { name: "Leon", state_id: state.id },
+                    { name: "Abasolo", state_id: state.id },
+                    { name: "San Miguel de Allende", state_id: state.id },
                 ], { transaction: tx });
             }
         });
         const municipality = await models_store_1.Municipality.findOne({
-            where: { name: 'Ameca' },
+            where: { name: "Ameca" },
             transaction: tx,
-            include: { model: models_store_1.State, as: 'state', attributes: ['name'] }
+            include: { model: models_store_1.State, as: "state", attributes: ["name"] },
         });
         //* Delegación semilla
         const delegation = await models_store_1.Delegation.create({
@@ -54,54 +54,58 @@ const createSeed = async () => {
             municipality_id: municipality?.id,
         }, { transaction: tx });
         //* Pharmacia
-        await models_store_1.Pharmacy.create({ delegation_id: delegation.id }, { transaction: tx });
+        const pharmacy = await models_store_1.Pharmacy.create({ delegation_id: delegation.id }, { transaction: tx });
         //* Usuarios semilla
         const password = await bcrypt_1.default.hash(process.env.USER_PASSWORD_SEED, 10);
         await models_store_1.User.create({
-            name: 'Admin',
-            lastname: 'Seed',
-            email: 'adminseed@vitalgest.mx',
+            // administrador
+            name: "Admin",
+            lastname: "Seed",
+            email: "adminseed@vitalgest.mx",
             password: password,
             status: true,
-            role: 'general_admin',
-            position: 'developer',
+            role: "general_admin",
+            position: "developer",
             delegation_id: delegation.id,
         }, { transaction: tx });
         const guardChief = await models_store_1.User.create({
-            name: 'Jefe Guardia',
-            lastname: 'Seed',
-            email: 'jefeguardiaseed@vitalgest.mx',
+            // Jefe de guardia
+            name: "Jefe Guardia",
+            lastname: "Seed",
+            email: "jefeguardiaseed@vitalgest.mx",
             password: password,
             status: true,
-            role: 'head_guard',
-            position: 'Jefe de guardia',
+            role: "head_guard",
+            position: "Jefe de guardia",
             delegation_id: delegation.id,
         }, { transaction: tx });
         const paramedical = await models_store_1.User.create({
-            name: 'Paramedico',
-            lastname: 'Seed',
-            email: 'paramedicoseed@vitalgest.mx',
+            // Paramedico
+            name: "Paramedico",
+            lastname: "Seed",
+            email: "paramedicoseed@vitalgest.mx",
             password: password,
             status: true,
-            role: 'paramedical',
-            position: 'Paramedico',
+            role: "paramedical",
+            position: "Paramedico",
             delegation_id: delegation.id,
         }, { transaction: tx });
         const driver = await models_store_1.User.create({
-            name: 'Chofer',
-            lastname: 'Seed',
-            email: 'choferseed@vitalgest.mx',
+            // Chofer
+            name: "Chofer",
+            lastname: "Seed",
+            email: "choferseed@vitalgest.mx",
             password: password,
             status: true,
-            role: 'vehicle_operator',
-            position: 'Chofer',
+            role: "vehicle_operator",
+            position: "Chofer",
             delegation_id: delegation.id,
         }, { transaction: tx });
         //* Ambulancia semilla
         const ambulance = await models_store_1.Ambulance.create({
-            number: 'DF434F7',
-            model: '2018',
-            brand: 'Mercedez Benz',
+            number: "DF434F7",
+            model: "2018",
+            brand: "Mercedez Benz",
             delegation_id: delegation.id,
         }, { transaction: tx });
         //* Guardia semilla
@@ -109,7 +113,7 @@ const createSeed = async () => {
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
         const guard = await models_store_1.Guard.create({
             date: startOfDay,
-            state: 'Nueva',
+            state: "Nueva",
             guard_chief: guardChief.id,
             delegation_id: delegation.id,
         }, { transaction: tx });
@@ -119,52 +123,130 @@ const createSeed = async () => {
             ambulance_id: ambulance.id,
             guard_id: guard.id,
             paramedical_id: paramedical.id,
-            driver_id: driver.id
+            driver_id: driver.id,
         }, { transaction: tx });
         //* Areas de ambulancia semilla
-        await models_store_1.AreaAmbulance.bulkCreate([
+        const areas = await models_store_1.AreaAmbulance.bulkCreate([
             {
                 id: 1,
-                name: 'EQUIPO DE VÍAS AÉREAS',
-                section: 'GABINETE 1',
-                order: 1
+                name: "EQUIPO DE VÍAS AÉREAS",
+                section: "GABINETE 1",
+                order: 1,
             },
             {
                 id: 2,
-                name: 'EQUIPO DE CIRCULACIÓN Y CONTROL DE HEMORRAGIAS',
-                section: 'GABINETE 2',
-                order: 2
+                name: "EQUIPO DE CIRCULACIÓN Y CONTROL DE HEMORRAGIAS",
+                section: "GABINETE 2",
+                order: 2,
             },
             {
                 id: 3,
-                name: 'MATERIAL PARTO DE EMERGANCIA',
-                section: 'GABINETE 3',
-                order: 3
+                name: "MATERIAL PARTO DE EMERGANCIA",
+                section: "GABINETE 3",
+                order: 3,
             },
             {
                 id: 4,
-                name: 'OTROS ELEMENTOS',
-                section: 'GABINETE 4',
-                order: 4
+                name: "OTROS ELEMENTOS",
+                section: "GABINETE 4",
+                order: 4,
             },
             {
                 id: 5,
-                name: 'SOLUCIONES Y MEDICAMENTOS',
-                section: 'GABINETE 5',
-                order: 5
+                name: "SOLUCIONES Y MEDICAMENTOS",
+                section: "GABINETE 5",
+                order: 5,
             },
             {
                 id: 6,
-                name: 'CAMAPEL',
-                section: 'VARIOS',
-                order: 6
+                name: "CAMAPEL",
+                section: "VARIOS",
+                order: 6,
             },
             {
                 id: 7,
-                name: 'BOTIQUIN',
-                section: 'VARIOS',
-                order: 7
-            }
+                name: "BOTIQUIN",
+                section: "VARIOS",
+                order: 7,
+            },
+        ], { transaction: tx });
+        //* Suministros semilla
+        const supplies = await models_store_1.Supply.bulkCreate([
+            {
+                pharmacy_id: pharmacy.id,
+                category: "Estetoscopio",
+                specification: "Pediatrico",
+                avaible_quantity: 10,
+                expiration_date: new Date("2027-10-10"),
+                measurement_unit: "unit",
+            },
+            {
+                pharmacy_id: pharmacy.id,
+                category: "Esfigmomanometro",
+                specification: "Adulto",
+                avaible_quantity: 10,
+                expiration_date: new Date("2027-10-10"),
+                measurement_unit: "unit",
+            },
+            {
+                pharmacy_id: pharmacy.id,
+                category: "Bolsa de válvula - mascarilla (BVM)",
+                specification: "Adulto",
+                avaible_quantity: 10,
+                expiration_date: new Date("2027-10-10"),
+                measurement_unit: "unit",
+            },
+            {
+                pharmacy_id: pharmacy.id,
+                category: "Mascarilla con reservorio",
+                specification: "Adulto",
+                avaible_quantity: 10,
+                expiration_date: new Date("2027-10-10"),
+                measurement_unit: "unit",
+            },
+        ], { transaction: tx });
+        //* Suministros a ambulancia
+        await models_store_1.SupplyAmbulance.bulkCreate([
+            {
+                ambulance_id: ambulance.id,
+                category: supplies[0].category,
+                specification: supplies[0].specification,
+                avaible_quantity: 5,
+                min_quantity: 3,
+                area_id: areas[0].id,
+                expiration_date: supplies[0].expiration_date,
+                measurement_unit: supplies[0].measurement_unit,
+            },
+            {
+                ambulance_id: ambulance.id,
+                category: supplies[1].category,
+                specification: supplies[1].specification,
+                avaible_quantity: 5,
+                min_quantity: 2,
+                area_id: areas[1].id,
+                expiration_date: supplies[1].expiration_date,
+                measurement_unit: supplies[1].measurement_unit,
+            },
+            {
+                ambulance_id: ambulance.id,
+                category: supplies[2].category,
+                specification: supplies[2].specification,
+                avaible_quantity: 4,
+                min_quantity: 2,
+                area_id: areas[2].id,
+                expiration_date: supplies[2].expiration_date,
+                measurement_unit: supplies[2].measurement_unit,
+            },
+            {
+                ambulance_id: ambulance.id,
+                category: supplies[3].category,
+                specification: supplies[3].specification,
+                avaible_quantity: 3,
+                min_quantity: 1,
+                area_id: areas[3].id,
+                expiration_date: supplies[3].expiration_date,
+                measurement_unit: supplies[3].measurement_unit,
+            },
         ], { transaction: tx });
         await tx.commit();
         return { success: true };

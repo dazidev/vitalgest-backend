@@ -5,9 +5,14 @@ const sequelize_adapter_1 = require("../../../../config/sequelize.adapter");
 class SupplyAmbulance extends sequelize_1.Model {
 }
 SupplyAmbulance.init({
-    id: { type: sequelize_1.DataTypes.UUID, primaryKey: true, defaultValue: sequelize_1.UUIDV4, allowNull: false },
+    id: {
+        type: sequelize_1.DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: sequelize_1.UUIDV4,
+        allowNull: false,
+    },
     category: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-    specification: { type: sequelize_1.DataTypes.STRING, allowNull: false },
+    specification: { type: sequelize_1.DataTypes.STRING, allowNull: true },
     avaible_quantity: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
     min_quantity: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
     expiration_date: { type: sequelize_1.DataTypes.DATE, allowNull: false },
@@ -15,21 +20,21 @@ SupplyAmbulance.init({
     area_id: {
         type: sequelize_1.DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
-        references: { model: 'areas_ambulance', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        references: { model: "areas_ambulance", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
     },
     ambulance_id: {
         type: sequelize_1.DataTypes.UUID,
         allowNull: false,
-        references: { model: 'ambulances', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        references: { model: "ambulances", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
     },
 }, {
     sequelize: sequelize_adapter_1.sequelize,
-    modelName: 'SupplyAmbulance',
-    tableName: 'supplies_ambulances',
+    modelName: "SupplyAmbulance",
+    tableName: "supplies_ambulances",
     timestamps: true,
     underscored: true,
     // paranoid: true //* activa borrado lógico

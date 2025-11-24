@@ -21,7 +21,8 @@ class AuthController {
         const [error, userEntityDto] = application_1.UserEntityDto.login(req.body);
         if (error)
             throw application_1.CustomError.badRequest(error);
-        this.authService.loginUser(userEntityDto)
+        this.authService
+            .loginUser(userEntityDto)
             .then((response) => {
             const { refreshToken, accessToken, ...dataResponse } = response;
             (0, infrastructure_1.setRefreshCookie)(res, refreshToken);
@@ -34,13 +35,14 @@ class AuthController {
         const refreshTokenReq = req.signedCookies?.[infrastructure_1.REFRESH_COOKIE_NAME];
         if (!refreshTokenReq)
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.NO_TOKEN_PROVIDED);
-        this.authService.newAccessToken(refreshTokenReq)
+        this.authService
+            .newAccessToken(refreshTokenReq)
             .then((response) => {
             const { accessToken, refreshToken } = response;
             (0, infrastructure_1.setRefreshCookie)(res, refreshToken);
             (0, infrastructure_1.setAccessCookie)(res, accessToken);
             res.json({
-                success: "true"
+                success: "true",
             });
         })
             .catch((error) => next(this.handleError(error)));

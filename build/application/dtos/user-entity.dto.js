@@ -7,36 +7,58 @@ class UserEntityDto {
     constructor(props) {
         Object.assign(this, props);
     }
-    ;
     static create(object) {
         const { name, lastname, email, password, role, position, delegationId } = object;
-        const validate = this.validateData(object, 'create');
+        const validate = this.validateData(object, "create");
         if (validate !== null)
             return validate;
-        return [undefined, new UserEntityDto({ name, lastname, email: email.toLowerCase(), password, role, position, delegationId })];
+        return [
+            undefined,
+            new UserEntityDto({
+                name,
+                lastname,
+                email: email.toLowerCase(),
+                password,
+                role,
+                position,
+                delegationId,
+            }),
+        ];
     }
-    ;
     static edit(object) {
         const { id, name, lastname, email, role, position, delegationId, status } = object;
-        const validate = this.validateData(object, 'edit');
+        const validate = this.validateData(object, "edit");
         if (validate !== null)
             return validate;
-        return [undefined, new UserEntityDto({ id, name, lastname, email: email.toLowerCase(), role, position, delegationId, status })];
+        return [
+            undefined,
+            new UserEntityDto({
+                id,
+                name,
+                lastname,
+                email: email.toLowerCase(),
+                role,
+                position,
+                delegationId,
+                status,
+            }),
+        ];
     }
-    ;
     static login(object) {
         const { email, password } = object;
-        const validate = this.validateData(object, 'password');
+        const validate = this.validateData(object, "password");
         if (validate !== null)
             return validate;
-        return [undefined, new UserEntityDto({ email: email.toLowerCase(), password })];
+        return [
+            undefined,
+            new UserEntityDto({ email: email.toLowerCase(), password }),
+        ];
     }
-    ;
 }
 exports.UserEntityDto = UserEntityDto;
 UserEntityDto.validateData = (object, type) => {
-    const { id, name, lastname, email, password, role, position, delegationId, status } = object;
-    if (type === 'password') {
+    const { id, name, lastname, email, password, role, position, delegationId, status, } = object;
+    if (type === "password") {
         if (!email)
             return [domain_1.ERROR_CODES.MISSING_EMAIL];
         if (!infrastructure_1.regularExp.email.test(email))
@@ -47,7 +69,7 @@ UserEntityDto.validateData = (object, type) => {
             return [domain_1.ERROR_CODES.INVALID_PASSWORD_FORMAT];
         return null;
     }
-    if (type === 'edit') {
+    if (type === "edit") {
         if (!id)
             return [domain_1.ERROR_CODES.MISSING_USER_ID];
         if (!status)
@@ -61,7 +83,7 @@ UserEntityDto.validateData = (object, type) => {
         return [domain_1.ERROR_CODES.MISSING_EMAIL];
     if (!infrastructure_1.regularExp.email.test(email))
         return [domain_1.ERROR_CODES.INVALID_EMAIL_FORMAT];
-    if (type === 'create') {
+    if (type === "create") {
         if (!password)
             return [domain_1.ERROR_CODES.MISSING_PASSWORD];
         if (!infrastructure_1.regularExp.password.test(password))
@@ -77,4 +99,3 @@ UserEntityDto.validateData = (object, type) => {
         return [domain_1.ERROR_CODES.MISSING_DELEGATION_ID];
     return null;
 };
-;

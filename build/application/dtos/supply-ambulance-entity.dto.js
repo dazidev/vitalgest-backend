@@ -33,7 +33,16 @@ class SupplyAmbEntityDto {
         const error = this.validateData(avaibleQuantity, minQuantity, areaId, ambulanceId);
         if (!(error === true))
             return [error];
-        return [undefined, new SupplyAmbEntityDto({ avaibleQuantity, minQuantity, areaId, supplyId, ambulanceId })];
+        return [
+            undefined,
+            new SupplyAmbEntityDto({
+                avaibleQuantity,
+                minQuantity,
+                areaId,
+                supplyId,
+                ambulanceId,
+            }),
+        ];
     }
     static edit(object) {
         const { id, avaibleQuantity, minQuantity, areaId, ambulanceId } = object;
@@ -44,7 +53,16 @@ class SupplyAmbEntityDto {
         const error = this.validateData(avaibleQuantity, minQuantity, areaId, ambulanceId);
         if (!(error === true))
             return [error];
-        return [undefined, new SupplyAmbEntityDto({ id, avaibleQuantity, minQuantity, areaId, ambulanceId })];
+        return [
+            undefined,
+            new SupplyAmbEntityDto({
+                id,
+                avaibleQuantity,
+                minQuantity,
+                areaId,
+                ambulanceId,
+            }),
+        ];
     }
     static id(object) {
         const { id } = object;

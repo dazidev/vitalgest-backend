@@ -1,67 +1,51 @@
-import express from 'express';
-import { AmbulancesService } from '../services/ambulance.service';
-import { AmbulancesController } from '../controllers/ambulances.controller';
-
+import express from "express";
+import { AmbulancesService } from "../services/ambulance.service";
+import { AmbulancesController } from "../controllers/ambulances.controller";
 
 const AmbulanceRoutes = express.Router();
 
 const ambulanceService = new AmbulancesService();
 const controller = new AmbulancesController(ambulanceService);
 
-AmbulanceRoutes.post(
-  '/create',
-  controller.createAmbulance.bind(controller)
-);
+AmbulanceRoutes.post("/create", controller.createAmbulance.bind(controller));
 
-AmbulanceRoutes.put(
-  '/edit/:id',
-  controller.editAmbulance.bind(controller)
-);
+AmbulanceRoutes.put("/edit/:id", controller.editAmbulance.bind(controller));
 
 AmbulanceRoutes.delete(
-  '/delete/:id',
+  "/delete/:id",
   controller.deleteAmbulance.bind(controller)
 );
 
-AmbulanceRoutes.get(
-  '/many/:amount',
-  controller.getAmbulances.bind(controller)
-);
+AmbulanceRoutes.get("/many/:amount", controller.getAmbulances.bind(controller));
 
-AmbulanceRoutes.get(
-  '/one/:id',
-  controller.getOneAmbulance.bind(controller)
-);
+AmbulanceRoutes.get("/one/:id", controller.getOneAmbulance.bind(controller));
 
 //* SUPPLIES
-AmbulanceRoutes.get(
-  '/areas',
-  controller.getAreas.bind(controller)
-);
+AmbulanceRoutes.get("/areas", controller.getAreas.bind(controller));
 
 AmbulanceRoutes.post(
-  '/supplies/create/:id',
+  "/supplies/create/:id",
   controller.addSupply.bind(controller)
 );
 
 AmbulanceRoutes.put(
-  '/supplies/edit/:id',
+  "/supplies/edit/:id",
   controller.editSupply.bind(controller)
 );
 
 AmbulanceRoutes.delete(
-  '/supplies/delete/:id',
+  "/supplies/delete/:id",
   controller.deleteSupply.bind(controller)
 );
 
 AmbulanceRoutes.get(
-  '/supplies/:id',
+  "/supplies/:id",
   controller.getAmbSupplies.bind(controller)
 );
 
 AmbulanceRoutes.get(
-  '/supplies/one/:id',
+  "/supplies/one/:id",
   controller.getOneAmbSupply.bind(controller)
-)
+);
 
 export default AmbulanceRoutes;

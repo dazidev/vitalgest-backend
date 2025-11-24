@@ -1,4 +1,3 @@
-
 /**
  * @openapi
  * /api/checklists/ambulance/questions:
@@ -20,7 +19,7 @@
  *               response:
  *                 value:
  *                   success: true
- *                   data: 
+ *                   data:
  *                     - id: "43a06473-2862-4d1a-90af-6051f20d8509"
  *                       question: "Limpieza de la unidad"
  *                       name_category: "Apariencia general"
@@ -100,7 +99,7 @@
  *               response:
  *                 value:
  *                   success: true
- *                   data: 
+ *                   data:
  *                     id: "43a06473-2862-4d1a-90af-6051f20d8509"
  *                     ambulance_id: "43a06473-2862-4d1a-90af-6051f20d8509"
  *                     shift_id: "43a06473-2862-4d1a-90af-6051f20d8509"
@@ -401,5 +400,338 @@
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
 
+/**
+ * @openapi
+ * /api/checklists/supply/create:
+ *   post:
+ *     summary: Crear checklist de suministros
+ *     tags: ['ENDPOINTS Gestión de Checklists']
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - shiftId
+ *             properties:
+ *               shiftId:
+ *                 type: string
+ *                 format: uuid
+ *           examples:
+ *             request:
+ *               value:
+ *                 shiftId: "b3a12058-7e5b-4edc-a01c-f0bdd1f38720"
+ *     responses:
+ *       201:
+ *         description: Checklist creado
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     id: "d204151f-804b-4031-ad2d-d1db962abf63"
+ *                     sign_paramedical_path: null
+ *                     sign_recipient_path: null
+ *                     shift_id: "b3a12058-7e5b-4edc-a01c-f0bdd1f38720"
+ *                     updatedAt: "2025-11-24T01:31:52.287Z"
+ *                     createdAt: "2025-11-24T01:31:52.287Z"
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
 
+/**
+ * @openapi
+ * /api/checklists/supply/delete/{id}:
+ *   delete:
+ *     summary: Eliminar checklist de suministros
+ *     tags: ['ENDPOINTS Gestión de Checklists']
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID del checklist de suministros
+ *     responses:
+ *       200:
+ *         description: Checklist eliminado correctamente
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       404:
+ *         description: Checklist no encontrado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
 
+/**
+ * @openapi
+ * /api/checklists/supply/{id}/sign:
+ *   put:
+ *     summary: Firmar checklist de suministros
+ *     tags: ['ENDPOINTS Gestión de Checklists']
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - recipientId
+ *             properties:
+ *               recipientId:
+ *                 type: string
+ *                 format: uuid
+ *           examples:
+ *             request:
+ *               value:
+ *                 recipientId: "ad39232c-f896-4f9b-a11e-ffe4668ba430"
+ *                 notes: "Aca una nota en texto"
+ *     responses:
+ *       200:
+ *         description: Checklist firmado correctamente
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       404:
+ *         description: Checklist no encontrado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+
+/**
+ * @openapi
+ * /api/checklists/supply/answers/{id}:
+ *   put:
+ *     summary: Guardar respuestas del checklist de suministros
+ *     tags: ['ENDPOINTS Gestión de Checklists']
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID del checklist de suministros
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - answers
+ *             properties:
+ *               answers:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - supplyId
+ *                     - requiredQuantity
+ *                   properties:
+ *                     supplyId:
+ *                       type: string
+ *                       format: uuid
+ *                     requiredQuantity:
+ *                       type: integer
+ *                       minimum: 0
+ *           examples:
+ *             request:
+ *               value:
+ *                 answers:
+ *                   - supplyId: "1d5438d6-7dbd-4766-bdf8-350be2adcb55"
+ *                     requiredQuantity: 1
+ *                   - supplyId: "c2c33dce-62c7-4be5-b277-d9cfae284d36"
+ *                     requiredQuantity: 1
+ *                   - supplyId: "e0d91e0c-15eb-470f-8664-afa7298568db"
+ *                     requiredQuantity: 0
+ *     responses:
+ *       200:
+ *         description: Respuestas guardadas correctamente
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       404:
+ *         description: Checklist no encontrado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+
+/**
+ * @openapi
+ * /api/checklists/supply/{id}:
+ *   get:
+ *     summary: Obtener checklist de suministros por ID
+ *     tags: ['ENDPOINTS Gestión de Checklists']
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID del checklist de suministros
+ *     responses:
+ *       200:
+ *         description: Checklist encontrado
+ *         content:
+ *           application/json:
+ *             examples:
+ *               response:
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                     shift_id: "65dbad2f-f7af-4c2e-8550-0d74050ae390"
+ *                     sign_paramedical_path: null
+ *                     recipient_id: "64059220-ea46-42ca-acc8-ad9dd79b4fad"
+ *                     sign_recipient_path: null
+ *                     notes: "Esto es una nota"
+ *                     createdAt: "2025-11-24T16:35:15.000Z"
+ *                     updatedAt: "2025-11-24T16:42:44.000Z"
+ *                     ambulance_id: null
+ *                     answers:
+ *                       - id: "c178669a-550f-4fcc-83ca-85297723e7bd"
+ *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                         category: "Estetoscopio"
+ *                         specification: "Pediatrico"
+ *                         avaible_quantity: 3
+ *                         min_quantity: 3
+ *                         required_quantity: 0
+ *                         measurement_unit: "unit"
+ *                         area_id: 1
+ *                         createdAt: "2025-11-24T16:45:41.000Z"
+ *                         updatedAt: "2025-11-24T16:45:41.000Z"
+ *                         area:
+ *                           name: "EQUIPO DE VÍAS AÉREAS"
+ *                           section: "GABINETE 1"
+ *                           order: 1
+ *                       - id: "107bf868-3e2b-44c7-8136-c913f2893412"
+ *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                         category: "Esfigmomanometro"
+ *                         specification: "Adulto"
+ *                         avaible_quantity: 0
+ *                         min_quantity: 2
+ *                         required_quantity: 2
+ *                         measurement_unit: "unit"
+ *                         area_id: 2
+ *                         createdAt: "2025-11-24T16:45:41.000Z"
+ *                         updatedAt: "2025-11-24T16:45:41.000Z"
+ *                         area:
+ *                           name: "EQUIPO DE CIRCULACIÓN Y CONTROL DE HEMORRAGIAS"
+ *                           section: "GABINETE 2"
+ *                           order: 2
+ *                       - id: "dc5f3d9e-b190-43db-848d-67dbfd772011"
+ *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                         category: "Bolsa de válvula - mascarilla (BVM)"
+ *                         specification: "Adulto"
+ *                         avaible_quantity: 1
+ *                         min_quantity: 2
+ *                         required_quantity: 1
+ *                         measurement_unit: "unit"
+ *                         area_id: 3
+ *                         createdAt: "2025-11-24T16:45:41.000Z"
+ *                         updatedAt: "2025-11-24T16:45:41.000Z"
+ *                         area:
+ *                           name: "MATERIAL PARTO DE EMERGANCIA"
+ *                           section: "GABINETE 3"
+ *                           order: 3
+ *                       - id: "4e0e0a65-e034-4824-9687-e2e48db5629a"
+ *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                         category: "Mascarilla con reservorio"
+ *                         specification: "Adulto"
+ *                         avaible_quantity: 0
+ *                         min_quantity: 1
+ *                         required_quantity: 1
+ *                         measurement_unit: "unit"
+ *                         area_id: 4
+ *                         createdAt: "2025-11-24T16:45:40.000Z"
+ *                         updatedAt: "2025-11-24T16:45:40.000Z"
+ *                         area:
+ *                           name: "OTROS ELEMENTOS"
+ *                           section: "GABINETE 4"
+ *                           order: 4
+ *       400:
+ *         description: Datos inválidos
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       404:
+ *         description: Checklist no encontrado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */

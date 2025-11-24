@@ -1,6 +1,5 @@
-
 export class AmbulanceEntity {
-  constructor (
+  constructor(
     public id?: string,
     public number?: string,
     public brand?: string,
@@ -8,13 +7,13 @@ export class AmbulanceEntity {
     public delegationId?: string
   ) {}
 
-  static create (object: {[key: string]: any}) {
-    const {number, brand, model, delegationId} = object;
+  static create(object: { [key: string]: any }) {
+    const { number, brand, model, delegationId } = object;
     return new AmbulanceEntity(undefined, number, brand, model, delegationId);
   }
 
-  static edit (object: {[key: string]: any}) {
-    const {id, number, brand, model, delegationId} = object;
+  static edit(object: { [key: string]: any }) {
+    const { id, number, brand, model, delegationId } = object;
     return new AmbulanceEntity(id, number, brand, model, delegationId);
-  } 
+  }
 }

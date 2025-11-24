@@ -28,12 +28,6 @@ __exportStar(require("./controllers/checklists.controller.interface"), exports);
 __exportStar(require("./controllers/supplies.controller.interface"), exports);
 __exportStar(require("./enums/user-roles.enum"), exports);
 __exportStar(require("./enums/error-codes.enum"), exports);
-// repositorios
-__exportStar(require("./repositories/repositorie.interface"), exports);
-__exportStar(require("./repositories/adm.repositorie.interface"), exports);
-__exportStar(require("./repositories/auth.repositorie.interface"), exports);
-__exportStar(require("./repositories/delegations.repositorie.interface"), exports);
-__exportStar(require("./repositories/guards.repositorie.interface"), exports);
 // servicios
 __exportStar(require("./services/services.interface"), exports);
 __exportStar(require("./services/delegations.service.interface"), exports);

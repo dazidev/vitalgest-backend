@@ -21,7 +21,8 @@ class AdmController {
         const [error, userEntityDto] = application_1.UserEntityDto.create(req.body);
         if (error)
             throw application_1.CustomError.badRequest(error);
-        this.admService.createUser(userEntityDto)
+        this.admService
+            .createUser(userEntityDto)
             .then((user) => res.status(201).json(user))
             .catch((error) => next(this.handleError(error)));
     }
@@ -30,7 +31,8 @@ class AdmController {
         const [error, userEntityDto] = application_1.UserEntityDto.edit({ id, ...req.body });
         if (error)
             throw application_1.CustomError.badRequest(error);
-        this.admService.editUser(userEntityDto)
+        this.admService
+            .editUser(userEntityDto)
             .then((user) => res.status(200).json(user))
             .catch((error) => next(this.handleError(error)));
     }
@@ -40,7 +42,8 @@ class AdmController {
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_USER_ID);
         if (!infrastructure_1.regularExp.uuid.test(id))
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_USER_ID);
-        this.admService.deleteUser(id)
+        this.admService
+            .deleteUser(id)
             .then((user) => res.status(200).json(user))
             .catch((error) => next(this.handleError(error)));
     }
@@ -49,13 +52,14 @@ class AdmController {
         const { role } = req.query;
         if (!amount)
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_AMOUNT);
-        const filter = role ? role : '';
+        const filter = role ? role : "";
         /*const n = Number(amount);
         if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
           throw CustomError.badRequest(ERROR_CODES.AMOUNT_NOT_NUMBER);
         }
         const validateAmount = Math.min(n, 50)*/
-        this.admService.getAllUsers(amount, filter)
+        this.admService
+            .getAllUsers(amount, filter)
             .then((user) => res.status(200).json(user))
             .catch((error) => next(this.handleError(error)));
     }
@@ -70,7 +74,8 @@ class AdmController {
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_USER_ID);
         if (!infrastructure_1.regularExp.password.test(password))
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_PASSWORD_FORMAT);
-        this.admService.changePasswordUser(id, password)
+        this.admService
+            .changePasswordUser(id, password)
             .then((user) => res.status(200).json(user))
             .catch((error) => next(this.handleError(error)));
     }
@@ -80,7 +85,8 @@ class AdmController {
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_USER_ID);
         if (!infrastructure_1.regularExp.uuid.test(id))
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_USER_ID);
-        this.admService.getUserById(id)
+        this.admService
+            .getUserById(id)
             .then((response) => res.status(200).json(response))
             .catch((error) => next(this.handleError(error)));
     }

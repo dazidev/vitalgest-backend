@@ -31,7 +31,10 @@ class ShiftEntityDto {
         const error = this.validateData(ambulanceId, guardId, paramedicalId, driverId);
         if (!(error === true))
             return [error];
-        return [undefined, new ShiftEntityDto({ ambulanceId, guardId, paramedicalId, driverId })];
+        return [
+            undefined,
+            new ShiftEntityDto({ ambulanceId, guardId, paramedicalId, driverId }),
+        ];
     }
     static edit(object) {
         const { id, name, ambulanceId, guardId, paramedicalId, driverId } = object;
@@ -44,7 +47,17 @@ class ShiftEntityDto {
         const error = this.validateData(ambulanceId, guardId, paramedicalId, driverId);
         if (!(error === true))
             return [error];
-        return [undefined, new ShiftEntityDto({ id, name, ambulanceId, guardId, paramedicalId, driverId })];
+        return [
+            undefined,
+            new ShiftEntityDto({
+                id,
+                name,
+                ambulanceId,
+                guardId,
+                paramedicalId,
+                driverId,
+            }),
+        ];
     }
     static delete(object) {
         const { id } = object;

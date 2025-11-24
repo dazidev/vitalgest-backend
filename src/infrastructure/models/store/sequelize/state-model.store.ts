@@ -1,6 +1,11 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
-import { sequelize } from '../../../config/sequelize.adapter';
-
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from "sequelize";
+import { sequelize } from "../../../config/sequelize.adapter";
 
 class State extends Model<
   InferAttributes<State>,
@@ -12,17 +17,22 @@ class State extends Model<
 
 State.init(
   {
-    id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, allowNull: false, autoIncrement: true },
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      primaryKey: true,
+      allowNull: false,
+      autoIncrement: true,
+    },
     name: { type: DataTypes.STRING(100), allowNull: false },
   },
   {
     sequelize,
-    modelName: 'State',
-    tableName: 'states',
+    modelName: "State",
+    tableName: "states",
     timestamps: true,
     underscored: true,
     // paranoid: true //* activa borrado lógico
-  },
+  }
 );
 
 export default State;

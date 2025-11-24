@@ -9,11 +9,10 @@ const errorHandler = (err, _req, res, _next) => {
             error: err.message,
         });
     }
-    ;
-    console.error('[INTERNAL ERROR]', err);
+    console.error("[INTERNAL ERROR]", err);
     return res.status(500).json({
         success: false,
-        error: 'INTERNAL_SERVER_ERROR',
+        error: "INTERNAL_SERVER_ERROR",
     });
 };
 exports.errorHandler = errorHandler;

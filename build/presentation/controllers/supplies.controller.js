@@ -11,10 +11,14 @@ class SuppliesController {
     }
     createSupply(req, res, next) {
         const { id: pharmacyId } = req.params;
-        const [error, supplyEntityDto] = supply_entity_dto_1.SupplyEntityDto.create({ ...req.body, pharmacyId });
+        const [error, supplyEntityDto] = supply_entity_dto_1.SupplyEntityDto.create({
+            ...req.body,
+            pharmacyId,
+        });
         if (error)
             throw application_1.CustomError.badRequest(error);
-        this.suppliesService.createSupply(supplyEntityDto)
+        this.suppliesService
+            .createSupply(supplyEntityDto)
             .then((response) => res.json(response))
             .catch((err) => next(application_1.CustomError.badRequest(err)));
     }
@@ -23,7 +27,8 @@ class SuppliesController {
         const [error, supplyEntityDto] = supply_entity_dto_1.SupplyEntityDto.edit({ id, ...req.body });
         if (error)
             throw application_1.CustomError.badRequest(error);
-        this.suppliesService.editSupply(supplyEntityDto)
+        this.suppliesService
+            .editSupply(supplyEntityDto)
             .then((response) => res.json(response))
             .catch((err) => next(application_1.CustomError.badRequest(err)));
     }
@@ -32,7 +37,8 @@ class SuppliesController {
         const [error, supplyEntityDto] = supply_entity_dto_1.SupplyEntityDto.id({ id });
         if (error)
             throw application_1.CustomError.badRequest(error);
-        this.suppliesService.deleteSupply(supplyEntityDto)
+        this.suppliesService
+            .deleteSupply(supplyEntityDto)
             .then((response) => res.json(response))
             .catch((err) => next(application_1.CustomError.badRequest(err)));
     }
@@ -42,7 +48,8 @@ class SuppliesController {
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_PHARMACY);
         if (!infrastructure_1.regularExp.uuid.test(id))
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_PHARMACY);
-        this.suppliesService.getSupplies(id)
+        this.suppliesService
+            .getSupplies(id)
             .then((response) => res.json(response))
             .catch((err) => next(application_1.CustomError.badRequest(err)));
     }
@@ -52,7 +59,8 @@ class SuppliesController {
         if (error)
             throw application_1.CustomError.badRequest(error);
         const { id: supplyId } = supplyEntityDto;
-        this.suppliesService.getOneSupply(supplyId)
+        this.suppliesService
+            .getOneSupply(supplyId)
             .then((response) => res.json(response))
             .catch((err) => next(application_1.CustomError.badRequest(err)));
     }
