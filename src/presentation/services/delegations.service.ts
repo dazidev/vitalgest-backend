@@ -278,7 +278,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
     return {
       success: true,
-      data: formatDelegations,
+      data: formatDelegations[0],
     };
   }
 }
