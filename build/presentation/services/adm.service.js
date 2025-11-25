@@ -191,7 +191,7 @@ class AdmService {
             const data = [user].map(mapUserRow);
             return {
                 success: true,
-                data,
+                data: data[0],
             };
         }
         catch (error) {

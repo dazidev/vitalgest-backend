@@ -227,7 +227,7 @@ export class AdmService implements AdmServiceInterface {
 
       return {
         success: true,
-        data,
+        data: data[0],
       };
     } catch (error) {
       if (typeof error === "string") throw error;
