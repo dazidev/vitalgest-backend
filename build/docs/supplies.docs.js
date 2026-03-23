@@ -22,7 +22,7 @@
  *               value:
  *                 category: "Bolsa de válvula - mascarilla (BVM)"
  *                 specification: "Adulto"
- *                 avilableQuantity: "2"
+ *                 avaibleQuantity: "2"
  *                 expirationDate: "2027-10-10"
  *                 measurementUnit: "unit"
  *     responses:
@@ -38,7 +38,7 @@
  *                     id: "cdac8062-7087-4990-a347-8aef353c4ce1"
  *                     category: "Bolsa de válvula - mascarilla (BVM)"
  *                     specification: "Adulto"
- *                     avialble_quantity: "2"
+ *                     avaible_quantity: "2"
  *                     expiration_date: "2027-10-10T00:00:00.000Z"
  *                     measurement_unit: "unit"
  *                     pharmacy_id: "23de0993-bd95-460c-b68e-480d18b2da1a"
@@ -79,7 +79,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *               value:
  *                 category: "Bolsa de válvula"
  *                 specification: "niño"
- *                 avilableQuantity: 2
+ *                 avaibleQuantity: 2
  *                 expirationDate: "2027-10-11"
  *                 measurementUnit: "lbs"
  *                 pharmacyId: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
@@ -164,7 +164,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *                     - id: "b34cb1cd-262d-4195-80ee-282de8ec7766"
  *                       category: "Bolsa de válvula"
  *                       specification: "niño"
- *                       avialble_quantity: 2
+ *                       avaible_quantity: 2
  *                       expiration_date: "2027-10-11T00:00:00.000Z"
  *                       measurement_unit: "lbs"
  *                       pharmacy_id: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
@@ -208,7 +208,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *                     id: "b34cb1cd-262d-4195-80ee-282de8ec7766"
  *                     category: "Bolsa de válvula"
  *                     specification: "niño"
- *                     avialble_quantity: 2
+ *                     avaible_quantity: 2
  *                     expiration_date: "2027-10-11T00:00:00.000Z"
  *                     measurement_unit: "lbs"
  *                     pharmacy_id: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
