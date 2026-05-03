@@ -54,6 +54,37 @@ class UserEntityDto {
             new UserEntityDto({ email: email.toLowerCase(), password }),
         ];
     }
+    static changePassword(object) {
+        const { id, currentPass, newPass } = object;
+        if (!id)
+            return [domain_1.ERROR_CODES.MISSING_USER_ID];
+        if (!infrastructure_1.regularExp.uuid.test(id))
+            return [domain_1.ERROR_CODES.MISSING_USER_ID];
+        if (!currentPass)
+            return [domain_1.ERROR_CODES.MISSING_PASSWORD];
+        if (!newPass)
+            return [domain_1.ERROR_CODES.MISSING_PASSWORD];
+        if (!infrastructure_1.regularExp.password.test(currentPass))
+            return [domain_1.ERROR_CODES.INVALID_PASSWORD_FORMAT];
+        if (!infrastructure_1.regularExp.password.test(newPass))
+            return [domain_1.ERROR_CODES.INVALID_PASSWORD_FORMAT];
+        return [
+            undefined,
+            new UserEntityDto({ id, password: currentPass, newPassword: newPass }),
+        ];
+    }
+    static changeInfo(object) {
+        const { id, name, lastname } = object;
+        if (!id)
+            return [domain_1.ERROR_CODES.MISSING_USER_ID];
+        if (!infrastructure_1.regularExp.uuid.test(id))
+            return [domain_1.ERROR_CODES.MISSING_USER_ID];
+        if (!name)
+            return [domain_1.ERROR_CODES.MISSING_NAME];
+        if (!lastname)
+            return [domain_1.ERROR_CODES.MISSING_LASTNAME];
+        return [undefined, new UserEntityDto({ id, name, lastname })];
+    }
 }
 exports.UserEntityDto = UserEntityDto;
 UserEntityDto.validateData = (object, type) => {
