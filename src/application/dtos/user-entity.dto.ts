@@ -11,6 +11,7 @@ type UserDtoProps = {
   password?: string;
   delegationId?: string;
   status?: boolean;
+  newPassword?: string;
 };
 
 export class UserEntityDto {
@@ -23,6 +24,7 @@ export class UserEntityDto {
   readonly password?: string;
   readonly delegationId?: string;
   readonly status?: boolean;
+  readonly newPassword?: string;
 
   private constructor(props: UserDtoProps) {
     Object.assign(this, props);
@@ -30,7 +32,7 @@ export class UserEntityDto {
 
   private static validateData = (
     object: any,
-    type: "create" | "edit" | "password"
+    type: "create" | "edit" | "password",
   ): null | [string] => {
     const {
       id,
@@ -130,5 +132,36 @@ export class UserEntityDto {
       undefined,
       new UserEntityDto({ email: email.toLowerCase(), password }),
     ];
+  }
+
+  static changePassword(object: {
+    [key: string]: any;
+  }): [string?, UserEntityDto?] {
+    const { id, currentPass, newPass } = object;
+
+    if (!id) return [ERROR_CODES.MISSING_USER_ID];
+    if (!regularExp.uuid.test(id)) return [ERROR_CODES.MISSING_USER_ID];
+    if (!currentPass) return [ERROR_CODES.MISSING_PASSWORD];
+    if (!newPass) return [ERROR_CODES.MISSING_PASSWORD];
+    if (!regularExp.password.test(currentPass))
+      return [ERROR_CODES.INVALID_PASSWORD_FORMAT];
+    if (!regularExp.password.test(newPass))
+      return [ERROR_CODES.INVALID_PASSWORD_FORMAT];
+
+    return [
+      undefined,
+      new UserEntityDto({ id, password: currentPass, newPassword: newPass }),
+    ];
+  }
+
+  static changeInfo(object: { [key: string]: any }): [string?, UserEntityDto?] {
+    const { id, name, lastname } = object;
+
+    if (!id) return [ERROR_CODES.MISSING_USER_ID];
+    if (!regularExp.uuid.test(id)) return [ERROR_CODES.MISSING_USER_ID];
+    if (!name) return [ERROR_CODES.MISSING_NAME];
+    if (!lastname) return [ERROR_CODES.MISSING_LASTNAME];
+
+    return [undefined, new UserEntityDto({ id, name, lastname })];
   }
 }

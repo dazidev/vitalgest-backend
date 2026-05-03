@@ -18,6 +18,7 @@ class User extends Model<
   declare email: string;
   declare password: string;
   declare status: boolean;
+  declare signature: string;
   declare role: string;
   declare position: string;
   declare delegation_id: string;
@@ -36,6 +37,7 @@ User.init(
     email: { type: DataTypes.STRING(150), allowNull: false /*unique: true*/ },
     password: { type: DataTypes.STRING(255), allowNull: false },
     status: { type: DataTypes.BOOLEAN, allowNull: false },
+    signature: { type: DataTypes.STRING(100), allowNull: true },
     role: { type: DataTypes.STRING(100), allowNull: false },
     position: { type: DataTypes.STRING(100), allowNull: false },
     delegation_id: { type: DataTypes.UUID, allowNull: false }, //todo: realizar la referencia
@@ -48,7 +50,7 @@ User.init(
     underscored: true,
     indexes: [{ unique: true, fields: ["email"], name: "uq_users_email" }],
     // paranoid: true //* activa borrado lógico
-  }
+  },
 );
 
 export default User;
