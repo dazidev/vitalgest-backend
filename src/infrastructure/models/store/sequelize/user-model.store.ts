@@ -18,7 +18,7 @@ class User extends Model<
   declare email: string;
   declare password: string;
   declare status: boolean;
-  declare signature: string;
+  declare signature: CreationOptional<string | null>;
   declare role: string;
   declare position: string;
   declare delegation_id: string;

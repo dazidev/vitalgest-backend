@@ -8,24 +8,24 @@ const userRoutes = express.Router();
 const userService = new UserService();
 const controller = new UserController(userService);
 
-userRoutes.post(
+userRoutes.patch(
   "/change/password/:id",
   [AuthMiddleware.validateJWT],
   controller.changePassword.bind(controller),
 );
 
-userRoutes.post(
+userRoutes.patch(
   "/change/info/:id",
   [AuthMiddleware.validateJWT],
   controller.changeInfo.bind(controller),
 );
 
-userRoutes.post(
+userRoutes.get(
   "/:id/upload/signature",
   [AuthMiddleware.validateJWT],
   controller.uploadSign.bind(controller),
 );
-userRoutes.post(
+userRoutes.patch(
   "/:id/image/attach",
   [AuthMiddleware.validateJWT],
   controller.attachSignatureImage.bind(controller),
