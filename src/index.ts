@@ -25,6 +25,7 @@ import {
   shiftRoutes,
   checklistsRoutes,
   suppliesRoutes,
+  userRoutes,
 } from "./presentation";
 import { errorHandler } from "./infrastructure";
 
@@ -48,7 +49,7 @@ const ACCEPTED_ORIGINS = [
 app.use(
   cors({
     origin: ACCEPTED_ORIGINS,
-  })
+  }),
 );
 
 // documentación
@@ -108,6 +109,7 @@ app.use("/api/ambulances", ambulancesRoutes);
 app.use("/api/shifts", shiftRoutes);
 app.use("/api/checklists", checklistsRoutes);
 app.use("/api/supplies", suppliesRoutes);
+app.use("/api/user", userRoutes);
 
 // para ver las imagenes
 app.use(
@@ -118,7 +120,7 @@ app.use(
     etag: true,
     setHeaders: (res) =>
       res.setHeader("Cache-Control", "public, max-age=604800"),
-  })
+  }),
 );
 
 // rutas que funcionan solo en desarrollo
@@ -135,7 +137,7 @@ if (!process.env.VERCEL) {
   const PORT = process.env.PORT ?? 3000;
   app.listen(PORT, () => {
     console.log(
-      `API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`
+      `API: http://localhost:${PORT} | Docs: http://localhost:${PORT}/api/docs`,
     );
   });
 }

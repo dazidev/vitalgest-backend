@@ -8,86 +8,87 @@ const path_1 = __importDefault(require("path"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 exports.swaggerSpec = (0, swagger_jsdoc_1.default)({
     definition: {
-        openapi: '3.0.3',
+        openapi: "3.0.3",
         info: {
-            title: 'API Vitalgest',
-            version: '1.0.0',
-            description: 'Documentación mínima de endpoints (request y response).',
+            title: "API Vitalgest",
+            version: "1.0.0",
+            description: "Documentación mínima de endpoints (request y response).",
         },
         servers: [
-            { url: 'http://localhost:3000' },
-            { url: 'https://vitalgest-backend.vercel.app' }
+            { url: "http://localhost:3000" },
+            { url: "https://vitalgest-backend.vercel.app" },
         ],
         components: {
             securitySchemes: {
-                bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+                bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
             },
             schemas: {
                 // Genéricos
                 ErrorResponse: {
-                    type: 'object',
+                    type: "object",
                     properties: {
-                        success: { type: 'boolean', example: false },
-                        error: { type: 'string', example: 'CODE_LIST' },
+                        success: { type: "boolean", example: false },
+                        error: { type: "string", example: "CODE_LIST" },
                     },
-                    required: ['success', 'error'],
+                    required: ["success", "error"],
                 },
                 // Tu dominio
                 User: {
-                    type: 'object',
+                    type: "object",
                     properties: {
-                        id: { type: 'string', format: 'uuid' },
-                        name: { type: 'string' },
-                        lastname: { type: 'string' },
-                        email: { type: 'string', format: 'email' },
-                        role: { type: 'string', example: 'admin' },
-                        state: { type: 'boolen', example: 'true' },
-                        position: { type: 'string', example: 'cargo' },
-                        DelegationId: { type: 'number', example: 1 }
+                        id: { type: "string", format: "uuid" },
+                        name: { type: "string" },
+                        lastname: { type: "string" },
+                        email: { type: "string", format: "email" },
+                        role: { type: "string", example: "admin" },
+                        state: { type: "boolen", example: "true" },
+                        position: { type: "string", example: "cargo" },
+                        DelegationId: { type: "number", example: 1 },
                     },
-                    required: ['name', 'lastname', 'email', 'role'],
+                    required: ["name", "lastname", "email", "role"],
                 },
                 ResponseCreateUser: {
-                    type: 'object',
+                    type: "object",
                     properties: {
-                        success: { type: 'boolean', example: true },
-                        data: { $ref: '#/components/schemas/User' }
-                    }
+                        success: { type: "boolean", example: true },
+                        data: { $ref: "#/components/schemas/User" },
+                    },
                 },
                 Delegation: {
-                    type: 'object',
+                    type: "object",
                     properties: {
-                        id: { type: 'string', format: 'uuid' },
-                        name: { type: 'string' },
+                        id: { type: "string", format: "uuid" },
+                        name: { type: "string" },
                         state: {
-                            stateId: { type: 'string' },
-                            stateName: { type: 'string' },
+                            stateId: { type: "string" },
+                            stateName: { type: "string" },
                         },
                         municipality: {
-                            municipalityId: { type: 'string' },
-                            municipalityName: { type: 'string' },
+                            municipalityId: { type: "string" },
+                            municipalityName: { type: "string" },
                         },
-                        pharmacyId: { type: 'string', format: 'uuid' },
+                        pharmacyId: { type: "string", format: "uuid" },
                     },
                 },
                 ResponseCreateDelegation: {
-                    type: 'object',
+                    type: "object",
                     properties: {
-                        success: { type: 'boolean', example: true },
-                        data: { $ref: '#/components/schemas/Delegation' }
-                    }
+                        success: { type: "boolean", example: true },
+                        data: { $ref: "#/components/schemas/Delegation" },
+                    },
                 },
             },
         },
     },
     apis: [
-        path_1.default.resolve('build/docs/adm.docs.js'),
-        path_1.default.resolve('build/docs/delegations.docs.js'),
-        path_1.default.resolve('build/docs/guards.docs.js'),
-        path_1.default.resolve('build/docs/ambulances.docs.js'),
-        path_1.default.resolve('build/docs/supplies-ambulance.docs.js'),
-        path_1.default.resolve('build/docs/shifts.docs.js'),
-        path_1.default.resolve('build/docs/checklists.docs.js'),
-        path_1.default.resolve('build/docs/supplies.docs.js'),
+        path_1.default.resolve("build/docs/adm.docs.js"),
+        path_1.default.resolve("build/docs/delegations.docs.js"),
+        path_1.default.resolve("build/docs/guards.docs.js"),
+        path_1.default.resolve("build/docs/ambulances.docs.js"),
+        path_1.default.resolve("build/docs/supplies-ambulance.docs.js"),
+        path_1.default.resolve("build/docs/shifts.docs.js"),
+        path_1.default.resolve("build/docs/checklists.docs.js"),
+        path_1.default.resolve("build/docs/supplies.docs.js"),
+        path_1.default.resolve("build/docs/users.docs.js"),
     ],
 });
