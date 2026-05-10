@@ -45,7 +45,11 @@ export class UserController {
   changeInfo(req: Request, res: Response, next: NextFunction): void {
     const { id } = req.params;
     const { name, lastname } = req.body;
-    const [error, _userEntityDto] = UserEntityDto.edit({ id, name, lastname });
+    const [error, _userEntityDto] = UserEntityDto.changeInfo({
+      id,
+      name,
+      lastname,
+    });
     if (error) throw CustomError.badRequest(error);
 
     this.userService

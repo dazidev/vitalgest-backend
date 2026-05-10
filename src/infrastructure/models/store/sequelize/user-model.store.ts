@@ -19,6 +19,8 @@ class User extends Model<
   declare password: string;
   declare status: boolean;
   declare signature: CreationOptional<string | null>;
+  declare phone: CreationOptional<string | null>;
+  declare photo: CreationOptional<string | null>;
   declare role: string;
   declare position: string;
   declare delegation_id: string;
@@ -38,6 +40,8 @@ User.init(
     password: { type: DataTypes.STRING(255), allowNull: false },
     status: { type: DataTypes.BOOLEAN, allowNull: false },
     signature: { type: DataTypes.STRING(100), allowNull: true },
+    phone: { type: DataTypes.STRING(100), allowNull: true },
+    photo: { type: DataTypes.STRING(100), allowNull: true },
     role: { type: DataTypes.STRING(100), allowNull: false },
     position: { type: DataTypes.STRING(100), allowNull: false },
     delegation_id: { type: DataTypes.UUID, allowNull: false }, //todo: realizar la referencia

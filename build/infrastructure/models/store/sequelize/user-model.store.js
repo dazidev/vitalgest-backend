@@ -17,6 +17,8 @@ User.init({
     password: { type: sequelize_1.DataTypes.STRING(255), allowNull: false },
     status: { type: sequelize_1.DataTypes.BOOLEAN, allowNull: false },
     signature: { type: sequelize_1.DataTypes.STRING(100), allowNull: true },
+    phone: { type: sequelize_1.DataTypes.STRING(100), allowNull: true },
+    photo: { type: sequelize_1.DataTypes.STRING(100), allowNull: true },
     role: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
     position: { type: sequelize_1.DataTypes.STRING(100), allowNull: false },
     delegation_id: { type: sequelize_1.DataTypes.UUID, allowNull: false }, //todo: realizar la referencia
