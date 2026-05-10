@@ -12,6 +12,6 @@ const userService = new user_service_1.UserService();
 const controller = new user_controller_1.UserController(userService);
 userRoutes.patch("/change/password/:id", [infrastructure_1.AuthMiddleware.validateJWT], controller.changePassword.bind(controller));
 userRoutes.patch("/change/info/:id", [infrastructure_1.AuthMiddleware.validateJWT], controller.changeInfo.bind(controller));
-userRoutes.get("/:id/upload/signature", [infrastructure_1.AuthMiddleware.validateJWT], controller.uploadSign.bind(controller));
+userRoutes.post("/:id/upload/signature", [infrastructure_1.AuthMiddleware.validateJWT], controller.uploadSign.bind(controller));
 userRoutes.patch("/:id/image/attach", [infrastructure_1.AuthMiddleware.validateJWT], controller.attachSignatureImage.bind(controller));
 exports.default = userRoutes;

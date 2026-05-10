@@ -130,7 +130,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @openapi
  * /api/user/{id}/upload/signature:
- *   get:
+ *   post:
  *     summary: Generar URL para subir firma de usuario
  *     tags: ['ENDPOINTS Gestión de usuarios']
  *     security: [{ bearerAuth: [] }]

@@ -20,7 +20,7 @@ userRoutes.patch(
   controller.changeInfo.bind(controller),
 );
 
-userRoutes.get(
+userRoutes.post(
   "/:id/upload/signature",
   [AuthMiddleware.validateJWT],
   controller.uploadSign.bind(controller),

@@ -11,37 +11,37 @@ const controller = new AdmController(admService);
 admRoutes.post(
   "/create/user",
   [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
-  controller.createUser.bind(controller)
+  controller.createUser.bind(controller),
 );
 
 admRoutes.put(
   "/edit/user/:id",
   [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
-  controller.editUser.bind(controller)
+  controller.editUser.bind(controller),
 );
 
 admRoutes.delete(
   "/delete/user/:id",
   [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
-  controller.deleteUser.bind(controller)
+  controller.deleteUser.bind(controller),
 );
 
 admRoutes.get(
   "/get-all/users/:amount",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin', true)],
-  controller.getAllUsers.bind(controller)
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin", true)],
+  controller.getAllUsers.bind(controller),
 );
 
 admRoutes.put(
   "/change-password/user/:id",
   [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
-  controller.changePasswordUser.bind(controller)
+  controller.changePasswordUser.bind(controller),
 );
 
 admRoutes.get(
   "/get/user/:id",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.getUserById.bind(controller)
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.getUserById.bind(controller),
 );
 
 export default admRoutes;

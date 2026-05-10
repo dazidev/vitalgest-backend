@@ -73,7 +73,7 @@ export class AdmService implements AdmServiceInterface {
           position: userEntity.position!,
           delegation_id: userEntity.delegation_id!,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx.commit();
@@ -119,7 +119,7 @@ export class AdmService implements AdmServiceInterface {
           delegation_id: delegationId,
           status: status,
         },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx.commit();
@@ -200,7 +200,7 @@ export class AdmService implements AdmServiceInterface {
 
       await User.update(
         { password: hashedPassword },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx.commit();
@@ -211,6 +211,7 @@ export class AdmService implements AdmServiceInterface {
     } catch (error) {
       await tx?.rollback();
       if (typeof error === "string") throw error;
+      console.log(error);
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
