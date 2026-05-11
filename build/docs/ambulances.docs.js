@@ -112,18 +112,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 /**
  * @openapi
- * /api/ambulances/many/{amount} | all:
+ * /api/ambulances/many:
  *   get:
- *     summary: Obtener ambulancia/s
+ *     summary: Obtener ambulancias
+ *     description: >
+ *       Obtiene la lista de ambulancias registradas. Permite aplicar paginación
+ *       mediante limit y offset. Si no se envían query params, devuelve todas
+ *       las ambulancias.
  *     tags: ['ENDPOINTS Gestión de ambulancias']
  *     security: [{ bearerAuth: [] }]
+ *
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Número máximo de ambulancias a devolver.
+ *         example: 2
+ *
+ *       - in: query
+ *         name: offset
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *         description: Número de ambulancias que se deben omitir antes de empezar a devolver resultados.
+ *         example: 2
+ *
  *     responses:
  *       200:
- *         description: Ambulancia/s obtenida/s
+ *         description: Ambulancias obtenidas correctamente
  *         content:
  *           application/json:
  *             examples:
- *               response:
+ *               withoutPagination:
+ *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
  *                   data:
@@ -134,25 +159,40 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *                       delegation:
  *                         id: "d50b8d02-02a9-41a2-88e2-74e7c4baf9f0"
  *                         name: "Delegación Ameca, Jalisco"
- *                     - id: "5597ebcb-1311-4370-8499-128883eb0fde"
- *                       number: "1234dfde23"
- *                       brand: "toyota"
- *                       model: "corolla"
+ *                     - id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
+ *                       number: "AMB-002"
+ *                       brand: "ford"
+ *                       model: "transit"
  *                       delegation:
- *                         id: "d50b8d02-02a9-41a2-88e2-74e7c4baf9f0"
- *                         name: "Delegación Ameca, Jalisco"
-
+ *                         id: "63a5ed18-6bf9-4df8-a193-426d73d82dab"
+ *                         name: "Delegación Guadalajara, Jalisco"
+ *
+ *               withPagination:
+ *                 summary: Respuesta con limit y offset
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     - id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
+ *                       number: "AMB-002"
+ *                       brand: "ford"
+ *                       model: "transit"
+ *                       delegation:
+ *                         id: "63a5ed18-6bf9-4df8-a193-426d73d82dab"
+ *                         name: "Delegación Guadalajara, Jalisco"
  *
  *       400:
- *         description: Datos inválidos
+ *         description: Datos inválidos. Puede ocurrir si limit u offset no son válidos.
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
  *       401:
- *         description: No autorizado
+ *         description: No autorizado. Token no proporcionado o inválido.
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 /**
  * @openapi
@@ -230,4 +270,4 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
- */ 
+ */

@@ -4,6 +4,7 @@ import {
   CustomError,
   AmbulanceEntityDto,
   SupplyAmbEntityDto,
+  PaginationDto,
 } from "../../application";
 import { regularExp } from "../../infrastructure";
 import { AmbulancesService } from "../services/ambulance.service";
@@ -52,11 +53,16 @@ export class AmbulancesController implements AmbulancesControllerInterface {
   }
 
   getAmbulances(req: Request, res: Response, next: NextFunction): void {
-    const { amount } = req.params;
-    if (!amount) throw CustomError.badRequest(ERROR_CODES.MISSING_AMOUNT);
+    const { limit, offset } = req.query;
+
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+    });
+    if (error) throw CustomError.badRequest(error);
 
     this.ambulancesService
-      .getAmbulances(amount)
+      .getAmbulances(paginationDto!)
       .then((response) => res.json(response))
       .catch((error) => next(CustomError.badRequest(error)));
   }

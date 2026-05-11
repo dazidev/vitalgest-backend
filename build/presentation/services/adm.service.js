@@ -132,21 +132,19 @@ class AdmService {
             throw domain_1.ERROR_CODES.DELETE_FAILED;
         }
     }
-    async getAllUsers(amount, role) {
-        let newAmount;
-        if (amount !== "all")
-            newAmount = parseInt(amount);
-        else
-            newAmount = amount;
+    async getAllUsers(paginationDto) {
+        const { limit, offset, role } = paginationDto;
         try {
-            const options = {
+            const users = await infrastructure_1.User.findAll({
+                order: [
+                    ["createdAt", "DESC"],
+                    ["id", "ASC"],
+                ],
                 attributes: { exclude: ["password"] },
-            };
-            if (role)
-                options.where = { role };
-            if (newAmount !== "all")
-                options.limit = Number(newAmount);
-            const users = await infrastructure_1.User.findAll(options);
+                ...(limit !== undefined ? { limit } : {}),
+                ...(offset !== undefined ? { offset } : {}),
+                ...(role !== undefined ? { where: { role } } : {}),
+            });
             const data = users.map(mapUserRow);
             return {
                 success: true,

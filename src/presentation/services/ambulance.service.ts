@@ -1,5 +1,6 @@
 import { Transaction } from "sequelize";
 import { AmbulanceEntityDto, SupplyAmbEntityDto } from "../../application";
+import { PaginationDto } from "../../application/dtos/pagination.dto";
 import {
   AmbulanceEntity,
   AmbulancesServiceInterface,
@@ -26,7 +27,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async createAmbulance(
-    ambulanceEntityDto: AmbulanceEntityDto
+    ambulanceEntityDto: AmbulanceEntityDto,
   ): Promise<object> {
     const { delegationId, number } = ambulanceEntityDto;
 
@@ -41,7 +42,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     const exists = await Ambulance.findOne({ where: { number: number } }).catch(
       () => {
         throw ERROR_CODES.UNKNOWN_DB_ERROR;
-      }
+      },
     );
 
     if (exists) throw "AMBULANCE_EXISTS";
@@ -113,7 +114,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
           model: ambulanceEntity.model!,
           delegation_id: ambulanceEntity.delegationId!,
         },
-        { where: { id } }
+        { where: { id } },
       );
 
       await tx.commit();
@@ -127,7 +128,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async deleteAmbulance(
-    ambulanceEntityDto: AmbulanceEntityDto
+    ambulanceEntityDto: AmbulanceEntityDto,
   ): Promise<object> {
     const { id } = ambulanceEntityDto;
     const ambulance = await Ambulance.destroy({ where: { id } });
@@ -137,27 +138,24 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     return { success: true };
   }
 
-  async getAmbulances(amount: string): Promise<object> {
-    let formatAmount;
-    if (!(amount === "all")) formatAmount = parseInt(amount);
-    else formatAmount = amount;
+  async getAmbulances(paginationDto: PaginationDto): Promise<object> {
+    const { limit, offset } = paginationDto;
 
-    let ambulances;
-
-    formatAmount === "all"
-      ? (ambulances = await Ambulance.findAll({
-          include: [
-            { model: Delegation, as: "delegation", attributes: ["id", "name"] },
-          ],
-        }))
-      : (ambulances = await Ambulance.findAll({
-          include: [
-            { model: Delegation, as: "delegation", attributes: ["id", "name"] },
-          ],
-          limit: formatAmount as number,
-        }));
-
-    if (ambulances.length === 0) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
+    const ambulances = await Ambulance.findAll({
+      order: [
+        ["createdAt", "DESC"],
+        ["id", "ASC"],
+      ],
+      include: [
+        {
+          model: Delegation,
+          as: "delegation",
+          attributes: ["id", "name"],
+        },
+      ],
+      ...(limit !== undefined ? { limit } : {}),
+      ...(offset !== undefined ? { offset } : {}),
+    });
 
     const formatAmbulances = ambulances.map((ambulance) => ({
       id: ambulance.id,
@@ -227,7 +225,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
         {
           avaible_quantity: newQuantity,
         },
-        { where: { id: supplyId }, transaction: tx }
+        { where: { id: supplyId }, transaction: tx },
       );
 
       const supplyAmb = await SupplyAmbulance.create(
@@ -241,7 +239,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
           area_id: Number(areaId), //! todo: hacer la tabla de areas
           ambulance_id: ambulanceId,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx.commit();
@@ -279,7 +277,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
           area_id: Number(areaId), //! todo: hacer la tabla de areas
           ambulance_id: ambulanceId,
         },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx.commit();
@@ -333,7 +331,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async getOneAmbSupply(
-    supplyAmbEntityDto: SupplyAmbEntityDto
+    supplyAmbEntityDto: SupplyAmbEntityDto,
   ): Promise<object> {
     const { id } = supplyAmbEntityDto;
     try {

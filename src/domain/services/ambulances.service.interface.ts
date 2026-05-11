@@ -1,11 +1,12 @@
 import { AmbulanceEntityDto } from "../../application";
 import { SupplyAmbEntityDto } from "../../application/dtos/supply-ambulance-entity.dto";
+import { PaginationDto } from "../../application/dtos/pagination.dto";
 
 export interface AmbulancesServiceInterface {
   createAmbulance(ambulanceEntityDto: AmbulanceEntityDto): Promise<object>;
   editAmbulance(ambulanceEntityDto: AmbulanceEntityDto): Promise<object>;
   deleteAmbulance(ambulanceEntityDto: AmbulanceEntityDto): Promise<object>;
-  getAmbulances(amount: string): Promise<object>;
+  getAmbulances(paginationDto: PaginationDto): Promise<object>;
   getOneAmbulance(id: string): Promise<object>;
 
   //* Supplies

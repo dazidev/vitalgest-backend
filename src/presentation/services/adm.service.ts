@@ -6,6 +6,7 @@ import { ERROR_CODES, UserEntity } from "../../domain";
 // librerias externas
 import bcrypt from "bcrypt";
 import { Transaction } from "sequelize";
+import { PaginationDto } from "../../application/dtos/pagination.dto";
 
 const mapUserRow = (r: any): object => ({
   id: r.id,
@@ -160,20 +161,21 @@ export class AdmService implements AdmServiceInterface {
     }
   }
 
-  async getAllUsers(amount: string, role?: string): Promise<object> {
-    let newAmount;
-    if (amount !== "all") newAmount = parseInt(amount);
-    else newAmount = amount;
+  async getAllUsers(paginationDto: PaginationDto): Promise<object> {
+    const { limit, offset, role } = paginationDto;
 
     try {
-      const options: any = {
+      const users = await User.findAll({
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "ASC"],
+        ],
         attributes: { exclude: ["password"] },
-      };
 
-      if (role) options.where = { role };
-      if (newAmount !== "all") options.limit = Number(newAmount);
-
-      const users = await User.findAll(options);
+        ...(limit !== undefined ? { limit } : {}),
+        ...(offset !== undefined ? { offset } : {}),
+        ...(role !== undefined ? { where: { role } } : {}),
+      });
 
       const data = users.map(mapUserRow);
 

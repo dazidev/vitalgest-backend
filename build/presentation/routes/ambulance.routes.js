@@ -12,7 +12,7 @@ const controller = new ambulances_controller_1.AmbulancesController(ambulanceSer
 AmbulanceRoutes.post("/create", controller.createAmbulance.bind(controller));
 AmbulanceRoutes.put("/edit/:id", controller.editAmbulance.bind(controller));
 AmbulanceRoutes.delete("/delete/:id", controller.deleteAmbulance.bind(controller));
-AmbulanceRoutes.get("/many/:amount", controller.getAmbulances.bind(controller));
+AmbulanceRoutes.get("/many", controller.getAmbulances.bind(controller));
 AmbulanceRoutes.get("/one/:id", controller.getOneAmbulance.bind(controller));
 //* SUPPLIES
 AmbulanceRoutes.get("/areas", controller.getAreas.bind(controller));

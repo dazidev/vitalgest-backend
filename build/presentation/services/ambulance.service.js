@@ -102,27 +102,23 @@ class AmbulancesService {
             throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
         return { success: true };
     }
-    async getAmbulances(amount) {
-        let formatAmount;
-        if (!(amount === "all"))
-            formatAmount = parseInt(amount);
-        else
-            formatAmount = amount;
-        let ambulances;
-        formatAmount === "all"
-            ? (ambulances = await infrastructure_1.Ambulance.findAll({
-                include: [
-                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
-                ],
-            }))
-            : (ambulances = await infrastructure_1.Ambulance.findAll({
-                include: [
-                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
-                ],
-                limit: formatAmount,
-            }));
-        if (ambulances.length === 0)
-            throw domain_1.ERROR_CODES.AMBULANCE_NOT_FOUND;
+    async getAmbulances(paginationDto) {
+        const { limit, offset } = paginationDto;
+        const ambulances = await infrastructure_1.Ambulance.findAll({
+            order: [
+                ["createdAt", "DESC"],
+                ["id", "ASC"],
+            ],
+            include: [
+                {
+                    model: infrastructure_1.Delegation,
+                    as: "delegation",
+                    attributes: ["id", "name"],
+                },
+            ],
+            ...(limit !== undefined ? { limit } : {}),
+            ...(offset !== undefined ? { offset } : {}),
+        });
         const formatAmbulances = ambulances.map((ambulance) => ({
             id: ambulance.id,
             number: ambulance.number,

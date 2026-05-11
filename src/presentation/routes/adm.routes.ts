@@ -27,7 +27,7 @@ admRoutes.delete(
 );
 
 admRoutes.get(
-  "/get-all/users/:amount",
+  "/get-all/users",
   [AuthMiddleware.validateJWT, RankMiddleware.validate("admin", true)],
   controller.getAllUsers.bind(controller),
 );

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { AdmControllerInterface, ERROR_CODES } from "../../domain";
 import { AdmService } from "../services/adm.service";
-import { CustomError, UserEntityDto } from "../../application";
+import { CustomError, PaginationDto, UserEntityDto } from "../../application";
 import { regularExp } from "../../infrastructure";
 
 export class AdmController implements AdmControllerInterface {
@@ -51,20 +51,17 @@ export class AdmController implements AdmControllerInterface {
   }
 
   getAllUsers(req: Request, res: Response, next: NextFunction): void {
-    const { amount } = req.params;
-    const { role } = req.query;
-    if (!amount) throw CustomError.badRequest(ERROR_CODES.MISSING_AMOUNT);
+    const { limit, offset, role } = req.query;
 
-    const filter = role ? (role as string) : "";
-
-    /*const n = Number(amount);
-    if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
-      throw CustomError.badRequest(ERROR_CODES.AMOUNT_NOT_NUMBER);
-    }
-    const validateAmount = Math.min(n, 50)*/
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+      role,
+    });
+    if (error) throw CustomError.badRequest(error);
 
     this.admService
-      .getAllUsers(amount, filter)
+      .getAllUsers(paginationDto!)
       .then((user) => res.status(200).json(user))
       .catch((error) => next(this.handleError(error)));
   }
