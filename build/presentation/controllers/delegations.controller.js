@@ -93,5 +93,24 @@ class DelegationsController {
             .then((response) => res.json(response))
             .catch((err) => next(this.handleError(err)));
     }
+    getMembers(req, res, next) {
+        const { limit, offset, role } = req.query;
+        const { id } = req.params;
+        if (!id)
+            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_DELEGATION_ID);
+        if (!infrastructure_1.regularExp.uuid.test(id))
+            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_DELEGATION_ID);
+        const [error, paginationDto] = application_1.PaginationDto.validate({
+            limit,
+            offset,
+            role,
+        });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
+        this.delegationsService
+            .getMembers(id, paginationDto)
+            .then((user) => res.status(200).json(user))
+            .catch((error) => next(this.handleError(error)));
+    }
 }
 exports.DelegationsController = DelegationsController;

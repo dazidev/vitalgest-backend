@@ -31,4 +31,7 @@ controller.getDelegations.bind(controller));
 delegationsRoutes.get("/one/:id", 
 //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
 controller.getDelegation.bind(controller));
+delegationsRoutes.get("/members/:id", 
+//[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+controller.getMembers.bind(controller));
 exports.default = delegationsRoutes;

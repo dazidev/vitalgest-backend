@@ -11,43 +11,49 @@ const controller = new DelegationsController(service);
 delegationsRoutes.get(
   "/states",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.getStates.bind(controller)
+  controller.getStates.bind(controller),
 );
 
 delegationsRoutes.get(
   "/state/:stateId/municipalities",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.getMunicipalities.bind(controller)
+  controller.getMunicipalities.bind(controller),
 );
 
 delegationsRoutes.post(
   "/create",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.createDelegation.bind(controller)
+  controller.createDelegation.bind(controller),
 );
 
 delegationsRoutes.put(
   "/edit/:id",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.editDelegation.bind(controller)
+  controller.editDelegation.bind(controller),
 );
 
 delegationsRoutes.delete(
   "/delete/:id",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.deleteDelegation.bind(controller)
+  controller.deleteDelegation.bind(controller),
 );
 
 delegationsRoutes.get(
   "/many/:amount",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.getDelegations.bind(controller)
+  controller.getDelegations.bind(controller),
 );
 
 delegationsRoutes.get(
   "/one/:id",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
-  controller.getDelegation.bind(controller)
+  controller.getDelegation.bind(controller),
+);
+
+delegationsRoutes.get(
+  "/members/:id",
+  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  controller.getMembers.bind(controller),
 );
 
 export default delegationsRoutes;

@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { DelegationsControllerInterface, ERROR_CODES } from "../../domain";
 import { DelegationsService } from "../services/delegations.service";
-import { CustomError, DelegationEntityDto } from "../../application";
+import {
+  CustomError,
+  DelegationEntityDto,
+  PaginationDto,
+} from "../../application";
 import { regularExp } from "../../infrastructure";
 
 export class DelegationsController implements DelegationsControllerInterface {
@@ -102,5 +106,26 @@ export class DelegationsController implements DelegationsControllerInterface {
       .getDelegation(id)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
+  }
+
+  getMembers(req: Request, res: Response, next: NextFunction): void {
+    const { limit, offset, role } = req.query;
+    const { id } = req.params;
+
+    if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_DELEGATION_ID);
+    if (!regularExp.uuid.test(id))
+      throw CustomError.badRequest(ERROR_CODES.INVALID_DELEGATION_ID);
+
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+      role,
+    });
+    if (error) throw CustomError.badRequest(error);
+
+    this.delegationsService
+      .getMembers(id, paginationDto!)
+      .then((user) => res.status(200).json(user))
+      .catch((error) => next(this.handleError(error)));
   }
 }

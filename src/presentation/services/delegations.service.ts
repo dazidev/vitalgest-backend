@@ -8,8 +8,28 @@ import {
   Delegation,
   sequelize,
   State,
+  User,
 } from "../../infrastructure";
 import { Transaction } from "sequelize";
+import { PaginationDto } from "../../application";
+
+const mapUserRow = (r: any): object => ({
+  id: r.id,
+  name: r.name,
+  lastname: r.lastname,
+  email: r.email,
+  status: r.status,
+  role: r.role,
+  signature: r.signature,
+  photo: r.photo,
+  phone: r.phone,
+  position: r.position,
+  delegation: {
+    id: r.delegation_id,
+  },
+  createdAt: r.createdAt,
+  updatedAt: r.updatedAt,
+});
 
 const mapDelegationRow = (r: any): object => ({
   id: r.id,
@@ -26,7 +46,7 @@ const mapDelegationRow = (r: any): object => ({
 
 export class DelegationsService implements DelegationsServiceInterface {
   private async getDelegationName(
-    municipalityId: number
+    municipalityId: number,
   ): Promise<string | boolean> {
     const municipality = await Municipality.findOne({
       where: { id: municipalityId },
@@ -60,7 +80,7 @@ export class DelegationsService implements DelegationsServiceInterface {
           name: state.name,
           municipalities: municipalities, // opcional
         };
-      })
+      }),
     );
 
     return {
@@ -73,7 +93,7 @@ export class DelegationsService implements DelegationsServiceInterface {
     const exists = await State.findOne({ where: { id: state } }).catch(
       (_error) => {
         throw ERROR_CODES.UNKNOWN_DB_ERROR;
-      }
+      },
     );
 
     if (!exists) throw ERROR_CODES.STATE_NOT_FOUND;
@@ -113,14 +133,14 @@ export class DelegationsService implements DelegationsServiceInterface {
           name: name as string,
           municipality_id: municipalityId!,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await Pharmacy.create(
         {
           delegation_id: delegation.id,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx.commit();
@@ -144,7 +164,7 @@ export class DelegationsService implements DelegationsServiceInterface {
     const exists = await Delegation.findOne({ where: { id } }).catch(
       (_error) => {
         throw ERROR_CODES.UNKNOWN_DB_ERROR;
-      }
+      },
     );
 
     if (!exists) throw ERROR_CODES.DELEGATION_NOT_FOUND;
@@ -170,7 +190,7 @@ export class DelegationsService implements DelegationsServiceInterface {
           name: name as string,
           municipality_id: municipalityId,
         },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx.commit();
@@ -280,5 +300,36 @@ export class DelegationsService implements DelegationsServiceInterface {
       success: true,
       data: formatDelegations[0],
     };
+  }
+
+  async getMembers(id: string, paginationDto: PaginationDto): Promise<object> {
+    const { limit, offset, role } = paginationDto;
+
+    try {
+      const users = await User.findAll({
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "ASC"],
+        ],
+        attributes: { exclude: ["password"] },
+
+        ...(limit !== undefined ? { limit } : {}),
+        ...(offset !== undefined ? { offset } : {}),
+        where: {
+          delegation_id: id,
+          ...(role !== undefined ? { role } : {}),
+        },
+      });
+
+      const data = users.map(mapUserRow);
+
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      if (typeof error === "string") throw error;
+      throw ERROR_CODES.UNKNOWN_DB_ERROR;
+    }
   }
 }

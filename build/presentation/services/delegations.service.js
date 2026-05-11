@@ -3,6 +3,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DelegationsService = void 0;
 const error_codes_enum_1 = require("../../domain/enums/error-codes.enum");
 const infrastructure_1 = require("../../infrastructure");
+const mapUserRow = (r) => ({
+    id: r.id,
+    name: r.name,
+    lastname: r.lastname,
+    email: r.email,
+    status: r.status,
+    role: r.role,
+    signature: r.signature,
+    photo: r.photo,
+    phone: r.phone,
+    position: r.position,
+    delegation: {
+        id: r.delegation_id,
+    },
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+});
 const mapDelegationRow = (r) => ({
     id: r.id,
     name: r.name,
@@ -222,6 +239,34 @@ class DelegationsService {
             success: true,
             data: formatDelegations[0],
         };
+    }
+    async getMembers(id, paginationDto) {
+        const { limit, offset, role } = paginationDto;
+        try {
+            const users = await infrastructure_1.User.findAll({
+                order: [
+                    ["createdAt", "DESC"],
+                    ["id", "ASC"],
+                ],
+                attributes: { exclude: ["password"] },
+                ...(limit !== undefined ? { limit } : {}),
+                ...(offset !== undefined ? { offset } : {}),
+                where: {
+                    delegation_id: id,
+                    ...(role !== undefined ? { role } : {}),
+                },
+            });
+            const data = users.map(mapUserRow);
+            return {
+                success: true,
+                data,
+            };
+        }
+        catch (error) {
+            if (typeof error === "string")
+                throw error;
+            throw error_codes_enum_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        }
     }
 }
 exports.DelegationsService = DelegationsService;
