@@ -44,12 +44,20 @@ class SuppliesController {
     }
     getSupplies(req, res, next) {
         const { id } = req.params;
+        const { limit, offset } = req.query;
         if (!id)
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_PHARMACY);
-        if (!infrastructure_1.regularExp.uuid.test(id))
+        if (!infrastructure_1.regularExp.uuid.test(id)) {
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_PHARMACY);
+        }
+        const [error, paginationDto] = application_1.PaginationDto.validate({
+            limit,
+            offset,
+        });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
         this.suppliesService
-            .getSupplies(id)
+            .getSupplies(id, paginationDto)
             .then((response) => res.json(response))
             .catch((err) => next(application_1.CustomError.badRequest(err)));
     }

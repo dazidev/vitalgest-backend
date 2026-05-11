@@ -1,5 +1,5 @@
 import { Transaction } from "sequelize";
-import { SupplyEntityDto } from "../../application";
+import { PaginationDto, SupplyEntityDto } from "../../application";
 import { ERROR_CODES, SuppliesServiceInterface } from "../../domain";
 import { Pharmacy, sequelize, Supply } from "../../infrastructure";
 
@@ -34,7 +34,7 @@ export class SuppliesService implements SuppliesServiceInterface {
           measurement_unit: measurementUnit!,
           pharmacy_id: pharmacyId,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx.commit();
@@ -78,7 +78,7 @@ export class SuppliesService implements SuppliesServiceInterface {
           measurement_unit: measurementUnit,
           pharmacy_id: pharmacyId,
         },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx.commit();
@@ -112,15 +112,28 @@ export class SuppliesService implements SuppliesServiceInterface {
   }
 
   //! falta hacer uno por todos
-  async getSupplies(pharmacyId: string): Promise<object> {
+  async getSupplies(
+    pharmacyId: string,
+    paginationDto: PaginationDto,
+  ): Promise<object> {
+    const { limit, offset } = paginationDto;
+
     try {
-      const pharmacy = Pharmacy.findOne({ where: { id: pharmacyId } });
+      const pharmacy = await Pharmacy.findOne({
+        where: { id: pharmacyId },
+      });
+
       if (!pharmacy) throw ERROR_CODES.PHARMACY_NOT_FOUND;
 
       const supplies = await Supply.findAll({
         where: { pharmacy_id: pharmacyId },
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "ASC"],
+        ],
+        ...(limit !== undefined ? { limit } : {}),
+        ...(offset !== undefined ? { offset } : {}),
       });
-      if (supplies.length === 0) throw ERROR_CODES.SUPPLIES_NOT_FOUND;
 
       return {
         success: true,

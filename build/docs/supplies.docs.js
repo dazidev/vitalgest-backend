@@ -139,25 +139,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 /**
  * @openapi
- * /api/supplies/pharmacy/{pharmacyId}:
+ * /api/supplies/pharmacy/{id}:
  *   get:
  *     summary: Obtener suministros de una farmacia
+ *     description: >
+ *       Obtiene la lista de suministros asociados a una farmacia específica.
+ *       Permite aplicar paginación mediante limit y offset. Si no se envían
+ *       query params, devuelve todos los suministros de la farmacia.
  *     tags: ['ENDPOINTS Gestión de suministros']
  *     security: [{ bearerAuth: [] }]
+ *
  *     parameters:
  *       - in: path
- *         name: pharmacyId
+ *         name: id
  *         required: true
- *         description: ID de la farmacia de la que se desean obtener los suministros
+ *         description: ID de la farmacia de la que se desean obtener los suministros.
  *         schema:
  *           type: string
+ *           format: uuid
+ *         example: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
+ *
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Número máximo de suministros a devolver.
+ *         example: 10
+ *
+ *       - in: query
+ *         name: offset
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *         description: Número de suministros que se deben omitir antes de empezar a devolver resultados.
+ *         example: 0
+ *
  *     responses:
  *       200:
- *         description: Lista de suministros de la farmacia
+ *         description: Lista de suministros de la farmacia obtenida correctamente
  *         content:
  *           application/json:
  *             examples:
- *               response:
+ *               withoutPagination:
+ *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
  *                   data:
@@ -170,16 +197,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *                       pharmacy_id: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
  *                       createdAt: "2025-11-07T00:24:21.000Z"
  *                       updatedAt: "2025-11-07T04:12:10.000Z"
+ *                     - id: "91ab32dc-5512-4ad7-91db-5c44b8fa1001"
+ *                       category: "Gasas"
+ *                       specification: "estéril"
+ *                       avaible_quantity: 25
+ *                       expiration_date: "2027-12-01T00:00:00.000Z"
+ *                       measurement_unit: "piezas"
+ *                       pharmacy_id: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
+ *                       createdAt: "2025-11-07T00:24:21.000Z"
+ *                       updatedAt: "2025-11-07T04:12:10.000Z"
+ *
+ *               withPagination:
+ *                 summary: Respuesta con limit y offset
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     - id: "b34cb1cd-262d-4195-80ee-282de8ec7766"
+ *                       category: "Bolsa de válvula"
+ *                       specification: "niño"
+ *                       avaible_quantity: 2
+ *                       expiration_date: "2027-10-11T00:00:00.000Z"
+ *                       measurement_unit: "lbs"
+ *                       pharmacy_id: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
+ *                       createdAt: "2025-11-07T00:24:21.000Z"
+ *                       updatedAt: "2025-11-07T04:12:10.000Z"
+ *
  *       400:
- *         description: Datos inválidos
+ *         description: Datos inválidos. Puede ocurrir si el id, limit u offset no son válidos.
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
  *       401:
- *         description: No autorizado
+ *         description: No autorizado. Token no proporcionado o inválido.
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 /**
  * @openapi

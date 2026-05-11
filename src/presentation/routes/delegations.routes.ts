@@ -39,7 +39,7 @@ delegationsRoutes.delete(
 );
 
 delegationsRoutes.get(
-  "/many/:amount",
+  "/many",
   //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
   controller.getDelegations.bind(controller),
 );

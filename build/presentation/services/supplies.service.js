@@ -82,16 +82,23 @@ class SuppliesService {
         }
     }
     //! falta hacer uno por todos
-    async getSupplies(pharmacyId) {
+    async getSupplies(pharmacyId, paginationDto) {
+        const { limit, offset } = paginationDto;
         try {
-            const pharmacy = infrastructure_1.Pharmacy.findOne({ where: { id: pharmacyId } });
+            const pharmacy = await infrastructure_1.Pharmacy.findOne({
+                where: { id: pharmacyId },
+            });
             if (!pharmacy)
                 throw domain_1.ERROR_CODES.PHARMACY_NOT_FOUND;
             const supplies = await infrastructure_1.Supply.findAll({
                 where: { pharmacy_id: pharmacyId },
+                order: [
+                    ["createdAt", "DESC"],
+                    ["id", "ASC"],
+                ],
+                ...(limit !== undefined ? { limit } : {}),
+                ...(offset !== undefined ? { offset } : {}),
             });
-            if (supplies.length === 0)
-                throw domain_1.ERROR_CODES.SUPPLIES_NOT_FOUND;
             return {
                 success: true,
                 data: supplies,

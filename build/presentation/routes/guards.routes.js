@@ -12,6 +12,6 @@ const controller = new guards_controller_1.GuardsController(guardService);
 guardsRoutes.post("/create", controller.createGuard.bind(controller));
 guardsRoutes.put("/edit/:id", controller.editGuard.bind(controller));
 guardsRoutes.delete("/delete/:id", controller.deleteGuard.bind(controller));
-guardsRoutes.get("/many/:amount", controller.getGuards.bind(controller));
+guardsRoutes.get("/many", controller.getGuards.bind(controller));
 guardsRoutes.get("/one/:id", controller.getOneGuard.bind(controller));
 exports.default = guardsRoutes;

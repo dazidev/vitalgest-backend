@@ -25,7 +25,7 @@ controller.editDelegation.bind(controller));
 delegationsRoutes.delete("/delete/:id", 
 //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
 controller.deleteDelegation.bind(controller));
-delegationsRoutes.get("/many/:amount", 
+delegationsRoutes.get("/many", 
 //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
 controller.getDelegations.bind(controller));
 delegationsRoutes.get("/one/:id", 

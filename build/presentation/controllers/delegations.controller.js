@@ -73,12 +73,15 @@ class DelegationsController {
             .catch((err) => next(this.handleError(err)));
     }
     getDelegations(req, res, next) {
-        const { amount } = req.params;
-        // todo: verificar que venga un número o un 'all'
-        if (!amount)
-            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_AMOUNT);
+        const { limit, offset } = req.query;
+        const [error, paginationDto] = application_1.PaginationDto.validate({
+            limit,
+            offset,
+        });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
         this.delegationsService
-            .getDelegations(amount)
+            .getDelegations(paginationDto)
             .then((response) => res.json(response))
             .catch((err) => next(this.handleError(err)));
     }

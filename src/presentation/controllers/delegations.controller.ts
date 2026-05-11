@@ -86,12 +86,16 @@ export class DelegationsController implements DelegationsControllerInterface {
   }
 
   getDelegations(req: Request, res: Response, next: NextFunction): void {
-    const { amount } = req.params;
-    // todo: verificar que venga un número o un 'all'
-    if (!amount) throw CustomError.badRequest(ERROR_CODES.MISSING_AMOUNT);
+    const { limit, offset } = req.query;
+
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+    });
+    if (error) throw CustomError.badRequest(error);
 
     this.delegationsService
-      .getDelegations(amount)
+      .getDelegations(paginationDto!)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }

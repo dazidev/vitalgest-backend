@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ERROR_CODES, SuppliesControllerInterface } from "../../domain";
 import { SuppliesService } from "../services/supplies.service";
 import { SupplyEntityDto } from "../../application/dtos/supply-entity.dto";
-import { CustomError } from "../../application";
+import { CustomError, PaginationDto } from "../../application";
 import { regularExp } from "../../infrastructure";
 
 export class SuppliesController implements SuppliesControllerInterface {
@@ -42,18 +42,30 @@ export class SuppliesController implements SuppliesControllerInterface {
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
+
   getSupplies(req: Request, res: Response, next: NextFunction): void {
     const { id } = req.params;
+    const { limit, offset } = req.query;
 
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_PHARMACY);
-    if (!regularExp.uuid.test(id))
+
+    if (!regularExp.uuid.test(id)) {
       throw CustomError.badRequest(ERROR_CODES.INVALID_PHARMACY);
+    }
+
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+    });
+
+    if (error) throw CustomError.badRequest(error);
 
     this.suppliesService
-      .getSupplies(id)
+      .getSupplies(id, paginationDto!)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
+
   getOneSupply(req: Request, res: Response, next: NextFunction): void {
     const { id } = req.params;
 

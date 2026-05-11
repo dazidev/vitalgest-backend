@@ -1,5 +1,5 @@
 import { Transaction } from "sequelize";
-import { ShiftEntityDto } from "../../application";
+import { PaginationDto, ShiftEntityDto } from "../../application";
 import { ERROR_CODES, ShiftEntity, ShiftsServiceInterface } from "../../domain";
 import { Ambulance, Guard, sequelize, Shift, User } from "../../infrastructure";
 
@@ -8,7 +8,7 @@ export class ShiftsService implements ShiftsServiceInterface {
     ambulanceId: string,
     guardId: string,
     paramedicalId: string,
-    driverId: string
+    driverId: string,
   ) => {
     const [amb, grd, prm, drv] = await Promise.all([
       Ambulance.findByPk(ambulanceId, { attributes: ["id"], raw: true }),
@@ -32,7 +32,7 @@ export class ShiftsService implements ShiftsServiceInterface {
       ambulanceId!,
       guardId!,
       paramedicalId!,
-      driverId!
+      driverId!,
     );
     if (typeof ok !== "boolean") throw ok;
 
@@ -60,7 +60,7 @@ export class ShiftsService implements ShiftsServiceInterface {
           paramedical_id: entity.paramedicalId,
           driver_id: entity.driverId,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx.commit();
@@ -106,7 +106,7 @@ export class ShiftsService implements ShiftsServiceInterface {
       ambulanceId!,
       guardId!,
       paramedicalId!,
-      driverId!
+      driverId!,
     );
     if (typeof ok !== "boolean") throw ok;
 
@@ -129,7 +129,7 @@ export class ShiftsService implements ShiftsServiceInterface {
           paramedical_id: entity.paramedicalId,
           driver_id: entity.driverId,
         },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx.commit();
@@ -152,39 +152,62 @@ export class ShiftsService implements ShiftsServiceInterface {
     return { success: true };
   }
 
-  async getShifts(guardId: string): Promise<object> {
-    const shifts = await Shift.findAll({
-      where: { guard_id: guardId },
-      include: [
-        { model: Ambulance, as: "ambulance", attributes: ["id", "number"] },
-        {
-          model: User,
-          as: "paramedical",
-          attributes: ["id", "name", "lastname"],
-        },
-        { model: User, as: "driver", attributes: ["id", "name", "lastname"] },
-      ],
-    }).catch(() => {
+  async getShifts(
+    guardId: string,
+    paginationDto: PaginationDto,
+  ): Promise<object> {
+    const { limit, offset } = paginationDto;
+
+    try {
+      const shifts = await Shift.findAll({
+        where: { guard_id: guardId },
+
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "ASC"],
+        ],
+
+        include: [
+          {
+            model: Ambulance,
+            as: "ambulance",
+            attributes: ["id", "number"],
+          },
+          {
+            model: User,
+            as: "paramedical",
+            attributes: ["id", "name", "lastname"],
+          },
+          {
+            model: User,
+            as: "driver",
+            attributes: ["id", "name", "lastname"],
+          },
+        ],
+
+        ...(limit !== undefined ? { limit } : {}),
+        ...(offset !== undefined ? { offset } : {}),
+      });
+
+      const formatShifts = shifts.map((shift) => ({
+        id: shift.id,
+        name: shift.name,
+        ambulance: shift.ambulance,
+        guard: shift.guard,
+        paramedical: shift.paramedical,
+        driver: shift.driver,
+        createdAt: shift.get("createdAt") as Date,
+        updatedAt: shift.get("updatedAt") as Date,
+      }));
+
+      return {
+        success: true,
+        data: formatShifts,
+      };
+    } catch (error) {
+      if (typeof error === "string") throw error;
       throw ERROR_CODES.UNKNOWN_DB_ERROR;
-    });
-
-    if (shifts.length === 0) throw ERROR_CODES.SHIFT_NOT_FOUND;
-
-    const formatShifts = shifts.map((shift) => ({
-      id: shift.id,
-      name: shift.name,
-      ambulance: shift.ambulance,
-      guard: shift.guard,
-      paramedical: shift.paramedical,
-      driver: shift.driver,
-      createdAt: shift.get("createdAt") as Date,
-      updatedAt: shift.get("updatedAt") as Date,
-    }));
-
-    return {
-      success: true,
-      data: formatShifts,
-    };
+    }
   }
 
   async getOneShift(id: string): Promise<object> {

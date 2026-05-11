@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ERROR_CODES, GuardsControllerInterface } from "../../domain";
-import { CustomError, GuardsEntityDto } from "../../application";
+import { CustomError, GuardsEntityDto, PaginationDto } from "../../application";
 import { GuardsService } from "../services/guards.service";
 import { regularExp } from "../../infrastructure";
 
@@ -39,11 +39,17 @@ export class GuardsController implements GuardsControllerInterface {
   }
 
   getGuards(req: Request, res: Response, next: NextFunction): void {
-    const { amount } = req.params;
-    if (!amount) throw CustomError.badRequest(ERROR_CODES.MISSING_AMOUNT);
+    const { limit, offset } = req.query;
+
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+    });
+
+    if (error) throw CustomError.badRequest(error);
 
     this.guardsService
-      .getGuards(amount)
+      .getGuards(paginationDto!)
       .then((response) => res.json(response))
       .catch((error) => next(CustomError.badRequest(error)));
   }

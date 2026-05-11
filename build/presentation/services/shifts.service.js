@@ -121,37 +121,55 @@ class ShiftsService {
             throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
         return { success: true };
     }
-    async getShifts(guardId) {
-        const shifts = await infrastructure_1.Shift.findAll({
-            where: { guard_id: guardId },
-            include: [
-                { model: infrastructure_1.Ambulance, as: "ambulance", attributes: ["id", "number"] },
-                {
-                    model: infrastructure_1.User,
-                    as: "paramedical",
-                    attributes: ["id", "name", "lastname"],
-                },
-                { model: infrastructure_1.User, as: "driver", attributes: ["id", "name", "lastname"] },
-            ],
-        }).catch(() => {
+    async getShifts(guardId, paginationDto) {
+        const { limit, offset } = paginationDto;
+        try {
+            const shifts = await infrastructure_1.Shift.findAll({
+                where: { guard_id: guardId },
+                order: [
+                    ["createdAt", "DESC"],
+                    ["id", "ASC"],
+                ],
+                include: [
+                    {
+                        model: infrastructure_1.Ambulance,
+                        as: "ambulance",
+                        attributes: ["id", "number"],
+                    },
+                    {
+                        model: infrastructure_1.User,
+                        as: "paramedical",
+                        attributes: ["id", "name", "lastname"],
+                    },
+                    {
+                        model: infrastructure_1.User,
+                        as: "driver",
+                        attributes: ["id", "name", "lastname"],
+                    },
+                ],
+                ...(limit !== undefined ? { limit } : {}),
+                ...(offset !== undefined ? { offset } : {}),
+            });
+            const formatShifts = shifts.map((shift) => ({
+                id: shift.id,
+                name: shift.name,
+                ambulance: shift.ambulance,
+                guard: shift.guard,
+                paramedical: shift.paramedical,
+                driver: shift.driver,
+                createdAt: shift.get("createdAt"),
+                updatedAt: shift.get("updatedAt"),
+            }));
+            return {
+                success: true,
+                data: formatShifts,
+            };
+        }
+        catch (error) {
+            if (typeof error === "string")
+                throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
-        });
-        if (shifts.length === 0)
-            throw domain_1.ERROR_CODES.SHIFT_NOT_FOUND;
-        const formatShifts = shifts.map((shift) => ({
-            id: shift.id,
-            name: shift.name,
-            ambulance: shift.ambulance,
-            guard: shift.guard,
-            paramedical: shift.paramedical,
-            driver: shift.driver,
-            createdAt: shift.get("createdAt"),
-            updatedAt: shift.get("updatedAt"),
-        }));
-        return {
-            success: true,
-            data: formatShifts,
-        };
+        }
     }
     async getOneShift(id) {
         const shift = await infrastructure_1.Shift.findOne({

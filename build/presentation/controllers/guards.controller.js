@@ -39,11 +39,15 @@ class GuardsController {
             .catch((err) => next(application_1.CustomError.badRequest(err)));
     }
     getGuards(req, res, next) {
-        const { amount } = req.params;
-        if (!amount)
-            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_AMOUNT);
+        const { limit, offset } = req.query;
+        const [error, paginationDto] = application_1.PaginationDto.validate({
+            limit,
+            offset,
+        });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
         this.guardsService
-            .getGuards(amount)
+            .getGuards(paginationDto)
             .then((response) => res.json(response))
             .catch((error) => next(application_1.CustomError.badRequest(error)));
     }

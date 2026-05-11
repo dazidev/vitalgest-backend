@@ -184,13 +184,13 @@ class DelegationsService {
             throw error_codes_enum_1.ERROR_CODES.DELETE_FAILED;
         }
     }
-    async getDelegations(amount) {
-        let newAmount;
-        if (amount !== "all")
-            newAmount = parseInt(amount);
-        else
-            newAmount = amount;
-        const options = {
+    async getDelegations(paginationDto) {
+        const { limit, offset } = paginationDto;
+        const delegations = await infrastructure_1.Delegation.findAll({
+            order: [
+                ["createdAt", "DESC"],
+                ["id", "ASC"],
+            ],
             include: [
                 {
                     model: infrastructure_1.Municipality,
@@ -203,12 +203,9 @@ class DelegationsService {
             attributes: {
                 exclude: ["municipality_id"],
             },
-        };
-        if (newAmount !== "all")
-            options.limit = Number(newAmount);
-        const delegations = await infrastructure_1.Delegation.findAll(options);
-        if (delegations.length === 0)
-            throw error_codes_enum_1.ERROR_CODES.DELEGATION_NOT_FOUND;
+            ...(limit !== undefined ? { limit } : {}),
+            ...(offset !== undefined ? { offset } : {}),
+        });
         const formatDelegations = delegations.map(mapDelegationRow);
         return {
             success: true,

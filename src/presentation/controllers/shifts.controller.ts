@@ -3,6 +3,7 @@ import { ERROR_CODES, ShiftsControllerInterface } from "../../domain";
 import {
   CustomError,
   GuardsEntityDto,
+  PaginationDto,
   ShiftEntityDto,
 } from "../../application";
 import { regularExp } from "../../infrastructure";
@@ -45,10 +46,23 @@ export class ShiftsController implements ShiftsControllerInterface {
 
   getShifts(req: Request, res: Response, next: NextFunction): void {
     const { id } = req.params;
+    const { limit, offset } = req.query;
+
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_GUARD_ID);
 
+    if (!regularExp.uuid.test(id)) {
+      throw CustomError.badRequest(ERROR_CODES.INVALID_GUARD_ID);
+    }
+
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+    });
+
+    if (error) throw CustomError.badRequest(error);
+
     this.shiftsService
-      .getShifts(id)
+      .getShifts(id, paginationDto!)
       .then((response) => res.json(response))
       .catch((error) => next(CustomError.badRequest(error)));
   }

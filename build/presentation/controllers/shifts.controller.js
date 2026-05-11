@@ -39,10 +39,20 @@ class ShiftsController {
     }
     getShifts(req, res, next) {
         const { id } = req.params;
+        const { limit, offset } = req.query;
         if (!id)
             throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.MISSING_GUARD_ID);
+        if (!infrastructure_1.regularExp.uuid.test(id)) {
+            throw application_1.CustomError.badRequest(domain_1.ERROR_CODES.INVALID_GUARD_ID);
+        }
+        const [error, paginationDto] = application_1.PaginationDto.validate({
+            limit,
+            offset,
+        });
+        if (error)
+            throw application_1.CustomError.badRequest(error);
         this.shiftsService
-            .getShifts(id)
+            .getShifts(id, paginationDto)
             .then((response) => res.json(response))
             .catch((error) => next(application_1.CustomError.badRequest(error)));
     }

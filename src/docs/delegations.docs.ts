@@ -190,18 +190,43 @@
 
 /**
  * @openapi
- * /api/delegations/many/{amount} | all:
+ * /api/delegations/many:
  *   get:
- *     summary: Obtener delegación/es
+ *     summary: Obtener delegaciones
+ *     description: >
+ *       Obtiene la lista de delegaciones registradas. Permite aplicar paginación
+ *       mediante limit y offset. Si no se envían query params, devuelve todas
+ *       las delegaciones.
  *     tags: ['ENDPOINTS Gestión de delegaciones']
  *     security: [{ bearerAuth: [] }]
+ *
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Número máximo de delegaciones a devolver.
+ *         example: 2
+ *
+ *       - in: query
+ *         name: offset
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *         description: Número de delegaciones que se deben omitir antes de empezar a devolver resultados.
+ *         example: 0
+ *
  *     responses:
  *       200:
- *         description: Delegación obtenida
+ *         description: Delegaciones obtenidas correctamente
  *         content:
  *           application/json:
  *             examples:
- *               response:
+ *               withoutPagination:
+ *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
  *                   data:
@@ -217,16 +242,50 @@
  *                         name: "Jalisco"
  *                       pharmacy:
  *                         id: "258a3b7d-782f-4615-a2f1-21c1f50e7255"
+ *                     - id: "63a5ed18-6bf9-4df8-a193-426d73d82dab"
+ *                       name: "Delegación Guadalajara, Jalisco"
+ *                       createdAt: "2025-11-08T10:30:00.000Z"
+ *                       updatedAt: "2025-11-08T10:30:00.000Z"
+ *                       municipality:
+ *                         id: 2
+ *                         name: "Guadalajara"
+ *                       state:
+ *                         id: 1
+ *                         name: "Jalisco"
+ *                       pharmacy:
+ *                         id: "7acb4ad2-3215-4e69-984e-821c36c341d8"
+ *
+ *               withPagination:
+ *                 summary: Respuesta con limit y offset
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
+ *                       name: "Delegación Ameca, Jalisco"
+ *                       createdAt: "2025-11-07T19:43:15.000Z"
+ *                       updatedAt: "2025-11-07T19:43:15.000Z"
+ *                       municipality:
+ *                         id: 1
+ *                         name: "Ameca"
+ *                       state:
+ *                         id: 1
+ *                         name: "Jalisco"
+ *                       pharmacy:
+ *                         id: "258a3b7d-782f-4615-a2f1-21c1f50e7255"
+ *
  *       400:
- *         description: Datos inválidos
+ *         description: Datos inválidos. Puede ocurrir si limit u offset no son válidos.
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
  *       401:
- *         description: No autorizado
+ *         description: No autorizado. Token no proporcionado o inválido.
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 
 /**

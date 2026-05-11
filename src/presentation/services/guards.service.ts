@@ -1,5 +1,5 @@
 import { Transaction } from "sequelize";
-import { GuardsEntityDto } from "../../application";
+import { GuardsEntityDto, PaginationDto } from "../../application";
 import { ERROR_CODES, GuardsServiceInterface } from "../../domain";
 import {
   Ambulance,
@@ -15,7 +15,7 @@ import {
 export class GuardsService implements GuardsServiceInterface {
   private async existsGuard(
     date: string,
-    delegationId: string
+    delegationId: string,
   ): Promise<boolean> {
     const exists = await Guard.findOne({
       where: { delegation_id: delegationId, date },
@@ -59,7 +59,7 @@ export class GuardsService implements GuardsServiceInterface {
           state: "Nueva",
           delegation_id: delegationId,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx.commit();
@@ -117,7 +117,7 @@ export class GuardsService implements GuardsServiceInterface {
           date: new Date(date!),
           state: state,
         },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx.commit();
@@ -150,68 +150,71 @@ export class GuardsService implements GuardsServiceInterface {
     }
   }
 
-  async getGuards(amount: string): Promise<object> {
-    let formatAmount;
-    if (!(amount === "all")) formatAmount = parseInt(amount);
-    else formatAmount = amount;
+  async getGuards(paginationDto: PaginationDto): Promise<object> {
+    const { limit, offset } = paginationDto;
 
-    let guards;
+    try {
+      const guards = await Guard.findAll({
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "ASC"],
+        ],
+        attributes: ["id", "date", "state", "created_at", "updated_at"],
+        include: [
+          {
+            model: User,
+            as: "guardChief",
+            attributes: ["id", "name", "lastname", "email"],
+          },
+          {
+            model: Delegation,
+            as: "delegation",
+            attributes: ["id", "name"],
+          },
+          {
+            model: Shift,
+            as: "shifts",
+            attributes: ["id", "name", "created_at", "updated_at"],
+            include: [
+              {
+                model: Ambulance,
+                as: "ambulance",
+                attributes: ["id", "number"],
+              },
+              {
+                model: User,
+                as: "paramedical",
+                attributes: ["id", "name", "lastname"],
+              },
+              {
+                model: User,
+                as: "driver",
+                attributes: ["id", "name", "lastname"],
+              },
+              {
+                model: ChecklistAmbulance,
+                as: "checklistAmbulance",
+              },
+              {
+                model: ChecklistSupply,
+                as: "checklistSupplies",
+              },
+            ],
+          },
+        ],
 
-    formatAmount === "all"
-      ? (guards = await Guard.findAll({
-          attributes: ["id", "date", "state", "created_at", "updated_at"],
-          include: [
-            {
-              model: User,
-              as: "guardChief",
-              attributes: ["id", "name", "lastname", "email"],
-            },
-            { model: Delegation, as: "delegation", attributes: ["id", "name"] },
-            {
-              model: Shift,
-              as: "shifts",
-              attributes: ["id", "name", "created_at", "updated_at"],
-              include: [
-                {
-                  model: Ambulance,
-                  as: "ambulance",
-                  attributes: ["id", "number"],
-                },
-                {
-                  model: User,
-                  as: "paramedical",
-                  attributes: ["id", "name", "lastname"],
-                },
-                {
-                  model: User,
-                  as: "driver",
-                  attributes: ["id", "name", "lastname"],
-                },
-                { model: ChecklistAmbulance, as: "checklistAmbulance" },
-                { model: ChecklistSupply, as: "checklistSupplies" },
-              ],
-            },
-          ],
-        }))
-      : (guards = await Guard.findAll({
-          attributes: ["id", "date", "state", "created_at", "updated_at"],
-          include: [
-            {
-              model: User,
-              as: "guardChief",
-              attributes: ["id", "name", "lastname", "email"],
-            },
-            { model: Delegation, as: "delegation", attributes: ["id", "name"] },
-          ],
-          limit: formatAmount as number,
-        }));
+        ...(limit !== undefined ? { limit } : {}),
+        ...(offset !== undefined ? { offset } : {}),
+      });
 
-    if (guards.length === 0) throw ERROR_CODES.GUARD_NOT_FOUND;
-
-    return {
-      success: true,
-      data: guards,
-    };
+      return {
+        success: true,
+        data: guards,
+      };
+    } catch (error) {
+      if (typeof error === "string") throw error;
+      throw ERROR_CODES.UNKNOWN_DB_ERROR;
+    }
   }
 
   async getOneGuard(id: string): Promise<object> {

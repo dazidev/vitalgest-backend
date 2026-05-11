@@ -240,12 +240,14 @@ export class DelegationsService implements DelegationsServiceInterface {
     }
   }
 
-  async getDelegations(amount: string): Promise<object> {
-    let newAmount;
-    if (amount !== "all") newAmount = parseInt(amount);
-    else newAmount = amount;
+  async getDelegations(paginationDto: PaginationDto): Promise<object> {
+    const { limit, offset } = paginationDto;
 
-    const options: any = {
+    const delegations = await Delegation.findAll({
+      order: [
+        ["createdAt", "DESC"],
+        ["id", "ASC"],
+      ],
       include: [
         {
           model: Municipality,
@@ -258,13 +260,9 @@ export class DelegationsService implements DelegationsServiceInterface {
       attributes: {
         exclude: ["municipality_id"],
       },
-    };
-
-    if (newAmount !== "all") options.limit = Number(newAmount);
-
-    const delegations = await Delegation.findAll(options);
-
-    if (delegations.length === 0) throw ERROR_CODES.DELEGATION_NOT_FOUND;
+      ...(limit !== undefined ? { limit } : {}),
+      ...(offset !== undefined ? { offset } : {}),
+    });
 
     const formatDelegations = delegations.map(mapDelegationRow);
 

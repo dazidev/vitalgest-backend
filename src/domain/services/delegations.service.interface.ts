@@ -1,3 +1,4 @@
+import { PaginationDto } from "../../application";
 import { DelegationEntity } from "../entities/delegation.entity";
 
 export interface DelegationsServiceInterface {
@@ -6,6 +7,6 @@ export interface DelegationsServiceInterface {
   createDelegation(delegationEntity: DelegationEntity): Promise<object>;
   editDelegation(delegationEntity: DelegationEntity): Promise<object>;
   deleteDelegation(id: string): Promise<object>;
-  getDelegations(amount: string): Promise<object>;
+  getDelegations(paginationDto: PaginationDto): Promise<object>;
   getDelegation(id: string): Promise<object>;
 }

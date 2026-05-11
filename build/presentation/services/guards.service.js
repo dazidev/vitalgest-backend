@@ -119,15 +119,14 @@ class GuardsService {
             throw domain_1.ERROR_CODES.UNKNOWN_ERROR;
         }
     }
-    async getGuards(amount) {
-        let formatAmount;
-        if (!(amount === "all"))
-            formatAmount = parseInt(amount);
-        else
-            formatAmount = amount;
-        let guards;
-        formatAmount === "all"
-            ? (guards = await infrastructure_1.Guard.findAll({
+    async getGuards(paginationDto) {
+        const { limit, offset } = paginationDto;
+        try {
+            const guards = await infrastructure_1.Guard.findAll({
+                order: [
+                    ["createdAt", "DESC"],
+                    ["id", "ASC"],
+                ],
                 attributes: ["id", "date", "state", "created_at", "updated_at"],
                 include: [
                     {
@@ -135,7 +134,11 @@ class GuardsService {
                         as: "guardChief",
                         attributes: ["id", "name", "lastname", "email"],
                     },
-                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
+                    {
+                        model: infrastructure_1.Delegation,
+                        as: "delegation",
+                        attributes: ["id", "name"],
+                    },
                     {
                         model: infrastructure_1.Shift,
                         as: "shifts",
@@ -156,30 +159,30 @@ class GuardsService {
                                 as: "driver",
                                 attributes: ["id", "name", "lastname"],
                             },
-                            { model: infrastructure_1.ChecklistAmbulance, as: "checklistAmbulance" },
-                            { model: infrastructure_1.ChecklistSupply, as: "checklistSupplies" },
+                            {
+                                model: infrastructure_1.ChecklistAmbulance,
+                                as: "checklistAmbulance",
+                            },
+                            {
+                                model: infrastructure_1.ChecklistSupply,
+                                as: "checklistSupplies",
+                            },
                         ],
                     },
                 ],
-            }))
-            : (guards = await infrastructure_1.Guard.findAll({
-                attributes: ["id", "date", "state", "created_at", "updated_at"],
-                include: [
-                    {
-                        model: infrastructure_1.User,
-                        as: "guardChief",
-                        attributes: ["id", "name", "lastname", "email"],
-                    },
-                    { model: infrastructure_1.Delegation, as: "delegation", attributes: ["id", "name"] },
-                ],
-                limit: formatAmount,
-            }));
-        if (guards.length === 0)
-            throw domain_1.ERROR_CODES.GUARD_NOT_FOUND;
-        return {
-            success: true,
-            data: guards,
-        };
+                ...(limit !== undefined ? { limit } : {}),
+                ...(offset !== undefined ? { offset } : {}),
+            });
+            return {
+                success: true,
+                data: guards,
+            };
+        }
+        catch (error) {
+            if (typeof error === "string")
+                throw error;
+            throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
+        }
     }
     async getOneGuard(id) {
         const guard = await infrastructure_1.Guard.findOne({
