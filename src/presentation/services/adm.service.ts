@@ -15,6 +15,9 @@ const mapUserRow = (r: any): object => ({
   email: r.email,
   status: r.status,
   role: r.role,
+  signature: r.signature,
+  photo: r.photo,
+  phone: r.phone,
   position: r.position,
   delegation: {
     id: r.delegation_id,
