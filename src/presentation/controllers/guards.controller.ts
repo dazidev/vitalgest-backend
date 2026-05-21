@@ -26,7 +26,11 @@ export class GuardsController implements GuardsControllerInterface {
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
-  deleteGuard(req: Request, res: Response, next: NextFunction): void {
+  deleteGuard(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_GUARD_ID);
     if (!regularExp.uuid.test(id))
@@ -54,7 +58,11 @@ export class GuardsController implements GuardsControllerInterface {
       .catch((error) => next(CustomError.badRequest(error)));
   }
 
-  getOneGuard(req: Request, res: Response, next: NextFunction): void {
+  getOneGuard(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_GUARD_ID);
     if (!regularExp.uuid.test(id))

@@ -44,7 +44,11 @@ export class ShiftsController implements ShiftsControllerInterface {
       .catch((err) => next(CustomError.badRequest(err)));
   }
 
-  getShifts(req: Request, res: Response, next: NextFunction): void {
+  getShifts(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     const { limit, offset } = req.query;
 
@@ -67,7 +71,11 @@ export class ShiftsController implements ShiftsControllerInterface {
       .catch((error) => next(CustomError.badRequest(error)));
   }
 
-  getOneShift(req: Request, res: Response, next: NextFunction): void {
+  getOneShift(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_GUARD_ID);
     if (!regularExp.uuid.test(id))

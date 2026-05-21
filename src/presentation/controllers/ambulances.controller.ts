@@ -67,7 +67,11 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       .catch((error) => next(CustomError.badRequest(error)));
   }
 
-  getOneAmbulance(req: Request, res: Response, next: NextFunction): void {
+  getOneAmbulance(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_AMBULANCE_ID);
     if (!regularExp.uuid.test(id))
@@ -119,7 +123,11 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       .catch((err) => next(CustomError.badRequest(err)));
   }
 
-  getAmbSupplies(req: Request, res: Response, next: NextFunction): void {
+  getAmbSupplies(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
 
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_AMBULANCE_ID);

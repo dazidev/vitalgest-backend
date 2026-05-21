@@ -43,7 +43,11 @@ export class SuppliesController implements SuppliesControllerInterface {
       .catch((err) => next(CustomError.badRequest(err)));
   }
 
-  getSupplies(req: Request, res: Response, next: NextFunction): void {
+  getSupplies(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     const { limit, offset } = req.query;
 

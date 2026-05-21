@@ -10,6 +10,7 @@ import {
   ChecklistAmbulance,
   ChecklistSupply,
   getCurrentTime,
+  Guard,
   Question,
   relToAbs,
   RequestAnswerInterface,
@@ -30,7 +31,7 @@ import { Transaction } from "sequelize";
 export class ChecklistsService implements ChecklistsServiceInterface {
   //* SUPPLIES CHECKLIST
   async createSupChecklist(
-    checkListSupplyEntityDto: CheckListSupplyEntityDto
+    checkListSupplyEntityDto: CheckListSupplyEntityDto,
   ): Promise<object> {
     const { shiftId } = checkListSupplyEntityDto;
 
@@ -55,7 +56,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         {
           shift_id: shiftId,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx.commit();
@@ -72,7 +73,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async signSupChecklist(
-    checkListSupplyEntityDto: CheckListSupplyEntityDto
+    checkListSupplyEntityDto: CheckListSupplyEntityDto,
   ): Promise<object> {
     const { id, recipientId, notes } = checkListSupplyEntityDto;
 
@@ -95,7 +96,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         {
           where: { id },
           transaction: tx,
-        }
+        },
       );
 
       await tx.commit();
@@ -111,7 +112,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async deleteSupChecklist(
-    checkListSupplyEntityDto: CheckListSupplyEntityDto
+    checkListSupplyEntityDto: CheckListSupplyEntityDto,
   ): Promise<object> {
     const { id } = checkListSupplyEntityDto;
 
@@ -218,7 +219,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
               ambulance_id: shift?.shift?.ambulance_id,
             },
             transaction: tx,
-          }
+          },
         );
 
         //* Registra la respuesta de la información de los insumos.
@@ -234,7 +235,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             measurement_unit: supply?.measurement_unit,
             area_id: Number(supply?.area_id),
           },
-          { transaction: tx }
+          { transaction: tx },
         );
       }
       await tx?.commit();
@@ -271,7 +272,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
   //* AMBULANCE CHECKLIST
   async createAmbChecklist(
-    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
   ) {
     const { ambulanceId, shiftId, km /*gasFile,*/ } =
       checkListAmbulanceEntityDto;
@@ -315,7 +316,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           km: Number(km!),
           gas_path: "sin utilizar" /*gas.relPath*/,
         },
-        { transaction: tx }
+        { transaction: tx },
       );
 
       await tx?.commit();
@@ -333,7 +334,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async signAmbChecklist(
-    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
   ) {
     const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } =
       checkListAmbulanceEntityDto;
@@ -369,7 +370,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           recipient_id: recipientId,
           notes: notes ?? undefined,
         },
-        { where: { id }, transaction: tx }
+        { where: { id }, transaction: tx },
       );
 
       await tx?.commit();
@@ -385,7 +386,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async deleteAmbChecklist(
-    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
   ) {
     const { id } = checkListAmbulanceEntityDto;
 
@@ -430,8 +431,36 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       const checklist = await ChecklistAmbulance.findByPk(id, {
         attributes: { exclude: ["ambulance_id", "shift_id", "recipient_id"] },
         include: [
-          { model: Ambulance, as: "ambulance", attributes: ["id"] },
-          { model: Shift, as: "shift", attributes: ["id"] },
+          { model: Ambulance, as: "ambulance", attributes: ["id", "number"] },
+          {
+            model: Shift,
+            as: "shift",
+            attributes: ["id"],
+            include: [
+              {
+                model: Guard,
+                as: "guard",
+                attributes: ["id", "date", "state"],
+                include: [
+                  {
+                    model: User,
+                    as: "guardChief",
+                    attributes: ["id", "name", "lastname"],
+                  },
+                ],
+              },
+              {
+                model: User,
+                as: "paramedical",
+                attributes: ["id", "name", "lastname"],
+              },
+              {
+                model: User,
+                as: "driver",
+                attributes: ["id", "name", "lastname"],
+              },
+            ],
+          },
           {
             model: User,
             as: "recipient",
@@ -528,7 +557,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             value_option: ans.valueOption ?? null,
             value_text: ans.valueText ?? null,
           },
-          { transaction: tx }
+          { transaction: tx },
         );
       }
       await tx?.commit();

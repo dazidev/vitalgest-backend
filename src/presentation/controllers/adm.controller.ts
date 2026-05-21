@@ -38,7 +38,11 @@ export class AdmController implements AdmControllerInterface {
       .catch((error) => next(this.handleError(error)));
   }
 
-  deleteUser(req: Request, res: Response, next: NextFunction): void {
+  deleteUser(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_USER_ID);
     if (!regularExp.uuid.test(id))
@@ -66,7 +70,11 @@ export class AdmController implements AdmControllerInterface {
       .catch((error) => next(this.handleError(error)));
   }
 
-  changePasswordUser(req: Request, res: Response, next: NextFunction): void {
+  changePasswordUser(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     const { password } = req.body;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_USER_ID);
@@ -82,7 +90,11 @@ export class AdmController implements AdmControllerInterface {
       .catch((error) => next(this.handleError(error)));
   }
 
-  getUserById(req: Request, res: Response, next: NextFunction): void {
+  getUserById(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_USER_ID);
     if (!regularExp.uuid.test(id))

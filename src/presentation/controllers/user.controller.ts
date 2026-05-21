@@ -26,7 +26,11 @@ export class UserController {
     return CustomError.badRequest(error);
   };
 
-  changePassword(req: Request, res: Response, next: NextFunction): void {
+  changePassword(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     const { currentPass, newPass } = req.body;
 
@@ -42,7 +46,11 @@ export class UserController {
       .catch((error) => next(this.handleError(error)));
   }
 
-  changeInfo(req: Request, res: Response, next: NextFunction): void {
+  changeInfo(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     const { name, lastname } = req.body;
     const [error, _userEntityDto] = UserEntityDto.changeInfo({
@@ -94,7 +102,7 @@ export class UserController {
   };
 
   attachSignatureImage = async (
-    req: Request,
+    req: Request<{ id: string }>,
     res: Response,
     next: NextFunction,
   ) => {

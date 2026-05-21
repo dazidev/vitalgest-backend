@@ -29,7 +29,11 @@ export class DelegationsController implements DelegationsControllerInterface {
       .catch((err) => next(this.handleError(err)));
   }
 
-  getMunicipalities(req: Request, res: Response, next: NextFunction): void {
+  getMunicipalities(
+    req: Request<{ stateId: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { stateId } = req.params;
     const numberStateId = parseInt(stateId);
     if (!stateId) throw CustomError.badRequest(ERROR_CODES.MISSING_STATE_ID);
@@ -100,7 +104,11 @@ export class DelegationsController implements DelegationsControllerInterface {
       .catch((err) => next(this.handleError(err)));
   }
 
-  getDelegation(req: Request, res: Response, next: NextFunction): void {
+  getDelegation(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { id } = req.params;
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_DELEGATION_ID);
     if (!regularExp.uuid.test(id))
@@ -112,7 +120,11 @@ export class DelegationsController implements DelegationsControllerInterface {
       .catch((err) => next(this.handleError(err)));
   }
 
-  getMembers(req: Request, res: Response, next: NextFunction): void {
+  getMembers(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const { limit, offset, role } = req.query;
     const { id } = req.params;
 
