@@ -15,5 +15,5 @@ admRoutes.put("/edit/user/:id", [infrastructure_1.AuthMiddleware.validateJWT, in
 admRoutes.delete("/delete/user/:id", [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate("admin")], controller.deleteUser.bind(controller));
 admRoutes.get("/get-all/users", [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate("admin", true)], controller.getAllUsers.bind(controller));
 admRoutes.put("/change-password/user/:id", [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate("admin")], controller.changePasswordUser.bind(controller));
-admRoutes.get("/get/user/:id", [infrastructure_1.AuthMiddleware.validateJWT, infrastructure_1.RankMiddleware.validate("admin")], controller.getUserById.bind(controller));
+admRoutes.get("/get/user/:id", [infrastructure_1.AuthMiddleware.validateJWT], controller.getUserById.bind(controller));
 exports.default = admRoutes;

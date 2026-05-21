@@ -339,8 +339,36 @@ class ChecklistsService {
             const checklist = await infrastructure_1.ChecklistAmbulance.findByPk(id, {
                 attributes: { exclude: ["ambulance_id", "shift_id", "recipient_id"] },
                 include: [
-                    { model: infrastructure_1.Ambulance, as: "ambulance", attributes: ["id"] },
-                    { model: infrastructure_1.Shift, as: "shift", attributes: ["id"] },
+                    { model: infrastructure_1.Ambulance, as: "ambulance", attributes: ["id", "number"] },
+                    {
+                        model: infrastructure_1.Shift,
+                        as: "shift",
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: infrastructure_1.Guard,
+                                as: "guard",
+                                attributes: ["id", "date", "state"],
+                                include: [
+                                    {
+                                        model: infrastructure_1.User,
+                                        as: "guardChief",
+                                        attributes: ["id", "name", "lastname"],
+                                    },
+                                ],
+                            },
+                            {
+                                model: infrastructure_1.User,
+                                as: "paramedical",
+                                attributes: ["id", "name", "lastname"],
+                            },
+                            {
+                                model: infrastructure_1.User,
+                                as: "driver",
+                                attributes: ["id", "name", "lastname"],
+                            },
+                        ],
+                    },
                     {
                         model: infrastructure_1.User,
                         as: "recipient",
