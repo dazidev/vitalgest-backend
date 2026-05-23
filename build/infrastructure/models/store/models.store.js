@@ -101,7 +101,15 @@ checklist_ambulance_model_store_1.default.belongsTo(user_model_store_1.default, 
 });
 user_model_store_1.default.hasMany(checklist_ambulance_model_store_1.default, {
     foreignKey: "recipient_id",
-    as: "checklistAmbulance",
+    as: "receivedAmbulanceChecklists",
+});
+checklist_ambulance_model_store_1.default.belongsTo(user_model_store_1.default, {
+    foreignKey: "deliverer_id",
+    as: "deliverer",
+});
+user_model_store_1.default.hasMany(checklist_ambulance_model_store_1.default, {
+    foreignKey: "deliverer_id",
+    as: "deliveredAmbulanceChecklists",
 });
 // supplies
 checklist_supply_model_store_1.default.belongsTo(ambulance_model_store_1.default, {
@@ -123,7 +131,15 @@ checklist_supply_model_store_1.default.belongsTo(user_model_store_1.default, {
 });
 user_model_store_1.default.hasMany(checklist_supply_model_store_1.default, {
     foreignKey: "recipient_id",
-    as: "checklistSupplies",
+    as: "receivedSupplyChecklists",
+});
+checklist_supply_model_store_1.default.belongsTo(user_model_store_1.default, {
+    foreignKey: "deliverer_id",
+    as: "deliverer",
+});
+user_model_store_1.default.hasMany(checklist_supply_model_store_1.default, {
+    foreignKey: "deliverer_id",
+    as: "deliveredSupplyChecklists",
 });
 // answers
 answer_model_store_1.default.belongsTo(question_model_store_1.default, { foreignKey: "question_id", as: "question" });

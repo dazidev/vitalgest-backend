@@ -28,7 +28,8 @@ ChecklistAmbulance.init({
     time: { type: sequelize_1.DataTypes.TIME, allowNull: false },
     km: { type: sequelize_1.DataTypes.INTEGER.UNSIGNED, allowNull: false },
     gas_path: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-    sign_operator_path: {
+    deliverer_id: { type: sequelize_1.DataTypes.UUID, allowNull: true },
+    sign_deliverer_path: {
         type: sequelize_1.DataTypes.STRING,
         defaultValue: null,
         allowNull: true,

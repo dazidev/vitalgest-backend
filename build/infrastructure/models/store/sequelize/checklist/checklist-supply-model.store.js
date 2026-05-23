@@ -18,7 +18,8 @@ ChecklistSupply.init({
         onUpdate: "CASCADE", // actualiza si el padre cambia de id
         onDelete: "CASCADE", // impide eliminar al padre si tiene hijos
     },
-    sign_paramedical_path: {
+    deliverer_id: { type: sequelize_1.DataTypes.UUID, allowNull: true },
+    sign_deliverer_path: {
         type: sequelize_1.DataTypes.STRING,
         defaultValue: null,
         allowNull: true,

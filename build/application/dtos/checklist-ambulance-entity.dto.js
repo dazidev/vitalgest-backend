@@ -50,7 +50,7 @@ class CheckListAmbulanceEntityDto {
         ];
     }
     static sign(object) {
-        const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } = object;
+        const { id, recipientId, delivererId, notes } = object;
         if (!id)
             return [domain_1.ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID];
         if (!infrastructure_1.regularExp.uuid.test(id))
@@ -59,13 +59,16 @@ class CheckListAmbulanceEntityDto {
             return [domain_1.ERROR_CODES.MISSING_RECIPIENT_ID];
         if (!infrastructure_1.regularExp.uuid.test(recipientId))
             return [domain_1.ERROR_CODES.INVALID_RECIPIENT_ID];
-        /*const error = this.validateSign(signOperatorFile, signRecipientFile)
-        if (!(error === true)) return [error]*/
+        if (!delivererId)
+            return [domain_1.ERROR_CODES.MISSING_DELIVERER_ID];
+        if (!infrastructure_1.regularExp.uuid.test(delivererId))
+            return [domain_1.ERROR_CODES.INVALID_DELIVERER_ID];
         return [
             undefined,
             new CheckListAmbulanceEntityDto({
                 id,
-                /*signOperatorFile, signRecipientFile,*/ recipientId,
+                recipientId,
+                delivererId,
                 notes,
             }),
         ];

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChecklistsService = void 0;
-const fs_1 = require("fs");
+//import { promises as fs } from "fs";
 const domain_1 = require("../../domain");
 const infrastructure_1 = require("../../infrastructure");
 class ChecklistsService {
@@ -40,7 +40,7 @@ class ChecklistsService {
         }
     }
     async signSupChecklist(checkListSupplyEntityDto) {
-        const { id, recipientId, notes } = checkListSupplyEntityDto;
+        const { id, recipientId, delivererId, notes } = checkListSupplyEntityDto;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -50,9 +50,24 @@ class ChecklistsService {
             });
             if (!exists)
                 throw domain_1.ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+            const deliverer = await infrastructure_1.User.findOne({
+                where: { id: delivererId },
+                attributes: ["id", "signature"],
+            });
+            if (!deliverer)
+                throw domain_1.ERROR_CODES.INVALID_DELIVERER_ID;
+            const recipient = await infrastructure_1.User.findOne({
+                where: { id: recipientId },
+                attributes: ["id", "signature"],
+            });
+            if (!recipient)
+                throw domain_1.ERROR_CODES.INVALID_RECIPIENT_ID;
             await infrastructure_1.ChecklistSupply.update({
-                recipient_id: recipientId,
-                notes: notes,
+                deliverer_id: deliverer.id,
+                sign_deliverer_path: deliverer.signature,
+                recipient_id: recipient.id,
+                sign_recipient_path: recipient.signature,
+                notes: notes ?? undefined,
             }, {
                 where: { id },
                 transaction: tx,
@@ -101,15 +116,78 @@ class ChecklistsService {
     async getSupChecklist(id) {
         try {
             const checklist = await infrastructure_1.ChecklistSupply.findByPk(id, {
+                attributes: [
+                    "id",
+                    "sign_paramedical_path",
+                    "sign_recipient_path",
+                    "notes",
+                    "createdAt",
+                    "updatedAt",
+                ],
                 include: [
+                    {
+                        model: infrastructure_1.Shift,
+                        as: "shift",
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: infrastructure_1.Guard,
+                                as: "guard",
+                                attributes: ["id", "date", "state"],
+                                include: [
+                                    {
+                                        model: infrastructure_1.User,
+                                        as: "guardChief",
+                                        attributes: ["id", "name", "lastname"],
+                                    },
+                                ],
+                            },
+                            {
+                                model: infrastructure_1.User,
+                                as: "paramedical",
+                                attributes: ["id", "name", "lastname"],
+                            },
+                            {
+                                model: infrastructure_1.User,
+                                as: "driver",
+                                attributes: ["id", "name", "lastname"],
+                            },
+                        ],
+                    },
+                    {
+                        model: infrastructure_1.Ambulance,
+                        as: "ambulance",
+                        attributes: ["id", "number"],
+                    },
+                    {
+                        model: infrastructure_1.User,
+                        as: "deliverer",
+                        attributes: ["id", "name", "lastname"],
+                    },
+                    {
+                        model: infrastructure_1.User,
+                        as: "recipient",
+                        attributes: ["id", "name", "lastname"],
+                    },
                     {
                         model: infrastructure_1.AnswerSupply,
                         as: "answers",
+                        attributes: [
+                            "id",
+                            "category",
+                            "specification",
+                            "avaible_quantity",
+                            "min_quantity",
+                            "required_quantity",
+                            "measurement_unit",
+                            "createdAt",
+                            "updatedAt",
+                        ],
                         include: [
                             {
                                 model: infrastructure_1.AreaAmbulance,
                                 as: "area",
-                                attributes: ["name", "section", "order"],
+                                attributes: ["id", "name", "section", "order"],
                             },
                         ],
                     },
@@ -264,31 +342,33 @@ class ChecklistsService {
         }
     }
     async signAmbChecklist(checkListAmbulanceEntityDto) {
-        const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } = checkListAmbulanceEntityDto;
+        const { id, recipientId, delivererId, notes } = checkListAmbulanceEntityDto;
         const checklist = await infrastructure_1.ChecklistAmbulance.findOne({
             where: { id },
             attributes: ["ambulance_id"],
         });
         if (!checklist)
             throw domain_1.ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
-        /*const { ambulance_id: ambulanceId } = checklist
-    
-        const baseDir = 'uploads/ambulance';
-        const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
-    
-        const saved: { absPath: string; relPath: string }[] = [];*/
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            /*const signOp = await saveWebFile(signOperatorFile!, baseDir, subDir);
-            saved.push({ absPath: signOp.absPath, relPath: signOp.relPath });
-      
-            const signRec = await saveWebFile(signRecipientFile!, baseDir, subDir);
-            saved.push({ absPath: signRec.absPath, relPath: signRec.relPath });*/
+            const deliverer = await infrastructure_1.User.findOne({
+                where: { id: delivererId },
+                attributes: ["id", "signature"],
+            });
+            if (!deliverer)
+                throw domain_1.ERROR_CODES.INVALID_DELIVERER_ID;
+            const recipient = await infrastructure_1.User.findOne({
+                where: { id: recipientId },
+                attributes: ["id", "signature"],
+            });
+            if (!recipient)
+                throw domain_1.ERROR_CODES.INVALID_RECIPIENT_ID;
             await infrastructure_1.ChecklistAmbulance.update({
-                /*sign_operator_path: signOp.relPath,
-              sign_recipient_path: signRec.relPath*/
-                recipient_id: recipientId,
+                deliverer_id: deliverer.id,
+                sign_deliverer_path: deliverer.signature,
+                recipient_id: recipient.id,
+                sign_recipient_path: recipient.signature,
                 notes: notes ?? undefined,
             }, { where: { id }, transaction: tx });
             await tx?.commit();
@@ -307,19 +387,22 @@ class ChecklistsService {
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            const checklist = await infrastructure_1.ChecklistAmbulance.findOne({
-                where: { id },
-                attributes: ["gas_path", "sign_operator_path", "sign_recipient_path"],
-                transaction: tx,
+            /*const checklist = await ChecklistAmbulance.findOne({
+              where: { id },
+              attributes: ["gas_path", "sign_deliverer_path", "sign_recipient_path"],
+              transaction: tx,
             });
-            const saved = [];
+      
+            const saved: { absPath: string }[] = [];
+      
             if (checklist?.gas_path)
-                saved.push({ absPath: (0, infrastructure_1.relToAbs)(checklist?.gas_path) });
+              saved.push({ absPath: relToAbs(checklist?.gas_path) });
             if (checklist?.sign_operator_path)
-                saved.push({ absPath: (0, infrastructure_1.relToAbs)(checklist?.sign_operator_path) });
+              saved.push({ absPath: relToAbs(checklist?.sign_operator_path) });
             if (checklist?.sign_recipient_path)
-                saved.push({ absPath: (0, infrastructure_1.relToAbs)(checklist?.sign_recipient_path) });
-            await Promise.allSettled(saved.map((f) => fs_1.promises.unlink(f.absPath)));
+              saved.push({ absPath: relToAbs(checklist?.sign_recipient_path) });
+      
+            await Promise.allSettled(saved.map((f) => fs.unlink(f.absPath)));*/
             const row = await infrastructure_1.ChecklistAmbulance.destroy({
                 where: { id },
                 transaction: tx,
@@ -368,6 +451,11 @@ class ChecklistsService {
                                 attributes: ["id", "name", "lastname"],
                             },
                         ],
+                    },
+                    {
+                        model: infrastructure_1.User,
+                        as: "deliverer",
+                        attributes: ["id", "name", "lastname"],
                     },
                     {
                         model: infrastructure_1.User,

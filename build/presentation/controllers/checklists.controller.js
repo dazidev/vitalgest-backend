@@ -45,23 +45,12 @@ class ChecklistsController {
     signSupChecklist(req, res, next) {
         try {
             const { id } = req.params;
-            const { recipientId, notes } = req.body;
-            // todo: habilitar después
-            /*const files = req.files as {
-              [field: string]: Express.Multer.File[]
-            } | undefined
-      
-            const signOperatorFileMf = files?.signOperatorFile?.[0]
-            const signRecipientFileMf = files?.signRecipientFile?.[0]
-      
-            const signOperatorFile = toWebFile(signOperatorFileMf)
-            const signRecipientFile = toWebFile(signRecipientFileMf)*/
+            const { recipientId, delivererId, notes } = req.body;
             const payload = {
                 id,
                 recipientId,
+                delivererId,
                 notes,
-                // signOperatorFile,
-                // signRecipientFile,
             };
             const [error, checkListSupplyEntityDto] = checklist_supply_entity_dto_1.CheckListSupplyEntityDto.sign(payload);
             if (error)
@@ -172,7 +161,7 @@ class ChecklistsController {
     signAmbChecklist(req, res, next) {
         try {
             const { id } = req.params;
-            const { recipientId, notes } = req.body;
+            const { recipientId, delivererId, notes } = req.body;
             // todo: habilitar después
             /*const files = req.files as {
               [field: string]: Express.Multer.File[]
@@ -186,9 +175,8 @@ class ChecklistsController {
             const payload = {
                 id,
                 recipientId,
+                delivererId,
                 notes,
-                // signOperatorFile,
-                // signRecipientFile,
             };
             const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.sign(payload);
             if (error)
