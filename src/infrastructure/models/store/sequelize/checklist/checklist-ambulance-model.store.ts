@@ -23,9 +23,10 @@ class ChecklistAmbulance extends Model<
   declare time: string;
   declare km: number;
   declare gas_path: string;
-  declare sign_operator_path?: string;
+  declare deliverer_id?: ForeignKey<User["id"]>;
+  declare sign_deliverer_path?: string | null;
   declare recipient_id?: ForeignKey<User["id"]>;
-  declare sign_recipient_path?: string;
+  declare sign_recipient_path?: string | null;
   declare notes?: string;
 
   declare ambulance?: NonAttribute<Ambulance>;
@@ -58,7 +59,8 @@ ChecklistAmbulance.init(
     time: { type: DataTypes.TIME, allowNull: false },
     km: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     gas_path: { type: DataTypes.STRING, allowNull: false },
-    sign_operator_path: {
+    deliverer_id: { type: DataTypes.UUID, allowNull: true },
+    sign_deliverer_path: {
       type: DataTypes.STRING,
       defaultValue: null,
       allowNull: true,
@@ -86,7 +88,7 @@ ChecklistAmbulance.init(
       },
     ],
     // paranoid: true //* activa borrado lógico
-  }
+  },
 );
 
 export default ChecklistAmbulance;

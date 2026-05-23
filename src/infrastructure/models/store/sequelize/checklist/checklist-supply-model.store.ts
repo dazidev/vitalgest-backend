@@ -20,9 +20,10 @@ class ChecklistSupply extends Model<
 > {
   declare id: CreationOptional<string>;
   declare shift_id: ForeignKey<Shift["id"]>;
-  declare sign_paramedical_path?: string;
+  declare deliverer_id?: ForeignKey<User["id"]>;
+  declare sign_deliverer_path?: string | null;
   declare recipient_id?: ForeignKey<User["id"]>;
-  declare sign_recipient_path?: string;
+  declare sign_recipient_path?: string | null;
   declare notes?: string;
 
   declare ambulance?: NonAttribute<Ambulance>; //! Esto esta generando una campo en la base de datos, o sólo es para declarar la relación?
@@ -45,7 +46,8 @@ ChecklistSupply.init(
       onUpdate: "CASCADE", // actualiza si el padre cambia de id
       onDelete: "CASCADE", // impide eliminar al padre si tiene hijos
     },
-    sign_paramedical_path: {
+    deliverer_id: { type: DataTypes.UUID, allowNull: true },
+    sign_deliverer_path: {
       type: DataTypes.STRING,
       defaultValue: null,
       allowNull: true,
@@ -74,7 +76,7 @@ ChecklistSupply.init(
       },
     ],
     // paranoid: true //* activa borrado lógico
-  }
+  },
 );
 
 export default ChecklistSupply;

@@ -90,10 +90,22 @@ ChecklistAmbulance.belongsTo(User, {
   foreignKey: "recipient_id",
   as: "recipient",
 });
+
 User.hasMany(ChecklistAmbulance, {
   foreignKey: "recipient_id",
-  as: "checklistAmbulance",
+  as: "receivedAmbulanceChecklists",
 });
+
+ChecklistAmbulance.belongsTo(User, {
+  foreignKey: "deliverer_id",
+  as: "deliverer",
+});
+
+User.hasMany(ChecklistAmbulance, {
+  foreignKey: "deliverer_id",
+  as: "deliveredAmbulanceChecklists",
+});
+
 // supplies
 ChecklistSupply.belongsTo(Ambulance, {
   foreignKey: "ambulance_id",
@@ -114,9 +126,20 @@ ChecklistSupply.belongsTo(User, {
   foreignKey: "recipient_id",
   as: "recipient",
 });
+
 User.hasMany(ChecklistSupply, {
   foreignKey: "recipient_id",
-  as: "checklistSupplies",
+  as: "receivedSupplyChecklists",
+});
+
+ChecklistSupply.belongsTo(User, {
+  foreignKey: "deliverer_id",
+  as: "deliverer",
+});
+
+User.hasMany(ChecklistSupply, {
+  foreignKey: "deliverer_id",
+  as: "deliveredSupplyChecklists",
 });
 
 // answers
