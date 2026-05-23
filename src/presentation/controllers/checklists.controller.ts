@@ -51,25 +51,13 @@ export class ChecklistsController implements CheckListsControllerInterface {
   signSupChecklist(req: Request, res: Response, next: NextFunction): void {
     try {
       const { id } = req.params;
-      const { recipientId, notes } = req.body;
-
-      // todo: habilitar después
-      /*const files = req.files as {
-        [field: string]: Express.Multer.File[]
-      } | undefined
-
-      const signOperatorFileMf = files?.signOperatorFile?.[0]
-      const signRecipientFileMf = files?.signRecipientFile?.[0]
-
-      const signOperatorFile = toWebFile(signOperatorFileMf)
-      const signRecipientFile = toWebFile(signRecipientFileMf)*/
+      const { recipientId, delivererId, notes } = req.body;
 
       const payload = {
         id,
         recipientId,
+        delivererId,
         notes,
-        // signOperatorFile,
-        // signRecipientFile,
       };
 
       const [error, checkListSupplyEntityDto] =
@@ -195,7 +183,7 @@ export class ChecklistsController implements CheckListsControllerInterface {
   signAmbChecklist(req: Request, res: Response, next: NextFunction): void {
     try {
       const { id } = req.params;
-      const { recipientId, notes } = req.body;
+      const { recipientId, delivererId, notes } = req.body;
 
       // todo: habilitar después
       /*const files = req.files as {
@@ -211,9 +199,8 @@ export class ChecklistsController implements CheckListsControllerInterface {
       const payload = {
         id,
         recipientId,
+        delivererId,
         notes,
-        // signOperatorFile,
-        // signRecipientFile,
       };
 
       const [error, checkListAmbulanceEntityDto] =

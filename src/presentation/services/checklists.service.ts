@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+//import { promises as fs } from "fs";
 import { ChecklistsServiceInterface, ERROR_CODES } from "../../domain";
 
 import {
@@ -12,7 +12,7 @@ import {
   getCurrentTime,
   Guard,
   Question,
-  relToAbs,
+  //relToAbs,
   RequestAnswerInterface,
   RequestAnswerSupInterface,
   sequelize,
@@ -75,7 +75,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   async signSupChecklist(
     checkListSupplyEntityDto: CheckListSupplyEntityDto,
   ): Promise<object> {
-    const { id, recipientId, notes } = checkListSupplyEntityDto;
+    const { id, recipientId, delivererId, notes } = checkListSupplyEntityDto;
 
     let tx: Transaction | undefined;
 
@@ -88,10 +88,25 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       });
       if (!exists) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
 
+      const deliverer = await User.findOne({
+        where: { id: delivererId },
+        attributes: ["id", "signature"],
+      });
+      if (!deliverer) throw ERROR_CODES.INVALID_DELIVERER_ID;
+
+      const recipient = await User.findOne({
+        where: { id: recipientId },
+        attributes: ["id", "signature"],
+      });
+      if (!recipient) throw ERROR_CODES.INVALID_RECIPIENT_ID;
+
       await ChecklistSupply.update(
         {
-          recipient_id: recipientId,
-          notes: notes,
+          deliverer_id: deliverer.id,
+          sign_deliverer_path: deliverer.signature,
+          recipient_id: recipient.id,
+          sign_recipient_path: recipient.signature,
+          notes: notes ?? undefined,
         },
         {
           where: { id },
@@ -148,15 +163,78 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   async getSupChecklist(id: string): Promise<object> {
     try {
       const checklist = await ChecklistSupply.findByPk(id, {
+        attributes: [
+          "id",
+          "sign_paramedical_path",
+          "sign_recipient_path",
+          "notes",
+          "createdAt",
+          "updatedAt",
+        ],
         include: [
+          {
+            model: Shift,
+            as: "shift",
+            attributes: ["id"],
+            include: [
+              {
+                model: Guard,
+                as: "guard",
+                attributes: ["id", "date", "state"],
+                include: [
+                  {
+                    model: User,
+                    as: "guardChief",
+                    attributes: ["id", "name", "lastname"],
+                  },
+                ],
+              },
+              {
+                model: User,
+                as: "paramedical",
+                attributes: ["id", "name", "lastname"],
+              },
+              {
+                model: User,
+                as: "driver",
+                attributes: ["id", "name", "lastname"],
+              },
+            ],
+          },
+          {
+            model: Ambulance,
+            as: "ambulance",
+            attributes: ["id", "number"],
+          },
+          {
+            model: User,
+            as: "deliverer",
+            attributes: ["id", "name", "lastname"],
+          },
+          {
+            model: User,
+            as: "recipient",
+            attributes: ["id", "name", "lastname"],
+          },
           {
             model: AnswerSupply,
             as: "answers",
+            attributes: [
+              "id",
+              "category",
+              "specification",
+              "avaible_quantity",
+              "min_quantity",
+              "required_quantity",
+              "measurement_unit",
+              "createdAt",
+              "updatedAt",
+            ],
             include: [
               {
                 model: AreaAmbulance,
                 as: "area",
-                attributes: ["name", "section", "order"],
+                attributes: ["id", "name", "section", "order"],
               },
             ],
           },
@@ -336,8 +414,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   async signAmbChecklist(
     checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
   ) {
-    const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } =
-      checkListAmbulanceEntityDto;
+    const { id, recipientId, delivererId, notes } = checkListAmbulanceEntityDto;
 
     const checklist = await ChecklistAmbulance.findOne({
       where: { id },
@@ -345,29 +422,29 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     });
     if (!checklist) throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
 
-    /*const { ambulance_id: ambulanceId } = checklist
-
-    const baseDir = 'uploads/ambulance';
-    const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
-
-    const saved: { absPath: string; relPath: string }[] = [];*/
-
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      /*const signOp = await saveWebFile(signOperatorFile!, baseDir, subDir);
-      saved.push({ absPath: signOp.absPath, relPath: signOp.relPath });
+      const deliverer = await User.findOne({
+        where: { id: delivererId },
+        attributes: ["id", "signature"],
+      });
+      if (!deliverer) throw ERROR_CODES.INVALID_DELIVERER_ID;
 
-      const signRec = await saveWebFile(signRecipientFile!, baseDir, subDir);
-      saved.push({ absPath: signRec.absPath, relPath: signRec.relPath });*/
+      const recipient = await User.findOne({
+        where: { id: recipientId },
+        attributes: ["id", "signature"],
+      });
+      if (!recipient) throw ERROR_CODES.INVALID_RECIPIENT_ID;
 
       await ChecklistAmbulance.update(
         {
-          /*sign_operator_path: signOp.relPath,
-        sign_recipient_path: signRec.relPath*/
-          recipient_id: recipientId,
+          deliverer_id: deliverer.id,
+          sign_deliverer_path: deliverer.signature,
+          recipient_id: recipient.id,
+          sign_recipient_path: recipient.signature,
           notes: notes ?? undefined,
         },
         { where: { id }, transaction: tx },
@@ -394,9 +471,9 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistAmbulance.findOne({
+      /*const checklist = await ChecklistAmbulance.findOne({
         where: { id },
-        attributes: ["gas_path", "sign_operator_path", "sign_recipient_path"],
+        attributes: ["gas_path", "sign_deliverer_path", "sign_recipient_path"],
         transaction: tx,
       });
 
@@ -409,7 +486,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       if (checklist?.sign_recipient_path)
         saved.push({ absPath: relToAbs(checklist?.sign_recipient_path) });
 
-      await Promise.allSettled(saved.map((f) => fs.unlink(f.absPath)));
+      await Promise.allSettled(saved.map((f) => fs.unlink(f.absPath)));*/
 
       const row = await ChecklistAmbulance.destroy({
         where: { id },
@@ -460,6 +537,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
                 attributes: ["id", "name", "lastname"],
               },
             ],
+          },
+          {
+            model: User,
+            as: "deliverer",
+            attributes: ["id", "name", "lastname"],
           },
           {
             model: User,

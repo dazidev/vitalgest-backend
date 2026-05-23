@@ -4,18 +4,15 @@ import { regularExp } from "../../infrastructure";
 type CheckListSupplyDtoProps = {
   id?: string;
   shiftId?: string;
-  signParamedicalFile?: File;
   recipientId?: string;
-  signRecipientFile?: File;
   notes?: string;
 };
 
 export class CheckListSupplyEntityDto {
   readonly id?: string;
   readonly shiftId?: string;
-  readonly signParamedicalFile?: File;
   readonly recipientId?: string;
-  readonly signRecipientFile?: File;
+  readonly delivererId?: string;
   readonly notes?: string;
 
   private constructor(props: CheckListSupplyDtoProps) {
@@ -48,8 +45,7 @@ export class CheckListSupplyEntityDto {
   static sign(object: {
     [key: string]: any;
   }): [string?, CheckListSupplyEntityDto?] {
-    const { id, /*signOperatorFile, signRecipientFile*/ recipientId, notes } =
-      object;
+    const { id, recipientId, delivererId, notes } = object;
 
     if (!id) return [ERROR_CODES.MISSING_CHECKLIST_SUPPLY_ID];
     if (!regularExp.uuid.test(id))
@@ -59,14 +55,15 @@ export class CheckListSupplyEntityDto {
     if (!regularExp.uuid.test(recipientId))
       return [ERROR_CODES.INVALID_RECIPIENT_ID];
 
-    //const error = this.validateSign(signOperatorFile, signRecipientFile);
-    //if (!(error === true)) return [error];
+    if (!delivererId) return [ERROR_CODES.MISSING_DELIVERER_ID];
+    if (!regularExp.uuid.test(delivererId))
+      return [ERROR_CODES.INVALID_DELIVERER_ID];
 
     return [
       undefined,
       new CheckListSupplyEntityDto({
         id,
-        /*signOperatorFile, signRecipientFile*/ recipientId,
+        recipientId,
         notes,
       }),
     ];

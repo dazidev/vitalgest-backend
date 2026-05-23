@@ -7,9 +7,8 @@ type CheckListAmbulanceDtoProps = {
   shiftId?: string;
   km?: string;
   gasFile?: File;
-  signOperatorFile?: File;
+  delivererId?: string;
   recipientId?: string;
-  signRecipientFile?: File;
   notes?: string;
 };
 
@@ -19,9 +18,8 @@ export class CheckListAmbulanceEntityDto {
   readonly shiftId?: string;
   readonly km?: string;
   readonly gasFile?: File;
-  readonly signOperatorFile?: File;
+  readonly delivererId?: string;
   readonly recipientId?: string;
-  readonly signRecipientFile?: File;
   readonly notes?: string;
 
   private constructor(props: CheckListAmbulanceDtoProps) {
@@ -31,7 +29,7 @@ export class CheckListAmbulanceEntityDto {
   private static validateData(
     ambulanceId: string,
     shiftId: string,
-    km: string /*gasFile: File*/
+    km: string /*gasFile: File*/,
   ) {
     if (!ambulanceId) return ERROR_CODES.MISSING_AMBULANCE_ID;
     if (!regularExp.uuid.test(ambulanceId))
@@ -84,8 +82,7 @@ export class CheckListAmbulanceEntityDto {
   static sign(object: {
     [key: string]: any;
   }): [string?, CheckListAmbulanceEntityDto?] {
-    const { id, /*signOperatorFile, signRecipientFile,*/ recipientId, notes } =
-      object;
+    const { id, recipientId, delivererId, notes } = object;
 
     if (!id) return [ERROR_CODES.MISSING_CHECKLIST_AMBULANCE_ID];
     if (!regularExp.uuid.test(id))
@@ -94,14 +91,16 @@ export class CheckListAmbulanceEntityDto {
     if (!regularExp.uuid.test(recipientId))
       return [ERROR_CODES.INVALID_RECIPIENT_ID];
 
-    /*const error = this.validateSign(signOperatorFile, signRecipientFile)
-    if (!(error === true)) return [error]*/
+    if (!delivererId) return [ERROR_CODES.MISSING_DELIVERER_ID];
+    if (!regularExp.uuid.test(delivererId))
+      return [ERROR_CODES.INVALID_DELIVERER_ID];
 
     return [
       undefined,
       new CheckListAmbulanceEntityDto({
         id,
-        /*signOperatorFile, signRecipientFile,*/ recipientId,
+        recipientId,
+        delivererId,
         notes,
       }),
     ];
