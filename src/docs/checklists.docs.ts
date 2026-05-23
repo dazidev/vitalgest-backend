@@ -155,35 +155,45 @@
  *     summary: Firmar checklist de ambulancia
  *     tags: ['ENDPOINTS Gestión de Checklists']
  *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID del checklist de ambulancia
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             required:
- *               - signOperatorFile
- *               - signRecipientFile
+ *               - recipientId
+ *               - delivererId
  *             properties:
- *               notes:
- *                 type: string
  *               recipientId:
  *                 type: string
- *                 formant: UUID
- *               signOperatorFile:
+ *                 format: uuid
+ *                 description: ID del usuario que recibe el checklist
+ *               delivererId:
  *                 type: string
- *                 format: binary
- *               signRecipientFile:
+ *                 format: uuid
+ *                 description: ID del usuario que entrega el checklist
+ *               notes:
  *                 type: string
- *                 format: binary
- *           encoding:
- *             signOperatorFile:
- *               contentType: image/jpeg, image/png, application/pdf
- *             signRecipientFile:
- *               contentType: image/jpeg, image/png, application/pdf
+ *                 nullable: true
+ *                 description: Observaciones o notas del checklist
+ *           examples:
+ *             request:
+ *               value:
+ *                 recipientId: "43a7bc86-5a19-4fc6-9add-887489221169"
+ *                 delivererId: "e8d02383-66a0-4ab0-8155-5c228933e84c"
+ *                 notes: "Checklist recibido correctamente"
  *     responses:
- *       201:
- *         description: Cheklist firmado
+ *       200:
+ *         description: Checklist de ambulancia firmado correctamente
  *         content:
  *           application/json:
  *             examples:
@@ -197,6 +207,11 @@
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  *       401:
  *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ *       404:
+ *         description: Checklist de ambulancia no encontrado
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -346,6 +361,10 @@
  *                         name: "Chofer"
  *                         lastname: "Seed"
  *                     recipient:
+ *                       id: "43a7bc86-5a19-4fc6-9add-887489221169"
+ *                       name: "Jefe Guardia"
+ *                       lastname: "Seed"
+ *                     deliverer:
  *                       id: "43a7bc86-5a19-4fc6-9add-887489221169"
  *                       name: "Jefe Guardia"
  *                       lastname: "Seed"
@@ -540,6 +559,7 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: ID del checklist de suministros
  *     requestBody:
  *       required: true
  *       content:
@@ -548,18 +568,29 @@
  *             type: object
  *             required:
  *               - recipientId
+ *               - delivererId
  *             properties:
  *               recipientId:
  *                 type: string
  *                 format: uuid
+ *                 description: ID del usuario que recibe el checklist de suministros
+ *               delivererId:
+ *                 type: string
+ *                 format: uuid
+ *                 description: ID del usuario que entrega el checklist de suministros
+ *               notes:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Observaciones o notas del checklist
  *           examples:
  *             request:
  *               value:
  *                 recipientId: "ad39232c-f896-4f9b-a11e-ffe4668ba430"
+ *                 delivererId: "e8d02383-66a0-4ab0-8155-5c228933e84c"
  *                 notes: "Aca una nota en texto"
  *     responses:
  *       200:
- *         description: Checklist firmado correctamente
+ *         description: Checklist de suministros firmado correctamente
  *         content:
  *           application/json:
  *             examples:
@@ -577,7 +608,7 @@
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  *       404:
- *         description: Checklist no encontrado
+ *         description: Checklist de suministros no encontrado
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -675,7 +706,7 @@
  *         description: ID del checklist de suministros
  *     responses:
  *       200:
- *         description: Checklist encontrado
+ *         description: Checklist de suministros encontrado correctamente
  *         content:
  *           application/json:
  *             examples:
@@ -683,73 +714,95 @@
  *                 value:
  *                   success: true
  *                   data:
- *                     id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
- *                     shift_id: "65dbad2f-f7af-4c2e-8550-0d74050ae390"
+ *                     id: "6a367407-0e60-40d6-b904-6e01f04745d7"
  *                     sign_paramedical_path: null
- *                     recipient_id: "64059220-ea46-42ca-acc8-ad9dd79b4fad"
  *                     sign_recipient_path: null
- *                     notes: "Esto es una nota"
- *                     createdAt: "2025-11-24T16:35:15.000Z"
- *                     updatedAt: "2025-11-24T16:42:44.000Z"
- *                     ambulance_id: null
+ *                     notes: ""
+ *                     createdAt: "2026-05-20T02:53:44.000Z"
+ *                     updatedAt: "2026-05-20T02:59:41.000Z"
+ *                     shift:
+ *                       id: "89b576c4-e58a-499c-8bc3-5530e4464cdf"
+ *                       guard:
+ *                         id: "160fc040-1612-438a-975f-ffcfa60614e3"
+ *                         date: "2026-05-20T00:00:00.000Z"
+ *                         state: "Cerrada"
+ *                         guardChief:
+ *                           id: "43a7bc86-5a19-4fc6-9add-887489221169"
+ *                           name: "Jefe Guardia"
+ *                           lastname: "Seed"
+ *                       paramedical:
+ *                         id: "e8d02383-66a0-4ab0-8155-5c228933e84c"
+ *                         name: "Paramedico"
+ *                         lastname: "Seed"
+ *                       driver:
+ *                         id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
+ *                         name: "Chofer"
+ *                         lastname: "Seed"
+ *                     ambulance:
+ *                       id: "23258793-4071-4b9b-b90a-10afa641b27f"
+ *                       number: "DF434F7"
+ *                     recipient:
+ *                       id: "43a7bc86-5a19-4fc6-9add-887489221169"
+ *                       name: "Jefe Guardia"
+ *                       lastname: "Seed"
+ *                     deliverer:
+ *                       id: "43a7bc86-5a19-4fc6-9add-887489221169"
+ *                       name: "Jefe Guardia"
+ *                       lastname: "Seed"
  *                     answers:
- *                       - id: "c178669a-550f-4fcc-83ca-85297723e7bd"
- *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                       - id: "6cffd14f-566d-42e3-9505-3cc951589274"
  *                         category: "Estetoscopio"
  *                         specification: "Pediatrico"
- *                         avaible_quantity: 3
+ *                         avaible_quantity: -2
  *                         min_quantity: 3
- *                         required_quantity: 0
+ *                         required_quantity: 5
  *                         measurement_unit: "unit"
- *                         area_id: 1
- *                         createdAt: "2025-11-24T16:45:41.000Z"
- *                         updatedAt: "2025-11-24T16:45:41.000Z"
+ *                         createdAt: "2026-05-20T02:59:41.000Z"
+ *                         updatedAt: "2026-05-20T02:59:41.000Z"
  *                         area:
+ *                           id: 1
  *                           name: "EQUIPO DE VÍAS AÉREAS"
  *                           section: "GABINETE 1"
  *                           order: 1
- *                       - id: "107bf868-3e2b-44c7-8136-c913f2893412"
- *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                       - id: "ad4ef371-880c-4d98-874d-82118fa39436"
  *                         category: "Esfigmomanometro"
  *                         specification: "Adulto"
- *                         avaible_quantity: 0
+ *                         avaible_quantity: -3
  *                         min_quantity: 2
- *                         required_quantity: 2
+ *                         required_quantity: 5
  *                         measurement_unit: "unit"
- *                         area_id: 2
- *                         createdAt: "2025-11-24T16:45:41.000Z"
- *                         updatedAt: "2025-11-24T16:45:41.000Z"
+ *                         createdAt: "2026-05-20T02:59:41.000Z"
+ *                         updatedAt: "2026-05-20T02:59:41.000Z"
  *                         area:
+ *                           id: 2
  *                           name: "EQUIPO DE CIRCULACIÓN Y CONTROL DE HEMORRAGIAS"
  *                           section: "GABINETE 2"
  *                           order: 2
- *                       - id: "dc5f3d9e-b190-43db-848d-67dbfd772011"
- *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                       - id: "5ca11fa3-19e8-4579-92da-aba9efa64b28"
  *                         category: "Bolsa de válvula - mascarilla (BVM)"
  *                         specification: "Adulto"
- *                         avaible_quantity: 1
+ *                         avaible_quantity: -2
  *                         min_quantity: 2
- *                         required_quantity: 1
+ *                         required_quantity: 4
  *                         measurement_unit: "unit"
- *                         area_id: 3
- *                         createdAt: "2025-11-24T16:45:41.000Z"
- *                         updatedAt: "2025-11-24T16:45:41.000Z"
+ *                         createdAt: "2026-05-20T02:59:41.000Z"
+ *                         updatedAt: "2026-05-20T02:59:41.000Z"
  *                         area:
+ *                           id: 3
  *                           name: "MATERIAL PARTO DE EMERGANCIA"
  *                           section: "GABINETE 3"
  *                           order: 3
- *                       - id: "4e0e0a65-e034-4824-9687-e2e48db5629a"
- *                         checklist_id: "86aa8dba-8748-4611-a92d-51b7555f13c9"
+ *                       - id: "9683588f-13e6-41ed-894a-0d06f90d6e8d"
  *                         category: "Mascarilla con reservorio"
  *                         specification: "Adulto"
- *                         avaible_quantity: 0
+ *                         avaible_quantity: -2
  *                         min_quantity: 1
- *                         required_quantity: 1
+ *                         required_quantity: 3
  *                         measurement_unit: "unit"
- *                         area_id: 4
- *                         createdAt: "2025-11-24T16:45:40.000Z"
- *                         updatedAt: "2025-11-24T16:45:40.000Z"
+ *                         createdAt: "2026-05-20T02:59:41.000Z"
+ *                         updatedAt: "2026-05-20T02:59:41.000Z"
  *                         area:
+ *                           id: 4
  *                           name: "OTROS ELEMENTOS"
  *                           section: "GABINETE 4"
  *                           order: 4
@@ -764,7 +817,7 @@
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  *       404:
- *         description: Checklist no encontrado
+ *         description: Checklist de suministros no encontrado
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
