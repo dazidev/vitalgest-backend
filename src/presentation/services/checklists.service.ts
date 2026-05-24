@@ -120,6 +120,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         success: true,
       };
     } catch (error) {
+      console.log(error);
       await tx?.rollback();
       if (typeof error === "string") throw error;
       throw ERROR_CODES.DELETE_FAILED;

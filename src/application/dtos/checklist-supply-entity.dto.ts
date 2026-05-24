@@ -5,6 +5,7 @@ type CheckListSupplyDtoProps = {
   id?: string;
   shiftId?: string;
   recipientId?: string;
+  delivererId?: string;
   notes?: string;
 };
 
@@ -64,6 +65,7 @@ export class CheckListSupplyEntityDto {
       new CheckListSupplyEntityDto({
         id,
         recipientId,
+        delivererId,
         notes,
       }),
     ];
