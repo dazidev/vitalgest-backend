@@ -78,6 +78,7 @@ class ChecklistsService {
             };
         }
         catch (error) {
+            console.log(error);
             await tx?.rollback();
             if (typeof error === "string")
                 throw error;

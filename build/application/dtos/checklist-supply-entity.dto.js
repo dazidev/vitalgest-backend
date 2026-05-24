@@ -45,6 +45,7 @@ class CheckListSupplyEntityDto {
             new CheckListSupplyEntityDto({
                 id,
                 recipientId,
+                delivererId,
                 notes,
             }),
         ];
