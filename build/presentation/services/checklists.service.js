@@ -119,7 +119,7 @@ class ChecklistsService {
             const checklist = await infrastructure_1.ChecklistSupply.findByPk(id, {
                 attributes: [
                     "id",
-                    "sign_paramedical_path",
+                    "sign_deliverer_path",
                     "sign_recipient_path",
                     "notes",
                     "createdAt",
@@ -210,6 +210,7 @@ class ChecklistsService {
             };
         }
         catch (error) {
+            console.log(error);
             if (typeof error === "string")
                 throw error;
             throw domain_1.ERROR_CODES.UNKNOWN_DB_ERROR;
@@ -293,11 +294,7 @@ class ChecklistsService {
     }
     //* AMBULANCE CHECKLIST
     async createAmbChecklist(checkListAmbulanceEntityDto) {
-        const { ambulanceId, shiftId, km /*gasFile,*/ } = checkListAmbulanceEntityDto;
-        /*const baseDir = 'uploads/ambulance';
-        const subDir = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}/${ambulanceId}`;
-    
-        const saved: { absPath: string; relPath: string }[] = [];*/
+        const { ambulanceId, shiftId, km } = checkListAmbulanceEntityDto;
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
@@ -319,14 +316,12 @@ class ChecklistsService {
             });
             if (exists)
                 throw domain_1.ERROR_CODES.CHECKLIST_ALREADY_EXISTS;
-            /*const gas = await saveWebFile(gasFile!, baseDir, subDir);
-            saved.push({ absPath: gas.absPath, relPath: gas.relPath });*/
             const checklist = await infrastructure_1.ChecklistAmbulance.create({
                 ambulance_id: ambulanceId,
                 shift_id: shiftId,
                 time: (0, infrastructure_1.getCurrentTime)(),
                 km: Number(km),
-                gas_path: "sin utilizar" /*gas.relPath*/,
+                gas_path: "sin utilizar",
             }, { transaction: tx });
             await tx?.commit();
             return {
@@ -335,7 +330,6 @@ class ChecklistsService {
             };
         }
         catch (error) {
-            // await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
             await tx?.rollback();
             if (typeof error === "string")
                 throw error;
@@ -378,7 +372,6 @@ class ChecklistsService {
             };
         }
         catch (err) {
-            // await Promise.allSettled(saved.map(f => fs.unlink(f.absPath)))
             await tx?.rollback();
             throw domain_1.ERROR_CODES.UPDATE_FAILED;
         }
@@ -388,22 +381,6 @@ class ChecklistsService {
         let tx;
         try {
             tx = await infrastructure_1.sequelize.transaction();
-            /*const checklist = await ChecklistAmbulance.findOne({
-              where: { id },
-              attributes: ["gas_path", "sign_deliverer_path", "sign_recipient_path"],
-              transaction: tx,
-            });
-      
-            const saved: { absPath: string }[] = [];
-      
-            if (checklist?.gas_path)
-              saved.push({ absPath: relToAbs(checklist?.gas_path) });
-            if (checklist?.sign_operator_path)
-              saved.push({ absPath: relToAbs(checklist?.sign_operator_path) });
-            if (checklist?.sign_recipient_path)
-              saved.push({ absPath: relToAbs(checklist?.sign_recipient_path) });
-      
-            await Promise.allSettled(saved.map((f) => fs.unlink(f.absPath)));*/
             const row = await infrastructure_1.ChecklistAmbulance.destroy({
                 where: { id },
                 transaction: tx,

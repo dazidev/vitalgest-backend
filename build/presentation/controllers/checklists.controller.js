@@ -11,22 +11,8 @@ class ChecklistsController {
     createSupChecklist(req, res, next) {
         try {
             const { shiftId } = req.body;
-            // todo: habilitar después
-            /*const files = req.files as {
-              [field: string]: Express.Multer.File[]
-            } | undefined
-      
-            const gasFileMf = files?.gasFile?.[0]
-            const signOperatorFileMf = files?.signOperatorFile?.[0]
-            const signRecipientFileMf = files?.signRecipientFile?.[0]
-      
-            const gasFile = toWebFile(gasFileMf)
-            const signOperatorFile = toWebFile(signOperatorFileMf)
-            const signRecipientFile = toWebFile(signRecipientFileMf)*/
             const payload = {
                 shiftId,
-                /*signOperatorFile,
-                signRecipientFile,*/
             };
             const [error, checkListSupplyEntityDto] = checklist_supply_entity_dto_1.CheckListSupplyEntityDto.create(payload);
             if (error)
@@ -124,25 +110,10 @@ class ChecklistsController {
     createAmbChecklist(req, res, next) {
         try {
             const { ambulanceId, shiftId, km } = req.body;
-            // todo: habilitar después
-            /*const files = req.files as {
-              [field: string]: Express.Multer.File[]
-            } | undefined
-      
-            const gasFileMf = files?.gasFile?.[0]
-            const signOperatorFileMf = files?.signOperatorFile?.[0]
-            const signRecipientFileMf = files?.signRecipientFile?.[0]
-      
-            const gasFile = toWebFile(gasFileMf)
-            const signOperatorFile = toWebFile(signOperatorFileMf)
-            const signRecipientFile = toWebFile(signRecipientFileMf)*/
             const payload = {
                 ambulanceId,
                 shiftId,
                 km,
-                /*gasFile,
-                signOperatorFile,
-                signRecipientFile,*/
             };
             const [error, checkListAmbulanceEntityDto] = application_1.CheckListAmbulanceEntityDto.create(payload);
             if (error)
@@ -162,16 +133,6 @@ class ChecklistsController {
         try {
             const { id } = req.params;
             const { recipientId, delivererId, notes } = req.body;
-            // todo: habilitar después
-            /*const files = req.files as {
-              [field: string]: Express.Multer.File[]
-            } | undefined
-      
-            const signOperatorFileMf = files?.signOperatorFile?.[0]
-            const signRecipientFileMf = files?.signRecipientFile?.[0]
-      
-            const signOperatorFile = toWebFile(signOperatorFileMf)
-            const signRecipientFile = toWebFile(signRecipientFileMf)*/
             const payload = {
                 id,
                 recipientId,
