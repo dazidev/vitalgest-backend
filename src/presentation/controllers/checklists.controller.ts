@@ -15,23 +15,8 @@ export class ChecklistsController implements CheckListsControllerInterface {
     try {
       const { shiftId } = req.body;
 
-      // todo: habilitar después
-      /*const files = req.files as {
-        [field: string]: Express.Multer.File[]
-      } | undefined
-
-      const gasFileMf = files?.gasFile?.[0]
-      const signOperatorFileMf = files?.signOperatorFile?.[0]
-      const signRecipientFileMf = files?.signRecipientFile?.[0]
-
-      const gasFile = toWebFile(gasFileMf)
-      const signOperatorFile = toWebFile(signOperatorFileMf)
-      const signRecipientFile = toWebFile(signRecipientFileMf)*/
-
       const payload = {
         shiftId,
-        /*signOperatorFile,
-        signRecipientFile,*/
       };
 
       const [error, checkListSupplyEntityDto] =
@@ -144,26 +129,10 @@ export class ChecklistsController implements CheckListsControllerInterface {
     try {
       const { ambulanceId, shiftId, km } = req.body;
 
-      // todo: habilitar después
-      /*const files = req.files as {
-        [field: string]: Express.Multer.File[]
-      } | undefined
-
-      const gasFileMf = files?.gasFile?.[0]
-      const signOperatorFileMf = files?.signOperatorFile?.[0]
-      const signRecipientFileMf = files?.signRecipientFile?.[0]
-
-      const gasFile = toWebFile(gasFileMf)
-      const signOperatorFile = toWebFile(signOperatorFileMf)
-      const signRecipientFile = toWebFile(signRecipientFileMf)*/
-
       const payload = {
         ambulanceId,
         shiftId,
         km,
-        /*gasFile,
-        signOperatorFile,
-        signRecipientFile,*/
       };
 
       const [error, checkListAmbulanceEntityDto] =
@@ -184,17 +153,6 @@ export class ChecklistsController implements CheckListsControllerInterface {
     try {
       const { id } = req.params;
       const { recipientId, delivererId, notes } = req.body;
-
-      // todo: habilitar después
-      /*const files = req.files as {
-        [field: string]: Express.Multer.File[]
-      } | undefined
-
-      const signOperatorFileMf = files?.signOperatorFile?.[0]
-      const signRecipientFileMf = files?.signRecipientFile?.[0]
-
-      const signOperatorFile = toWebFile(signOperatorFileMf)
-      const signRecipientFile = toWebFile(signRecipientFileMf)*/
 
       const payload = {
         id,
