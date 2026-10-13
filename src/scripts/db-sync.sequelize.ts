@@ -1,6 +1,5 @@
 import { sequelize } from "../infrastructure";
-import "../infrastructure/models/index"; // importa todos tus modelos
-// o un index que importe todos
+import "../infrastructure/models/index";
 
 async function run() {
   await sequelize.authenticate();

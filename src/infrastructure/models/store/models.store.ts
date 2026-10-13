@@ -16,6 +16,8 @@ import Supply from "./sequelize/supplies/supply-model.store";
 import SupplyAmbulance from "./sequelize/supplies/supply-ambulance-model.store";
 import AreaAmbulance from "./sequelize/supplies/area-ambulance-model.store";
 import AnswerSupply from "./sequelize/checklist/answer-supply-model.store";
+import QuestionCategory from "./sequelize/checklist/question-category-model.store";
+import QuestionSubcategory from "./sequelize/checklist/question-subcategory-model.store";
 
 // Definicion de asociaciones
 State.hasMany(Municipality, { foreignKey: "state_id", as: "municipalities" });
@@ -193,6 +195,36 @@ Ambulance.hasMany(SupplyAmbulance, {
   as: "supplies",
 });
 
+// Categorías y subcategorías
+QuestionCategory.hasMany(QuestionSubcategory, {
+  foreignKey: "category_id",
+  as: "subcategories",
+});
+QuestionSubcategory.belongsTo(QuestionCategory, {
+  foreignKey: "category_id",
+  as: "category",
+});
+
+// Categorías y preguntas
+QuestionCategory.hasMany(Question, {
+  foreignKey: "category_id",
+  as: "questions",
+});
+Question.belongsTo(QuestionCategory, {
+  foreignKey: "category_id",
+  as: "category",
+});
+
+// Subcategorías y preguntas
+QuestionSubcategory.hasMany(Question, {
+  foreignKey: "subcategory_id",
+  as: "questions",
+});
+Question.belongsTo(QuestionSubcategory, {
+  foreignKey: "subcategory_id",
+  as: "subcategory",
+});
+
 // desde aca se debe hacer las importaciones
 export {
   State,
@@ -207,6 +239,8 @@ export {
   ChecklistSupply,
   AnswerSupply,
   Question,
+  QuestionCategory,
+  QuestionSubcategory,
   Answer,
   AnswerComponent,
   Supply,

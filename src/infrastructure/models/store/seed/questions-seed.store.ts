@@ -1,6 +1,10 @@
 import { Transaction } from "sequelize";
 import { sequelize } from "../../../config/sequelize.adapter";
-import { Question } from "../models.store";
+import {
+  Question,
+  QuestionCategory,
+  QuestionSubcategory,
+} from "../models.store";
 
 enum CATEGORIES {
   C1 = "Apariencia general",
@@ -30,14 +34,33 @@ enum TYPE_RESPONSES {
   BOOL_OPTION_TEXT = "bool_option_text",
 }
 
+interface LegacyQuestionSeed {
+  question: string;
+  name_category: string;
+  order_category: number;
+  name_subcategory?: string | null;
+  order_subcategory?: number | null;
+  order_question_category: number;
+  type_response: Question["type_response"];
+}
+
 export const createQuestionsSeed = async () => {
   let tx: Transaction | undefined;
+
+  const legacyQuestions: LegacyQuestionSeed[] = [];
+
+  const addLegacyQuestions = (
+    questions: LegacyQuestionSeed[],
+    _options?: { transaction: Transaction },
+  ): void => {
+    legacyQuestions.push(...questions);
+  };
 
   try {
     tx = await sequelize.transaction();
 
     //* Apariencia general (1)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Limpieza de la unidad",
@@ -61,11 +84,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Compartimiento del operador (2)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Checklist",
@@ -157,11 +180,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Comportamiento del motor (3)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Señal de fugas",
@@ -241,11 +264,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.OPTION,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Recorrido exterior lado del aperador (4)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Luces laterales de emergencia",
@@ -297,11 +320,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL_OPTION,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Recorrido exterior frente (5)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Torreta",
@@ -374,11 +397,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL_OPTION,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Recorrido exterior lado del copiloto (6)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Luces laterales de emergencia",
@@ -430,11 +453,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL_OPTION,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Compartimiento del paciente (7)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Luces de paso",
@@ -507,11 +530,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL_TEXT,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Recorrido exterior posterior (8)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Barra de tráfico",
@@ -584,11 +607,11 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL_OPTION,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Herramienta y aditamentos (9)
-    await Question.bulkCreate(
+    await addLegacyQuestions(
       [
         {
           question: "Gato hidráulico",
@@ -640,8 +663,138 @@ export const createQuestionsSeed = async () => {
           type_response: TYPE_RESPONSES.BOOL_OPTION,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
+
+    //* Crear categorías
+    const categoryDefinitions = new Map<
+      string,
+      { name: string; order: number }
+    >();
+
+    for (const item of legacyQuestions) {
+      const existing = categoryDefinitions.get(item.name_category);
+
+      if (existing && existing.order !== item.order_category) {
+        throw new Error("Orden inconsistente en categoría");
+      }
+
+      categoryDefinitions.set(item.name_category, {
+        name: item.name_category,
+        order: item.order_category,
+      });
+    }
+
+    const categories = await QuestionCategory.bulkCreate(
+      [...categoryDefinitions.values()]
+        .sort((a, b) => a.order - b.order)
+        .map((category, index) => ({
+          name: category.name,
+          order: index + 1,
+        })),
+      { transaction: tx },
+    );
+
+    const categoryMap = new Map(
+      categories.map((category) => [category.name, category.id]),
+    );
+
+    //* Crear subcategorías
+    const subcategoryDefinitions = new Map<
+      string,
+      {
+        category_id: string;
+        name: string;
+        order: number;
+      }
+    >();
+
+    for (const item of legacyQuestions) {
+      if (!item.name_subcategory) continue;
+
+      const categoryId = categoryMap.get(item.name_category);
+
+      if (!categoryId) throw new Error("Categoría no encontrada");
+
+      const key = `${item.name_category}:${item.name_subcategory}`;
+
+      const existing = subcategoryDefinitions.get(key);
+
+      if (existing && existing.order !== item.order_subcategory) {
+        throw new Error("Orden inconsistente en subcategoría");
+      }
+
+      subcategoryDefinitions.set(key, {
+        category_id: categoryId,
+        name: item.name_subcategory,
+        order: item.order_subcategory ?? 1,
+      });
+    }
+
+    const subcategoryOrders = new Map<string, number>();
+
+    const subcategories = await QuestionSubcategory.bulkCreate(
+      [...subcategoryDefinitions.values()]
+        .sort(
+          (a, b) =>
+            a.category_id.localeCompare(b.category_id) || a.order - b.order,
+        )
+        .map((subcategory) => {
+          const nextOrder =
+            (subcategoryOrders.get(subcategory.category_id) ?? 0) + 1;
+
+          subcategoryOrders.set(subcategory.category_id, nextOrder);
+
+          return {
+            category_id: subcategory.category_id,
+            name: subcategory.name,
+            order: nextOrder,
+          };
+        }),
+      { transaction: tx },
+    );
+
+    const subcategoryMap = new Map(
+      subcategories.map((subcategory) => [
+        `${subcategory.category_id}:${subcategory.name}`,
+        subcategory.id,
+      ]),
+    );
+
+    //* Crear preguntas con orden automático
+    const questionOrders = new Map<string, number>();
+
+    const questionsToCreate = legacyQuestions.map((item) => {
+      const categoryId = categoryMap.get(item.name_category);
+
+      if (!categoryId) throw new Error("Categoría no encontrada");
+
+      const subcategoryId = item.name_subcategory
+        ? subcategoryMap.get(`${categoryId}:${item.name_subcategory}`)
+        : null;
+
+      if (item.name_subcategory && !subcategoryId) {
+        throw new Error("Subcategoría no encontrada");
+      }
+
+      const groupKey = subcategoryId ?? categoryId;
+
+      const nextOrder = (questionOrders.get(groupKey) ?? 0) + 1;
+
+      questionOrders.set(groupKey, nextOrder);
+
+      return {
+        question: item.question,
+        category_id: categoryId,
+        subcategory_id: subcategoryId ?? null,
+        order_question_category: nextOrder,
+        type_response: item.type_response,
+      };
+    });
+
+    await Question.bulkCreate(questionsToCreate, {
+      transaction: tx,
+    });
 
     await tx.commit();
 

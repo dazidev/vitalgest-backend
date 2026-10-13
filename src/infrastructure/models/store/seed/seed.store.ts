@@ -31,11 +31,11 @@ export const createSeed = async () => {
         { name: "San Luis Potosí" },
         { name: "Guanajuato" },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Municipios
-    await states.map(async (state) => {
+    for (const state of states) {
       if (state.name === "Jalisco") {
         await Municipality.bulkCreate(
           [
@@ -43,7 +43,7 @@ export const createSeed = async () => {
             { name: "Tala", state_id: state.id },
             { name: "Guadalajara", state_id: state.id },
           ],
-          { transaction: tx }
+          { transaction: tx },
         );
       } else if (state.name === "San Luis Potosí") {
         await Municipality.bulkCreate(
@@ -52,7 +52,7 @@ export const createSeed = async () => {
             { name: "Rio verde", state_id: state.id },
             { name: "Matehuala", state_id: state.id },
           ],
-          { transaction: tx }
+          { transaction: tx },
         );
       } else if (state.name === "Guanajuato") {
         await Municipality.bulkCreate(
@@ -61,10 +61,10 @@ export const createSeed = async () => {
             { name: "Abasolo", state_id: state.id },
             { name: "San Miguel de Allende", state_id: state.id },
           ],
-          { transaction: tx }
+          { transaction: tx },
         );
       }
-    });
+    }
 
     const municipality = await Municipality.findOne({
       where: { name: "Ameca" },
@@ -78,19 +78,19 @@ export const createSeed = async () => {
         name: `Delegación ${municipality?.name}, ${municipality?.state?.name}`,
         municipality_id: municipality?.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Pharmacia
     const pharmacy = await Pharmacy.create(
       { delegation_id: delegation.id },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Usuarios semilla
     const password = await bcrypt.hash(
       process.env.USER_PASSWORD_SEED as string,
-      10
+      10,
     );
 
     await User.create(
@@ -105,7 +105,7 @@ export const createSeed = async () => {
         position: "developer",
         delegation_id: delegation.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     const guardChief = await User.create(
@@ -120,7 +120,7 @@ export const createSeed = async () => {
         position: "Jefe de guardia",
         delegation_id: delegation.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     const paramedical = await User.create(
@@ -135,7 +135,7 @@ export const createSeed = async () => {
         position: "Paramedico",
         delegation_id: delegation.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     const driver = await User.create(
@@ -150,7 +150,7 @@ export const createSeed = async () => {
         position: "Chofer",
         delegation_id: delegation.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Ambulancia semilla
@@ -161,7 +161,7 @@ export const createSeed = async () => {
         brand: "Mercedez Benz",
         delegation_id: delegation.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Guardia semilla
@@ -172,7 +172,7 @@ export const createSeed = async () => {
       now.getDate(),
       0,
       0,
-      0
+      0,
     );
 
     const guard = await Guard.create(
@@ -182,7 +182,7 @@ export const createSeed = async () => {
         guard_chief: guardChief.id,
         delegation_id: delegation.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Turno semilla
@@ -194,7 +194,7 @@ export const createSeed = async () => {
         paramedical_id: paramedical.id,
         driver_id: driver.id,
       },
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Areas de ambulancia semilla
@@ -243,7 +243,7 @@ export const createSeed = async () => {
           order: 7,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Suministros semilla
@@ -282,7 +282,7 @@ export const createSeed = async () => {
           measurement_unit: "unit",
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     //* Suministros a ambulancia
@@ -329,7 +329,7 @@ export const createSeed = async () => {
           measurement_unit: supplies[3].measurement_unit,
         },
       ],
-      { transaction: tx }
+      { transaction: tx },
     );
 
     await tx.commit();

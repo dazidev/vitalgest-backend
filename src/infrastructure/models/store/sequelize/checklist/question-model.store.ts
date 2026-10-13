@@ -1,14 +1,16 @@
 import {
   CreationOptional,
   DataTypes,
+  ForeignKey,
   InferAttributes,
   InferCreationAttributes,
   Model,
+  NonAttribute,
   UUIDV4,
 } from "sequelize";
 import { sequelize } from "../../../../config/sequelize.adapter";
-
-// const RESPONSE_STATES = ['BUENO','REGULAR','MALO'] as const;
+import QuestionCategory from "./question-category-model.store";
+import QuestionSubcategory from "./question-subcategory-model.store";
 
 const TYPE_RESPONSES = [
   "bool",
@@ -28,11 +30,14 @@ class Question extends Model<
 > {
   declare id: CreationOptional<string>;
   declare question: string;
-  declare name_category: string;
-  declare order_category: number;
+
+  declare category_id: ForeignKey<QuestionCategory["id"]>;
+  declare subcategory_id: ForeignKey<QuestionSubcategory["id"]> | null;
+
+  declare category?: NonAttribute<QuestionCategory>;
+  declare subcategory?: NonAttribute<QuestionSubcategory | null>;
+
   declare order_question_category: number;
-  declare name_subcategory: CreationOptional<string | null>;
-  declare order_subcategory: CreationOptional<number | null>;
   declare type_response: TypeResponse;
 }
 
@@ -44,22 +49,34 @@ Question.init(
       defaultValue: UUIDV4,
       allowNull: false,
     },
-    question: { type: DataTypes.STRING, allowNull: false },
-    name_category: { type: DataTypes.STRING, allowNull: false },
-    order_category: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    question: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    category_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "question_categories",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    subcategory_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      defaultValue: null,
+      references: {
+        model: "question_subcategories",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
     order_question_category: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
-    },
-    name_subcategory: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: null,
-    },
-    order_subcategory: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: true,
-      defaultValue: null,
     },
     type_response: {
       type: DataTypes.ENUM(...TYPE_RESPONSES),
@@ -72,7 +89,14 @@ Question.init(
     tableName: "questions",
     timestamps: true,
     underscored: true,
-  }
+    indexes: [
+      { fields: ["category_id"] },
+      { fields: ["subcategory_id"] },
+      {
+        fields: ["category_id", "subcategory_id", "order_question_category"],
+      },
+    ],
+  },
 );
 
 export default Question;
