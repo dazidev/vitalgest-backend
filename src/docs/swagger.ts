@@ -116,7 +116,9 @@ export const swaggerSpec = swaggerJSDoc({
               ],
               example: "bool",
             },
-            category: { $ref: "#/components/schemas/QuestionCategory" },
+            category: {
+              $ref: "#/components/schemas/QuestionCategory",
+            },
             subcategory: {
               allOf: [{ $ref: "#/components/schemas/QuestionSubcategory" }],
               nullable: true,

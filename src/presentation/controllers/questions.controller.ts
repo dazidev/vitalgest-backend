@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from "express";
 
 import { QuestionsControllerInterface, ERROR_CODES } from "../../domain";
 
-import { CustomError, QuestionCategoryEntityDto } from "../../application";
+import {
+  CustomError,
+  QuestionCategoryEntityDto,
+  QuestionSubcategoryEntityDto,
+} from "../../application";
 
 import { regularExp } from "../../infrastructure";
 import { QuestionsService } from "../services/questions.service";
@@ -13,13 +17,20 @@ export class QuestionsController implements QuestionsControllerInterface {
   private handleError = (error: unknown): CustomError => {
     if (error instanceof CustomError) return error;
 
-    if (error === ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND)
-      return CustomError.notFound(ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND);
+    if (
+      error === ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND ||
+      error === ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND
+    ) {
+      return CustomError.notFound(error);
+    }
 
     if (
       error === ERROR_CODES.QUESTION_CATEGORY_ALREADY_EXISTS ||
       error === ERROR_CODES.QUESTION_CATEGORY_HAS_DEPENDENCIES ||
-      error === ERROR_CODES.QUESTION_CATEGORY_CONFLICT
+      error === ERROR_CODES.QUESTION_CATEGORY_CONFLICT ||
+      error === ERROR_CODES.QUESTION_SUBCATEGORY_ALREADY_EXISTS ||
+      error === ERROR_CODES.QUESTION_SUBCATEGORY_HAS_QUESTIONS ||
+      error === ERROR_CODES.QUESTION_SUBCATEGORY_CONFLICT
     ) {
       return new CustomError(409, error);
     }
@@ -110,6 +121,93 @@ export class QuestionsController implements QuestionsControllerInterface {
 
     this.questionsService
       .deleteCategory(categoryDto!.id!)
+      .then((response) => res.status(200).json(response))
+      .catch((error) => next(this.handleError(error)));
+  }
+
+  //* SUBCATEGORIES
+
+  getSubcategories(req: Request, res: Response, next: NextFunction): void {
+    const { categoryId } = req.query;
+
+    if (
+      categoryId !== undefined &&
+      (typeof categoryId !== "string" || !regularExp.uuid.test(categoryId))
+    ) {
+      throw CustomError.badRequest(ERROR_CODES.INVALID_QUESTION_CATEGORY_ID);
+    }
+
+    this.questionsService
+      .getSubcategories(typeof categoryId === "string" ? categoryId : undefined)
+      .then((response) => res.status(200).json(response))
+      .catch((error) => next(this.handleError(error)));
+  }
+
+  getSubcategory(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
+    const { id } = req.params;
+
+    if (!id)
+      throw CustomError.badRequest(ERROR_CODES.MISSING_QUESTION_SUBCATEGORY_ID);
+
+    if (!regularExp.uuid.test(id))
+      throw CustomError.badRequest(ERROR_CODES.INVALID_QUESTION_SUBCATEGORY_ID);
+
+    this.questionsService
+      .getSubcategory(id)
+      .then((response) => res.status(200).json(response))
+      .catch((error) => next(this.handleError(error)));
+  }
+
+  createSubcategory(req: Request, res: Response, next: NextFunction): void {
+    const [error, subcategoryDto] = QuestionSubcategoryEntityDto.create(
+      req.body ?? {},
+    );
+
+    if (error) throw CustomError.badRequest(error);
+
+    this.questionsService
+      .createSubcategory(subcategoryDto!)
+      .then((response) => res.status(201).json(response))
+      .catch((error) => next(this.handleError(error)));
+  }
+
+  editSubcategory(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
+    const { id } = req.params;
+
+    const [error, subcategoryDto] = QuestionSubcategoryEntityDto.edit({
+      ...req.body,
+      id,
+    });
+
+    if (error) throw CustomError.badRequest(error);
+
+    this.questionsService
+      .editSubcategory(subcategoryDto!)
+      .then((response) => res.status(200).json(response))
+      .catch((error) => next(this.handleError(error)));
+  }
+
+  deleteSubcategory(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
+    const [error, subcategoryDto] = QuestionSubcategoryEntityDto.delete({
+      id: req.params.id,
+    });
+
+    if (error) throw CustomError.badRequest(error);
+
+    this.questionsService
+      .deleteSubcategory(subcategoryDto!.id!)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }

@@ -11,4 +11,5 @@ export * from "./dtos/sup-answers.dto";
 export * from "./dtos/supply-entity.dto";
 export * from "./dtos/supply-ambulance-entity.dto";
 export * from "./dtos/questions/question-category-entity.dto";
+export * from "./dtos/questions/question-subcategory-entity.dto";
 export * from "./errors/custom.error";

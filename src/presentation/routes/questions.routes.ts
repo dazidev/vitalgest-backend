@@ -41,4 +41,36 @@ questionsRoutes.delete(
   controller.deleteCategory.bind(controller),
 );
 
+//* SUBCATEGORIES
+
+questionsRoutes.get(
+  "/subcategories",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.getSubcategories.bind(controller),
+);
+
+questionsRoutes.get(
+  "/subcategories/:id",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.getSubcategory.bind(controller),
+);
+
+questionsRoutes.post(
+  "/subcategories",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.createSubcategory.bind(controller),
+);
+
+questionsRoutes.put(
+  "/subcategories/:id",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.editSubcategory.bind(controller),
+);
+
+questionsRoutes.delete(
+  "/subcategories/:id",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.deleteSubcategory.bind(controller),
+);
+
 export default questionsRoutes;
