@@ -12,6 +12,8 @@ import {
   getCurrentTime,
   Guard,
   Question,
+  QuestionCategory,
+  QuestionSubcategory,
   //relToAbs,
   RequestAnswerInterface,
   RequestAnswerSupInterface,
@@ -329,21 +331,64 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   //* QUESTIONS
-  async getAmbQuestions(): Promise<object> {
+
+  private async findAmbQuestions(categoryId?: string) {
     const questions = await Question.findAll({
-      order: ["order_category", "order_question_category"],
+      ...(categoryId ? { where: { category_id: categoryId } } : {}),
+      include: [
+        {
+          model: QuestionCategory,
+          as: "category",
+          attributes: ["id", "name", "order"],
+          required: true,
+        },
+        {
+          model: QuestionSubcategory,
+          as: "subcategory",
+          attributes: ["id", "name", "order"],
+          required: false,
+        },
+      ],
+      order: [
+        [{ model: QuestionCategory, as: "category" }, "order", "ASC"],
+        [{ model: QuestionSubcategory, as: "subcategory" }, "order", "ASC"],
+        ["order_question_category", "ASC"],
+      ],
     });
+
+    return questions.map((question) => ({
+      ...question.toJSON(),
+      name_category: question.category?.name ?? null,
+      order_category: question.category?.order ?? null,
+      name_subcategory: question.subcategory?.name ?? null,
+      order_subcategory: question.subcategory?.order ?? null,
+    }));
+  }
+
+  async getAmbQuestions(): Promise<object> {
+    const questions = await this.findAmbQuestions();
+
     return {
       success: true,
       data: questions,
     };
   }
 
-  async getAmbQuestionPerCategory(category: number): Promise<object> {
-    const questions = await Question.findAll({
-      where: { order_category: category },
-      order: ["order_question_category"],
+  async getAmbQuestionPerCategory(categoryOrder: number): Promise<object> {
+    const category = await QuestionCategory.findOne({
+      where: { order: categoryOrder },
+      attributes: ["id"],
     });
+
+    if (!category) {
+      return {
+        success: true,
+        data: [],
+      };
+    }
+
+    const questions = await this.findAmbQuestions(category.id);
+
     return {
       success: true,
       data: questions,
@@ -533,14 +578,27 @@ export class ChecklistsService implements ChecklistsServiceInterface {
                 attributes: [
                   "id",
                   "question",
-                  "name_category",
-                  "order_category",
+                  "category_id",
+                  "subcategory_id",
                   "order_question_category",
-                  "name_subcategory",
-                  "order_subcategory",
                   "type_response",
                 ],
+                include: [
+                  {
+                    model: QuestionCategory,
+                    as: "category",
+                    attributes: ["id", "name", "order"],
+                    required: true,
+                  },
+                  {
+                    model: QuestionSubcategory,
+                    as: "subcategory",
+                    attributes: ["id", "name", "order"],
+                    required: false,
+                  },
+                ],
               },
+
               {
                 model: AnswerComponent,
                 as: "components",
@@ -555,11 +613,20 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             ],
           },
         ],
+
         order: [
           [
             { model: Answer, as: "answers" },
             { model: Question, as: "question" },
-            "order_category",
+            { model: QuestionCategory, as: "category" },
+            "order",
+            "ASC",
+          ],
+          [
+            { model: Answer, as: "answers" },
+            { model: Question, as: "question" },
+            { model: QuestionSubcategory, as: "subcategory" },
+            "order",
             "ASC",
           ],
           [
@@ -572,9 +639,31 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       });
       if (!checklist) throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
 
+      const answers = (checklist.get("answers") as Answer[] | undefined) ?? [];
+
+      const formattedAnswers = answers.map((answer) => {
+        const question = answer.question;
+
+        return {
+          ...answer.toJSON(),
+          question: question
+            ? {
+                ...question.toJSON(),
+                name_category: question.category?.name ?? null,
+                order_category: question.category?.order ?? null,
+                name_subcategory: question.subcategory?.name ?? null,
+                order_subcategory: question.subcategory?.order ?? null,
+              }
+            : null,
+        };
+      });
+
       return {
         success: true,
-        data: checklist,
+        data: {
+          ...checklist.toJSON(),
+          answers: formattedAnswers,
+        },
       };
     } catch (error) {
       if (typeof error === "string") throw error; //! TODO: tipificar mejor?

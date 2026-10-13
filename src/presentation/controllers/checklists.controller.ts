@@ -109,8 +109,7 @@ export class ChecklistsController implements CheckListsControllerInterface {
 
       const category = Number(catNorm);
 
-      //! todo: si se van a implementar mas categorias esto debe ser diferente
-      if (category < 1 || category > 9)
+      if (!Number.isSafeInteger(category) || category < 1)
         return next(CustomError.badRequest(ERROR_CODES.INVALID_CATEGORY));
 
       this.checklistsService
