@@ -26,6 +26,7 @@ import {
   checklistsRoutes,
   suppliesRoutes,
   userRoutes,
+  questionsRoutes,
 } from "./presentation";
 import { errorHandler } from "./infrastructure";
 
@@ -110,6 +111,7 @@ app.use("/api/shifts", shiftRoutes);
 app.use("/api/checklists", checklistsRoutes);
 app.use("/api/supplies", suppliesRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/questions", questionsRoutes);
 
 // para ver las imagenes
 app.use(

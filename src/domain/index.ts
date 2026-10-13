@@ -23,3 +23,7 @@ export * from "./services/ambulances.service.interface";
 export * from "./services/shifts.service.interface";
 export * from "./services/checklists.service.interface";
 export * from "./services/supplies.service.interface";
+
+// questions
+export * from "./controllers/questions.controller.interface";
+export * from "./services/questions.service.interface";
