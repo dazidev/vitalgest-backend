@@ -756,7 +756,12 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       await tx.commit();
     } catch (error) {
-      if (tx && !tx.finished) await tx.rollback();
+      try {
+        await tx?.rollback();
+      } catch (rollbackError) {
+        console.error("Error al revertir la transacción:", rollbackError);
+      }
+
       this.handleDatabaseError(error, "question");
     }
 
@@ -915,7 +920,12 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       await tx.commit();
     } catch (error) {
-      if (tx && !tx.finished) await tx.rollback();
+      try {
+        await tx?.rollback();
+      } catch (rollbackError) {
+        console.error("Error al revertir la transacción:", rollbackError);
+      }
+
       this.handleDatabaseError(error, "question");
     }
 
@@ -981,7 +991,12 @@ export class QuestionsService implements QuestionsServiceInterface {
         success: true,
       };
     } catch (error) {
-      if (tx && !tx.finished) await tx.rollback();
+      try {
+        await tx?.rollback();
+      } catch (rollbackError) {
+        console.error("Error al revertir la transacción:", rollbackError);
+      }
+
       this.handleDatabaseError(error, "question");
     }
   }
