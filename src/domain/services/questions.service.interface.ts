@@ -1,5 +1,6 @@
 import {
   QuestionCategoryEntityDto,
+  QuestionEntityDto,
   QuestionSubcategoryEntityDto,
 } from "../../application";
 
@@ -21,4 +22,11 @@ export interface QuestionsServiceInterface {
     subcategoryDto: QuestionSubcategoryEntityDto,
   ): Promise<object>;
   deleteSubcategory(id: string): Promise<object>;
+
+  //* Questions
+  getQuestions(categoryId?: string, subcategoryId?: string): Promise<object>;
+  getQuestion(id: string): Promise<object>;
+  createQuestion(questionDto: QuestionEntityDto): Promise<object>;
+  editQuestion(questionDto: QuestionEntityDto): Promise<object>;
+  deleteQuestion(id: string): Promise<object>;
 }

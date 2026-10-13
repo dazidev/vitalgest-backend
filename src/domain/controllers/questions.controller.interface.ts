@@ -14,4 +14,11 @@ export interface QuestionsControllerInterface {
   createSubcategory(req: Request, res: Response, next: NextFunction): void;
   editSubcategory(req: Request, res: Response, next: NextFunction): void;
   deleteSubcategory(req: Request, res: Response, next: NextFunction): void;
+
+  //* Questions
+  getQuestions(req: Request, res: Response, next: NextFunction): void;
+  getQuestion(req: Request, res: Response, next: NextFunction): void;
+  createQuestion(req: Request, res: Response, next: NextFunction): void;
+  editQuestion(req: Request, res: Response, next: NextFunction): void;
+  deleteQuestion(req: Request, res: Response, next: NextFunction): void;
 }

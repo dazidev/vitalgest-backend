@@ -74,7 +74,10 @@ export const swaggerSpec = swaggerJSDoc({
           type: "object",
           properties: {
             id: { type: "string", format: "uuid" },
-            name: { type: "string", example: "Compartimiento del operador" },
+            name: {
+              type: "string",
+              example: "Compartimiento del operador",
+            },
             order: { type: "integer", minimum: 1, example: 2 },
             createdAt: { type: "string", format: "date-time" },
             updatedAt: { type: "string", format: "date-time" },

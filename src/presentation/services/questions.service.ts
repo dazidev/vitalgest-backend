@@ -6,11 +6,13 @@ import {
 
 import {
   QuestionCategoryEntityDto,
+  QuestionEntityDto,
   QuestionSubcategoryEntityDto,
 } from "../../application";
 import { ERROR_CODES, QuestionsServiceInterface } from "../../domain";
 
 import {
+  Answer,
   Question,
   QuestionCategory,
   QuestionSubcategory,
@@ -52,7 +54,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
   private handleDatabaseError(
     error: unknown,
-    entity: "category" | "subcategory" = "category",
+    entity: "category" | "subcategory" | "question" = "category",
   ): never {
     if (typeof error === "string") throw error;
 
@@ -60,12 +62,16 @@ export class QuestionsService implements QuestionsServiceInterface {
       if (entity === "subcategory")
         throw ERROR_CODES.QUESTION_SUBCATEGORY_CONFLICT;
 
+      if (entity === "question") throw ERROR_CODES.QUESTION_CONFLICT;
+
       throw ERROR_CODES.QUESTION_CATEGORY_CONFLICT;
     }
 
     if (error instanceof ForeignKeyConstraintError) {
       if (entity === "subcategory")
         throw ERROR_CODES.QUESTION_SUBCATEGORY_HAS_QUESTIONS;
+
+      if (entity === "question") throw ERROR_CODES.QUESTION_CONFLICT;
 
       throw ERROR_CODES.QUESTION_CATEGORY_HAS_DEPENDENCIES;
     }
@@ -104,6 +110,51 @@ export class QuestionsService implements QuestionsServiceInterface {
     for (let i = 0; i < subcategories.length; i++) {
       await subcategories[i].update({ order: i + 1 }, { transaction: tx });
     }
+  }
+
+  private async getGroupQuestions(
+    categoryId: string,
+    subcategoryId: string | null,
+    tx: Transaction,
+  ): Promise<Question[]> {
+    return Question.findAll({
+      where: {
+        category_id: categoryId,
+        subcategory_id: subcategoryId,
+      },
+      order: [
+        ["order_question_category", "ASC"],
+        ["id", "ASC"],
+      ],
+      transaction: tx,
+      lock: tx.LOCK.UPDATE,
+    });
+  }
+
+  private async reorderQuestions(
+    questions: Question[],
+    tx: Transaction,
+  ): Promise<void> {
+    for (let i = 0; i < questions.length; i++) {
+      const newOrder = i + 1;
+
+      if (questions[i].order_question_category !== newOrder) {
+        await questions[i].update(
+          { order_question_category: newOrder },
+          { transaction: tx },
+        );
+      }
+    }
+  }
+
+  private formatQuestion(question: Question): object {
+    return {
+      ...question.toJSON(),
+      name_category: question.category?.name ?? null,
+      order_category: question.category?.order ?? null,
+      name_subcategory: question.subcategory?.name ?? null,
+      order_subcategory: question.subcategory?.order ?? null,
+    };
   }
 
   //* CATEGORIES
@@ -571,6 +622,367 @@ export class QuestionsService implements QuestionsServiceInterface {
     } catch (error) {
       await tx?.rollback();
       this.handleDatabaseError(error, "subcategory");
+    }
+  }
+
+  //* QUESTIONS
+
+  async getQuestions(
+    categoryId?: string,
+    subcategoryId?: string,
+  ): Promise<object> {
+    try {
+      const questions = await Question.findAll({
+        where: {
+          ...(categoryId !== undefined ? { category_id: categoryId } : {}),
+          ...(subcategoryId !== undefined
+            ? { subcategory_id: subcategoryId }
+            : {}),
+        },
+        include: [
+          {
+            model: QuestionCategory,
+            as: "category",
+            attributes: ["id", "name", "order"],
+            required: true,
+          },
+          {
+            model: QuestionSubcategory,
+            as: "subcategory",
+            attributes: ["id", "name", "order"],
+            required: false,
+          },
+        ],
+        order: [
+          [{ model: QuestionCategory, as: "category" }, "order", "ASC"],
+          [{ model: QuestionSubcategory, as: "subcategory" }, "order", "ASC"],
+          ["order_question_category", "ASC"],
+        ],
+      });
+
+      return {
+        success: true,
+        data: questions.map((question) => this.formatQuestion(question)),
+      };
+    } catch (error) {
+      this.handleDatabaseError(error, "question");
+    }
+  }
+
+  async getQuestion(id: string): Promise<object> {
+    try {
+      const question = await Question.findByPk(id, {
+        include: [
+          {
+            model: QuestionCategory,
+            as: "category",
+            attributes: ["id", "name", "order"],
+            required: true,
+          },
+          {
+            model: QuestionSubcategory,
+            as: "subcategory",
+            attributes: ["id", "name", "order"],
+            required: false,
+          },
+        ],
+      });
+
+      if (!question) throw ERROR_CODES.QUESTION_NOT_FOUND;
+
+      return {
+        success: true,
+        data: this.formatQuestion(question),
+      };
+    } catch (error) {
+      this.handleDatabaseError(error, "question");
+    }
+  }
+
+  async createQuestion(questionDto: QuestionEntityDto): Promise<object> {
+    const { question, categoryId, subcategoryId, typeResponse } = questionDto;
+
+    let tx: Transaction | undefined;
+    let createdId = "";
+
+    try {
+      tx = await sequelize.transaction();
+
+      //* Bloquear categoría para controlar inserciones
+      const category = await QuestionCategory.findByPk(categoryId!, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
+
+      //* Validar relación de subcategoría
+      if (subcategoryId) {
+        const subcategory = await QuestionSubcategory.findByPk(subcategoryId, {
+          transaction: tx,
+        });
+
+        if (!subcategory) throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
+
+        if (subcategory.category_id !== categoryId)
+          throw ERROR_CODES.QUESTION_SUBCATEGORY_CATEGORY_MISMATCH;
+      }
+
+      const groupQuestions = await this.getGroupQuestions(
+        categoryId!,
+        subcategoryId ?? null,
+        tx,
+      );
+
+      const nextOrder =
+        groupQuestions.length === 0
+          ? 1
+          : Math.max(
+              ...groupQuestions.map((item) => item.order_question_category),
+            ) + 1;
+
+      const newQuestion = await Question.create(
+        {
+          question: question!,
+          category_id: categoryId!,
+          subcategory_id: subcategoryId ?? null,
+          order_question_category: nextOrder,
+          type_response: typeResponse!,
+        },
+        { transaction: tx },
+      );
+
+      createdId = newQuestion.id;
+
+      await tx.commit();
+    } catch (error) {
+      if (tx && !tx.finished) await tx.rollback();
+      this.handleDatabaseError(error, "question");
+    }
+
+    return this.getQuestion(createdId);
+  }
+
+  async editQuestion(questionDto: QuestionEntityDto): Promise<object> {
+    const { id, question, categoryId, subcategoryId, typeResponse, order } =
+      questionDto;
+
+    let tx: Transaction | undefined;
+
+    try {
+      tx = await sequelize.transaction();
+
+      const original = await Question.findByPk(id!, {
+        transaction: tx,
+      });
+
+      if (!original) throw ERROR_CODES.QUESTION_NOT_FOUND;
+
+      const sourceCategoryId = original.category_id;
+      const sourceSubcategoryId = original.subcategory_id;
+
+      const targetCategoryId = categoryId ?? sourceCategoryId;
+
+      const targetSubcategoryId =
+        subcategoryId !== undefined
+          ? subcategoryId
+          : targetCategoryId !== sourceCategoryId
+            ? null
+            : sourceSubcategoryId;
+
+      const categoryIds = [
+        ...new Set([sourceCategoryId, targetCategoryId]),
+      ].sort();
+
+      for (const currentId of categoryIds) {
+        const category = await QuestionCategory.findByPk(currentId, {
+          transaction: tx,
+          lock: tx.LOCK.UPDATE,
+        });
+
+        if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
+      }
+
+      const current = await Question.findByPk(id!, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!current) throw ERROR_CODES.QUESTION_NOT_FOUND;
+
+      if (
+        current.category_id !== sourceCategoryId ||
+        current.subcategory_id !== sourceSubcategoryId
+      )
+        throw ERROR_CODES.QUESTION_CONFLICT;
+
+      const answersCount = await Answer.count({
+        where: { question_id: id! },
+        transaction: tx,
+      });
+
+      if (answersCount > 0) throw ERROR_CODES.QUESTION_HAS_ANSWERS;
+
+      if (targetSubcategoryId !== null) {
+        const subcategory = await QuestionSubcategory.findByPk(
+          targetSubcategoryId,
+          { transaction: tx },
+        );
+
+        if (!subcategory) throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
+
+        if (subcategory.category_id !== targetCategoryId)
+          throw ERROR_CODES.QUESTION_SUBCATEGORY_CATEGORY_MISMATCH;
+      }
+
+      const sourceQuestions = await this.getGroupQuestions(
+        sourceCategoryId,
+        sourceSubcategoryId,
+        tx,
+      );
+
+      const movingGroup =
+        sourceCategoryId !== targetCategoryId ||
+        sourceSubcategoryId !== targetSubcategoryId;
+
+      if (movingGroup) {
+        const targetQuestions = await this.getGroupQuestions(
+          targetCategoryId,
+          targetSubcategoryId,
+          tx,
+        );
+
+        const newPosition = order ?? targetQuestions.length + 1;
+
+        if (newPosition < 1 || newPosition > targetQuestions.length + 1)
+          throw ERROR_CODES.INVALID_QUESTION_ORDER;
+
+        const temporaryOrder =
+          targetQuestions.length === 0
+            ? 1
+            : Math.max(
+                ...targetQuestions.map((item) => item.order_question_category),
+              ) + 1;
+
+        await current.update(
+          {
+            category_id: targetCategoryId,
+            subcategory_id: targetSubcategoryId,
+            order_question_category: temporaryOrder,
+            ...(question !== undefined ? { question } : {}),
+            ...(typeResponse !== undefined
+              ? { type_response: typeResponse }
+              : {}),
+          },
+          { transaction: tx },
+        );
+
+        const remainingSource = sourceQuestions.filter(
+          (item) => item.id !== id,
+        );
+
+        await this.reorderQuestions(remainingSource, tx);
+
+        const reorderedTarget = [...targetQuestions];
+
+        reorderedTarget.splice(newPosition - 1, 0, current);
+
+        await this.reorderQuestions(reorderedTarget, tx);
+      } else {
+        await current.update(
+          {
+            ...(question !== undefined ? { question } : {}),
+            ...(typeResponse !== undefined
+              ? { type_response: typeResponse }
+              : {}),
+          },
+          { transaction: tx },
+        );
+
+        if (order !== undefined) {
+          if (order > sourceQuestions.length)
+            throw ERROR_CODES.INVALID_QUESTION_ORDER;
+
+          if (current.order_question_category !== order) {
+            const reordered = sourceQuestions.filter((item) => item.id !== id);
+
+            reordered.splice(order - 1, 0, current);
+
+            await this.reorderQuestions(reordered, tx);
+          }
+        }
+      }
+
+      await tx.commit();
+    } catch (error) {
+      if (tx && !tx.finished) await tx.rollback();
+      this.handleDatabaseError(error, "question");
+    }
+
+    return this.getQuestion(id!);
+  }
+
+  async deleteQuestion(id: string): Promise<object> {
+    let tx: Transaction | undefined;
+
+    try {
+      tx = await sequelize.transaction();
+
+      const original = await Question.findByPk(id, {
+        transaction: tx,
+      });
+
+      if (!original) throw ERROR_CODES.QUESTION_NOT_FOUND;
+
+      const category = await QuestionCategory.findByPk(original.category_id, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
+
+      const current = await Question.findByPk(id, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!current) throw ERROR_CODES.QUESTION_NOT_FOUND;
+
+      if (
+        current.category_id !== original.category_id ||
+        current.subcategory_id !== original.subcategory_id
+      )
+        throw ERROR_CODES.QUESTION_CONFLICT;
+
+      const answersCount = await Answer.count({
+        where: { question_id: id },
+        transaction: tx,
+      });
+
+      if (answersCount > 0) throw ERROR_CODES.QUESTION_HAS_ANSWERS;
+
+      const groupQuestions = await this.getGroupQuestions(
+        current.category_id,
+        current.subcategory_id,
+        tx,
+      );
+
+      await current.destroy({ transaction: tx });
+
+      const remainingQuestions = groupQuestions.filter(
+        (item) => item.id !== id,
+      );
+
+      await this.reorderQuestions(remainingQuestions, tx);
+
+      await tx.commit();
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      if (tx && !tx.finished) await tx.rollback();
+      this.handleDatabaseError(error, "question");
     }
   }
 }

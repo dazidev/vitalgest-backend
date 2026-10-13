@@ -73,4 +73,36 @@ questionsRoutes.delete(
   controller.deleteSubcategory.bind(controller),
 );
 
+//* QUESTIONS
+
+questionsRoutes.get(
+  "/",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.getQuestions.bind(controller),
+);
+
+questionsRoutes.get(
+  "/:id",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.getQuestion.bind(controller),
+);
+
+questionsRoutes.post(
+  "/",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.createQuestion.bind(controller),
+);
+
+questionsRoutes.put(
+  "/:id",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.editQuestion.bind(controller),
+);
+
+questionsRoutes.delete(
+  "/:id",
+  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  controller.deleteQuestion.bind(controller),
+);
+
 export default questionsRoutes;
