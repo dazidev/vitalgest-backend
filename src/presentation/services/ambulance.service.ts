@@ -141,7 +141,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   async getAmbulances(paginationDto: PaginationDto): Promise<object> {
     const { limit, offset } = paginationDto;
 
-    const ambulances = await Ambulance.findAll({
+    const { count, rows: ambulances } = await Ambulance.findAndCountAll({
       order: [
         ["createdAt", "DESC"],
         ["id", "ASC"],
@@ -171,6 +171,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     return {
       success: true,
       data: formatAmbulances,
+      total: count,
     };
   }
 

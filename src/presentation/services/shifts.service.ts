@@ -159,7 +159,7 @@ export class ShiftsService implements ShiftsServiceInterface {
     const { limit, offset } = paginationDto;
 
     try {
-      const shifts = await Shift.findAll({
+      const { count, rows: shifts } = await Shift.findAndCountAll({
         where: { guard_id: guardId },
 
         order: [
@@ -203,6 +203,7 @@ export class ShiftsService implements ShiftsServiceInterface {
       return {
         success: true,
         data: formatShifts,
+        total: count,
       };
     } catch (error) {
       if (typeof error === "string") throw error;

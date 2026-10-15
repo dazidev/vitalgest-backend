@@ -125,7 +125,7 @@ export class SuppliesService implements SuppliesServiceInterface {
 
       if (!pharmacy) throw ERROR_CODES.PHARMACY_NOT_FOUND;
 
-      const supplies = await Supply.findAll({
+      const { count, rows: supplies } = await Supply.findAndCountAll({
         where: { pharmacy_id: pharmacyId },
         order: [
           ["createdAt", "DESC"],
@@ -138,6 +138,7 @@ export class SuppliesService implements SuppliesServiceInterface {
       return {
         success: true,
         data: supplies,
+        total: count,
       };
     } catch (error) {
       if (typeof error === "string") throw error;

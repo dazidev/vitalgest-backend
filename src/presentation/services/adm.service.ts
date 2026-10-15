@@ -168,7 +168,7 @@ export class AdmService implements AdmServiceInterface {
     const { limit, offset, role } = paginationDto;
 
     try {
-      const users = await User.findAll({
+      const { count, rows: users } = await User.findAndCountAll({
         order: [
           ["createdAt", "DESC"],
           ["id", "ASC"],
@@ -185,6 +185,7 @@ export class AdmService implements AdmServiceInterface {
       return {
         success: true,
         data,
+        total: count,
       };
     } catch (error) {
       if (typeof error === "string") throw error;

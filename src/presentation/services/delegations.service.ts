@@ -243,7 +243,7 @@ export class DelegationsService implements DelegationsServiceInterface {
   async getDelegations(paginationDto: PaginationDto): Promise<object> {
     const { limit, offset } = paginationDto;
 
-    const delegations = await Delegation.findAll({
+    const { count, rows: delegations } = await Delegation.findAndCountAll({
       order: [
         ["createdAt", "DESC"],
         ["id", "ASC"],
@@ -269,6 +269,7 @@ export class DelegationsService implements DelegationsServiceInterface {
     return {
       success: true,
       data: formatDelegations,
+      total: count,
     };
   }
 
@@ -304,7 +305,7 @@ export class DelegationsService implements DelegationsServiceInterface {
     const { limit, offset, role } = paginationDto;
 
     try {
-      const users = await User.findAll({
+      const { count, rows: users } = await User.findAndCountAll({
         order: [
           ["createdAt", "DESC"],
           ["id", "ASC"],
@@ -324,6 +325,7 @@ export class DelegationsService implements DelegationsServiceInterface {
       return {
         success: true,
         data,
+        total: count,
       };
     } catch (error) {
       if (typeof error === "string") throw error;
