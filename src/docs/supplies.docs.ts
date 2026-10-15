@@ -145,8 +145,11 @@
  *     summary: Obtener suministros de una farmacia
  *     description: >
  *       Obtiene la lista de suministros asociados a una farmacia específica.
- *       Permite aplicar paginación mediante limit y offset. Si no se envían
- *       query params, devuelve todos los suministros de la farmacia.
+ *       Permite aplicar paginación mediante limit y offset.
+ *       Si no se envían parámetros de paginación, devuelve todos los
+ *       suministros de la farmacia. La propiedad total indica la cantidad
+ *       de suministros pertenecientes a la farmacia solicitada,
+ *       independientemente de limit y offset.
  *     tags: ['ENDPOINTS Gestión de suministros']
  *     security: [{ bearerAuth: [] }]
  *
@@ -175,14 +178,61 @@
  *         schema:
  *           type: integer
  *           minimum: 0
- *         description: Número de suministros que se deben omitir antes de empezar a devolver resultados.
+ *         description: Número de suministros que se deben omitir antes de devolver resultados.
  *         example: 0
  *
  *     responses:
  *       200:
- *         description: Lista de suministros de la farmacia obtenida correctamente
+ *         description: Lista de suministros obtenida correctamente.
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - data
+ *                 - total
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   description: Lista de suministros de la farmacia.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       category:
+ *                         type: string
+ *                       specification:
+ *                         type: string
+ *                       avaible_quantity:
+ *                         type: integer
+ *                       expiration_date:
+ *                         type: string
+ *                         format: date-time
+ *                       measurement_unit:
+ *                         type: string
+ *                       pharmacy_id:
+ *                         type: string
+ *                         format: uuid
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                 total:
+ *                   type: integer
+ *                   minimum: 0
+ *                   description: >
+ *                     Cantidad total de suministros pertenecientes
+ *                     a la farmacia, sin aplicar limit ni offset.
+ *                   example: 35
+ *
  *             examples:
  *               withoutPagination:
  *                 summary: Respuesta sin paginación
@@ -207,24 +257,49 @@
  *                       pharmacy_id: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
  *                       createdAt: "2025-11-07T00:24:21.000Z"
  *                       updatedAt: "2025-11-07T04:12:10.000Z"
+ *                   total: 2
  *
  *               withPagination:
  *                 summary: Respuesta con limit y offset
+ *                 description: >
+ *                   Ejemplo de una consulta con limit=1 y offset=0.
+ *                   Se devuelve un suministro, aunque la farmacia
+ *                   tiene dos registrados.
  *                 value:
  *                   success: true
  *                   data:
- *                     - id: "b34cb1cd-262d-4195-80ee-282de8ec7766"
- *                       category: "Bolsa de válvula"
- *                       specification: "niño"
- *                       avaible_quantity: 2
- *                       expiration_date: "2027-10-11T00:00:00.000Z"
- *                       measurement_unit: "lbs"
+ *                     - id: "91ab32dc-5512-4ad7-91db-5c44b8fa1001"
+ *                       category: "Gasas"
+ *                       specification: "estéril"
+ *                       avaible_quantity: 25
+ *                       expiration_date: "2027-12-01T00:00:00.000Z"
+ *                       measurement_unit: "piezas"
  *                       pharmacy_id: "2ab30b87-fa26-4b52-9429-e8a686ac2be3"
  *                       createdAt: "2025-11-07T00:24:21.000Z"
  *                       updatedAt: "2025-11-07T04:12:10.000Z"
+ *                   total: 2
+ *
+ *               emptyPage:
+ *                 summary: Página sin resultados
+ *                 description: >
+ *                   La página solicitada no contiene registros,
+ *                   aunque existen suministros en la farmacia.
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 2
+ *
+ *               noSupplies:
+ *                 summary: Farmacia sin suministros registrados
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 0
  *
  *       400:
- *         description: Datos inválidos. Puede ocurrir si el id, limit u offset no son válidos.
+ *         description: >
+ *           Datos inválidos o farmacia no encontrada.
+ *           Puede ocurrir si id, limit u offset no son válidos.
  *         content:
  *           application/json:
  *             schema:

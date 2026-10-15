@@ -124,8 +124,11 @@
  *     summary: Obtener turnos de una guardia
  *     description: >
  *       Obtiene la lista de turnos asociados a una guardia específica.
- *       Permite aplicar paginación mediante limit y offset. Si no se envían
- *       query params, devuelve todos los turnos de la guardia.
+ *       Permite aplicar paginación mediante limit y offset.
+ *       Si no se envían parámetros de paginación, devuelve todos los
+ *       turnos de la guardia. La propiedad total indica la cantidad
+ *       de turnos asociados a la guardia, independientemente de
+ *       limit y offset.
  *     tags: ['ENDPOINTS Gestión de turnos']
  *     security: [{ bearerAuth: [] }]
  *
@@ -146,7 +149,7 @@
  *           type: integer
  *           minimum: 1
  *         description: Número máximo de turnos a devolver.
- *         example: 2
+ *         example: 10
  *
  *       - in: query
  *         name: offset
@@ -154,14 +157,80 @@
  *         schema:
  *           type: integer
  *           minimum: 0
- *         description: Número de turnos que se deben omitir antes de empezar a devolver resultados.
+ *         description: Número de turnos que se deben omitir antes de devolver resultados.
  *         example: 0
  *
  *     responses:
  *       200:
- *         description: Turnos obtenidos correctamente
+ *         description: Turnos obtenidos correctamente.
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - data
+ *                 - total
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   description: Lista de turnos de la guardia.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *                       ambulance:
+ *                         type: object
+ *                         nullable: true
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           number:
+ *                             type: string
+ *                       paramedical:
+ *                         type: object
+ *                         nullable: true
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           name:
+ *                             type: string
+ *                           lastname:
+ *                             type: string
+ *                       driver:
+ *                         type: object
+ *                         nullable: true
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                           name:
+ *                             type: string
+ *                           lastname:
+ *                             type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                 total:
+ *                   type: integer
+ *                   minimum: 0
+ *                   description: >
+ *                     Cantidad total de turnos pertenecientes a la
+ *                     guardia solicitada, sin aplicar limit ni offset.
+ *                   example: 8
+ *
  *             examples:
  *               withoutPagination:
  *                 summary: Respuesta sin paginación
@@ -173,42 +242,77 @@
  *                       ambulance:
  *                         id: "5597ebcb-1311-4370-8499-128883eb0fde"
  *                         number: "AMB-001"
- *                       guard: null
  *                       paramedical:
  *                         id: "e8d02383-66a0-4ab0-8155-5c228933e84c"
  *                         name: "Paramedico"
  *                         lastname: "Seed"
  *                       driver:
- *                         id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
+ *                         id: "43a7bc86-5a19-4fc6-9add-887489221169"
  *                         name: "Chofer"
  *                         lastname: "Seed"
  *                       createdAt: "2026-05-11T08:10:07.000Z"
  *                       updatedAt: "2026-05-11T09:03:59.000Z"
+ *                     - id: "9d4cc86e-8902-41eb-abcd-12ef34567890"
+ *                       name: "Turno tarde"
+ *                       ambulance:
+ *                         id: "6597ebcb-1311-4370-8499-128883eb0fde"
+ *                         number: "AMB-002"
+ *                       paramedical:
+ *                         id: "f8d02383-66a0-4ab0-8155-5c228933e84c"
+ *                         name: "Juan"
+ *                         lastname: "Pérez"
+ *                       driver:
+ *                         id: "53a7bc86-5a19-4fc6-9add-887489221169"
+ *                         name: "Pedro"
+ *                         lastname: "Gómez"
+ *                       createdAt: "2026-05-11T14:00:00.000Z"
+ *                       updatedAt: "2026-05-11T14:00:00.000Z"
+ *                   total: 2
  *
  *               withPagination:
  *                 summary: Respuesta con limit y offset
+ *                 description: >
+ *                   Ejemplo de una consulta con limit=1 y offset=0.
+ *                   Se devuelve un turno, aunque la guardia tiene dos.
  *                 value:
  *                   success: true
  *                   data:
- *                     - id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
- *                       name: "Turno mañana"
+ *                     - id: "9d4cc86e-8902-41eb-abcd-12ef34567890"
+ *                       name: "Turno tarde"
  *                       ambulance:
- *                         id: "5597ebcb-1311-4370-8499-128883eb0fde"
- *                         number: "AMB-001"
- *                       guard: null
+ *                         id: "6597ebcb-1311-4370-8499-128883eb0fde"
+ *                         number: "AMB-002"
  *                       paramedical:
- *                         id: "e8d02383-66a0-4ab0-8155-5c228933e84c"
- *                         name: "Paramedico"
- *                         lastname: "Seed"
+ *                         id: "f8d02383-66a0-4ab0-8155-5c228933e84c"
+ *                         name: "Juan"
+ *                         lastname: "Pérez"
  *                       driver:
- *                         id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
- *                         name: "Chofer"
- *                         lastname: "Seed"
- *                       createdAt: "2026-05-11T08:10:07.000Z"
- *                       updatedAt: "2026-05-11T09:03:59.000Z"
+ *                         id: "53a7bc86-5a19-4fc6-9add-887489221169"
+ *                         name: "Pedro"
+ *                         lastname: "Gómez"
+ *                       createdAt: "2026-05-11T14:00:00.000Z"
+ *                       updatedAt: "2026-05-11T14:00:00.000Z"
+ *                   total: 2
+ *
+ *               emptyPage:
+ *                 summary: Página sin resultados
+ *                 description: >
+ *                   La página solicitada no contiene registros,
+ *                   aunque existen turnos asociados a la guardia.
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 2
+ *
+ *               noShifts:
+ *                 summary: Guardia sin turnos registrados
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 0
  *
  *       400:
- *         description: Datos inválidos. Puede ocurrir si el id, limit u offset no son válidos.
+ *         description: Datos inválidos. Puede ocurrir si id, limit u offset no son válidos.
  *         content:
  *           application/json:
  *             schema:

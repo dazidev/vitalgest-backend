@@ -194,9 +194,11 @@
  *   get:
  *     summary: Obtener delegaciones
  *     description: >
- *       Obtiene la lista de delegaciones registradas. Permite aplicar paginación
- *       mediante limit y offset. Si no se envían query params, devuelve todas
- *       las delegaciones.
+ *       Obtiene la lista de delegaciones registradas.
+ *       Permite aplicar paginación mediante limit y offset.
+ *       Si no se envían parámetros de paginación, devuelve todas las
+ *       delegaciones. La propiedad total indica la cantidad de
+ *       delegaciones registradas, independientemente de limit y offset.
  *     tags: ['ENDPOINTS Gestión de delegaciones']
  *     security: [{ bearerAuth: [] }]
  *
@@ -208,7 +210,7 @@
  *           type: integer
  *           minimum: 1
  *         description: Número máximo de delegaciones a devolver.
- *         example: 2
+ *         example: 10
  *
  *       - in: query
  *         name: offset
@@ -216,14 +218,70 @@
  *         schema:
  *           type: integer
  *           minimum: 0
- *         description: Número de delegaciones que se deben omitir antes de empezar a devolver resultados.
+ *         description: Número de delegaciones que se deben omitir antes de devolver resultados.
  *         example: 0
  *
  *     responses:
  *       200:
- *         description: Delegaciones obtenidas correctamente
+ *         description: Delegaciones obtenidas correctamente.
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - data
+ *                 - total
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   description: Lista de delegaciones obtenidas.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *                       municipality:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           name:
+ *                             type: string
+ *                       state:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           name:
+ *                             type: string
+ *                       pharmacy:
+ *                         type: object
+ *                         nullable: true
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                 total:
+ *                   type: integer
+ *                   minimum: 0
+ *                   description: >
+ *                     Cantidad total de delegaciones registradas
+ *                     sin aplicar limit ni offset.
+ *                   example: 2
+ *
  *             examples:
  *               withoutPagination:
  *                 summary: Respuesta sin paginación
@@ -254,24 +312,41 @@
  *                         name: "Jalisco"
  *                       pharmacy:
  *                         id: "7acb4ad2-3215-4e69-984e-821c36c341d8"
+ *                   total: 2
  *
  *               withPagination:
  *                 summary: Respuesta con limit y offset
+ *                 description: Consulta con limit=1 y offset=0.
  *                 value:
  *                   success: true
  *                   data:
- *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
- *                       name: "Delegación Ameca, Jalisco"
- *                       createdAt: "2025-11-07T19:43:15.000Z"
- *                       updatedAt: "2025-11-07T19:43:15.000Z"
+ *                     - id: "63a5ed18-6bf9-4df8-a193-426d73d82dab"
+ *                       name: "Delegación Guadalajara, Jalisco"
+ *                       createdAt: "2025-11-08T10:30:00.000Z"
+ *                       updatedAt: "2025-11-08T10:30:00.000Z"
  *                       municipality:
- *                         id: 1
- *                         name: "Ameca"
+ *                         id: 2
+ *                         name: "Guadalajara"
  *                       state:
  *                         id: 1
  *                         name: "Jalisco"
  *                       pharmacy:
- *                         id: "258a3b7d-782f-4615-a2f1-21c1f50e7255"
+ *                         id: "7acb4ad2-3215-4e69-984e-821c36c341d8"
+ *                   total: 2
+ *
+ *               emptyPage:
+ *                 summary: Página sin resultados
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 2
+ *
+ *               noDelegations:
+ *                 summary: Sin delegaciones registradas
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 0
  *
  *       400:
  *         description: Datos inválidos. Puede ocurrir si limit u offset no son válidos.
@@ -335,9 +410,12 @@
  *   get:
  *     summary: Obtener miembros de una delegación
  *     description: >
- *       Obtiene la lista de usuarios pertenecientes a una delegación específica.
+ *       Obtiene los usuarios pertenecientes a una delegación específica.
  *       Permite filtrar por rol y aplicar paginación mediante limit y offset.
- *       Si no se envían query params, devuelve todos los miembros de la delegación.
+ *       Si no se envían parámetros de paginación, devuelve todos los
+ *       miembros que cumplen los filtros. La propiedad total indica
+ *       la cantidad de miembros que coinciden con la delegación y el
+ *       rol solicitado, independientemente de limit y offset.
  *     tags: ['ENDPOINTS Gestión de delegaciones']
  *     security: [{ bearerAuth: [] }]
  *
@@ -362,7 +440,7 @@
  *             - head_guard
  *             - vehicle_operator
  *             - paramedical
- *         description: Rol por el cual se desea filtrar a los miembros de la delegación.
+ *         description: Rol por el cual se desea filtrar a los miembros.
  *         example: "paramedical"
  *
  *       - in: query
@@ -372,7 +450,7 @@
  *           type: integer
  *           minimum: 1
  *         description: Número máximo de miembros a devolver.
- *         example: 2
+ *         example: 10
  *
  *       - in: query
  *         name: offset
@@ -380,14 +458,75 @@
  *         schema:
  *           type: integer
  *           minimum: 0
- *         description: Número de miembros que se deben omitir antes de empezar a devolver resultados.
+ *         description: Número de miembros que se deben omitir antes de devolver resultados.
  *         example: 0
  *
  *     responses:
  *       200:
- *         description: Miembros de la delegación obtenidos correctamente
+ *         description: Miembros de la delegación obtenidos correctamente.
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - data
+ *                 - total
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   description: Usuarios de la delegación que cumplen los filtros.
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *                       lastname:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                         format: email
+ *                       status:
+ *                         type: boolean
+ *                       role:
+ *                         type: string
+ *                       signature:
+ *                         type: string
+ *                         nullable: true
+ *                       photo:
+ *                         type: string
+ *                         nullable: true
+ *                       phone:
+ *                         type: string
+ *                         nullable: true
+ *                       position:
+ *                         type: string
+ *                       delegation:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             format: uuid
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                 total:
+ *                   type: integer
+ *                   minimum: 0
+ *                   description: >
+ *                     Total de miembros que pertenecen a la delegación
+ *                     y cumplen el filtro de rol, sin aplicar paginación.
+ *                   example: 3
+ *
  *             examples:
  *               withoutPagination:
  *                 summary: Respuesta sin paginación
@@ -416,9 +555,24 @@
  *                         id: "63a5ed18-6bf9-4df8-a193-426d73d82dab"
  *                       createdAt: "2026-05-10T21:42:36.000Z"
  *                       updatedAt: "2026-05-10T21:42:36.000Z"
+ *                     - id: "e8d02383-66a0-4ab0-8155-5c228933e84c"
+ *                       name: "Paramedico"
+ *                       lastname: "Seed"
+ *                       email: "paramedicoseed@vitalgest.mx"
+ *                       status: true
+ *                       role: "paramedical"
+ *                       position: "Paramedico"
+ *                       delegation:
+ *                         id: "63a5ed18-6bf9-4df8-a193-426d73d82dab"
+ *                       createdAt: "2026-05-10T21:42:36.000Z"
+ *                       updatedAt: "2026-05-10T21:42:36.000Z"
+ *                   total: 3
  *
  *               withPaginationAndRole:
  *                 summary: Respuesta con role, limit y offset
+ *                 description: >
+ *                   Consulta filtrada por role=paramedical,
+ *                   con limit=1 y offset=0.
  *                 value:
  *                   success: true
  *                   data:
@@ -433,9 +587,27 @@
  *                         id: "63a5ed18-6bf9-4df8-a193-426d73d82dab"
  *                       createdAt: "2026-05-10T21:42:36.000Z"
  *                       updatedAt: "2026-05-10T21:42:36.000Z"
+ *                   total: 1
+ *
+ *               emptyPage:
+ *                 summary: Página sin resultados
+ *                 description: >
+ *                   No existen registros en la página solicitada,
+ *                   aunque hay miembros que cumplen los filtros.
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 3
+ *
+ *               noMembers:
+ *                 summary: Sin miembros que cumplan los filtros
+ *                 value:
+ *                   success: true
+ *                   data: []
+ *                   total: 0
  *
  *       400:
- *         description: Datos inválidos. Puede ocurrir si el id, role, limit u offset no son válidos.
+ *         description: Datos inválidos. Puede ocurrir si id, role, limit u offset no son válidos.
  *         content:
  *           application/json:
  *             schema:

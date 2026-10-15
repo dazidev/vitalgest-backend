@@ -9,7 +9,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 config();
 
-// R2 declarations
 const BUCKET = process.env.R2_BUCKET!;
 const MAX_BYTES = Number(process.env.MAX_UPLOAD_BYTES ?? 5_000_000);
 

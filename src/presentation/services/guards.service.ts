@@ -154,7 +154,8 @@ export class GuardsService implements GuardsServiceInterface {
     const { limit, offset } = paginationDto;
 
     try {
-      const guards = await Guard.findAll({
+      const { count, rows: guards } = await Guard.findAndCountAll({
+        distinct: true,
         order: [
           ["createdAt", "DESC"],
           ["id", "ASC"],
@@ -210,6 +211,7 @@ export class GuardsService implements GuardsServiceInterface {
       return {
         success: true,
         data: guards,
+        total: count,
       };
     } catch (error) {
       if (typeof error === "string") throw error;
