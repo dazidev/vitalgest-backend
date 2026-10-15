@@ -144,6 +144,8 @@
  *   get:
  *     summary: Obtener suministros de una farmacia
  *     description: >
+ *       La propiedad total indica el número de registros que cumplen los filtros,
+ *       independientemente de limit y offset.
  *       Obtiene la lista de suministros asociados a una farmacia específica.
  *       Permite aplicar paginación mediante limit y offset. Si no se envían
  *       query params, devuelve todos los suministros de la farmacia.
@@ -188,6 +190,7 @@
  *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "b34cb1cd-262d-4195-80ee-282de8ec7766"
  *                       category: "Bolsa de válvula"
@@ -212,6 +215,7 @@
  *                 summary: Respuesta con limit y offset
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "b34cb1cd-262d-4195-80ee-282de8ec7766"
  *                       category: "Bolsa de válvula"

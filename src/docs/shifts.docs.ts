@@ -123,6 +123,8 @@
  *   get:
  *     summary: Obtener turnos de una guardia
  *     description: >
+ *       La propiedad total indica el número de registros que cumplen los filtros,
+ *       independientemente de limit y offset.
  *       Obtiene la lista de turnos asociados a una guardia específica.
  *       Permite aplicar paginación mediante limit y offset. Si no se envían
  *       query params, devuelve todos los turnos de la guardia.
@@ -167,6 +169,7 @@
  *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
+ *                   total: 1
  *                   data:
  *                     - id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
  *                       name: "Turno mañana"
@@ -189,6 +192,7 @@
  *                 summary: Respuesta con limit y offset
  *                 value:
  *                   success: true
+ *                   total: 1
  *                   data:
  *                     - id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
  *                       name: "Turno mañana"

@@ -194,6 +194,8 @@
  *   get:
  *     summary: Obtener delegaciones
  *     description: >
+ *       La propiedad total indica el número de registros que cumplen los filtros,
+ *       independientemente de limit y offset.
  *       Obtiene la lista de delegaciones registradas. Permite aplicar paginación
  *       mediante limit y offset. Si no se envían query params, devuelve todas
  *       las delegaciones.
@@ -229,6 +231,7 @@
  *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                       name: "Delegación Ameca, Jalisco"
@@ -259,6 +262,7 @@
  *                 summary: Respuesta con limit y offset
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "2a4ee64b-5108-4b1e-a779-aff4d291a766"
  *                       name: "Delegación Ameca, Jalisco"
@@ -335,6 +339,8 @@
  *   get:
  *     summary: Obtener miembros de una delegación
  *     description: >
+ *       La propiedad total indica el número de registros que cumplen los filtros,
+ *       independientemente de limit y offset.
  *       Obtiene la lista de usuarios pertenecientes a una delegación específica.
  *       Permite filtrar por rol y aplicar paginación mediante limit y offset.
  *       Si no se envían query params, devuelve todos los miembros de la delegación.
@@ -393,6 +399,7 @@
  *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "3f5d3291-4160-436d-a11d-785204291e50"
  *                       name: "Admin"
@@ -421,6 +428,7 @@
  *                 summary: Respuesta con role, limit y offset
  *                 value:
  *                   success: true
+ *                   total: 1
  *                   data:
  *                     - id: "e8d02383-66a0-4ab0-8155-5c228933e84c"
  *                       name: "Paramedico"

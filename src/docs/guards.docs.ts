@@ -116,6 +116,8 @@
  *   get:
  *     summary: Obtener guardias
  *     description: >
+ *       La propiedad total indica el número de registros que cumplen los filtros,
+ *       independientemente de limit y offset.
  *       Obtiene la lista de guardias registradas. Permite aplicar paginación
  *       mediante limit y offset. Si no se envían query params, devuelve todas
  *       las guardias.
@@ -151,6 +153,7 @@
  *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
+ *                   total: 1
  *                   data:
  *                     - id: "5597ebcb-1311-4370-8499-128883eb0fde"
  *                       date: "2026-05-11"
@@ -188,6 +191,7 @@
  *                 summary: Respuesta con limit y offset
  *                 value:
  *                   success: true
+ *                   total: 1
  *                   data:
  *                     - id: "5597ebcb-1311-4370-8499-128883eb0fde"
  *                       date: "2026-05-11"

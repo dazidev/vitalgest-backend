@@ -117,6 +117,8 @@
  *   get:
  *     summary: Obtener ambulancias
  *     description: >
+ *       La propiedad total indica el número de registros que cumplen los filtros,
+ *       independientemente de limit y offset.
  *       Obtiene la lista de ambulancias registradas. Permite aplicar paginación
  *       mediante limit y offset. Si no se envían query params, devuelve todas
  *       las ambulancias.
@@ -152,6 +154,7 @@
  *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "5597ebcb-1311-4370-8499-128883eb0fde"
  *                       number: "1234dfde23"
@@ -172,6 +175,7 @@
  *                 summary: Respuesta con limit y offset
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "871a1d2f-4f4b-42a6-ba17-22dc9a09a639"
  *                       number: "AMB-002"

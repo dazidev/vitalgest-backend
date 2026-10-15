@@ -164,6 +164,8 @@
  *   get:
  *     summary: Obtener usuarios
  *     description: >
+ *       La propiedad total indica el número de registros que cumplen los filtros,
+ *       independientemente de limit y offset.
  *       Obtiene la lista de usuarios registrados. Permite filtrar por rol y aplicar
  *       paginación mediante limit y offset. Si no se envían query params, devuelve
  *       todos los usuarios.
@@ -213,6 +215,7 @@
  *                 summary: Respuesta sin paginación
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "da19f580-7bf4-4364-be48-7c5e2cc52e8a"
  *                       name: "Randy"
@@ -241,6 +244,7 @@
  *                 summary: Respuesta con limit y offset
  *                 value:
  *                   success: true
+ *                   total: 2
  *                   data:
  *                     - id: "3f5d3291-4160-436d-a11d-785204291e50"
  *                       name: "Admin"
