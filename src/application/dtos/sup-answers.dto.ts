@@ -17,27 +17,30 @@ export class SupAnswersDto {
     }
 
     const out: AnswerSupInterface[] = [];
+
     for (let i = 0; i < answers.length; i++) {
       const a = answers[i] ?? {};
 
       const supplyId = String(a.supplyId ?? "").trim();
-      const requiredQuantity = String(a.requiredQuantity ?? "").trim();
+      const reportedQuantity = String(a.reportedQuantity ?? "").trim();
 
       if (!supplyId) return [ERROR_CODES.MISSING_SUPPLY_ID];
       if (!regularExp.uuid.test(supplyId))
         return [ERROR_CODES.INVALID_SUPPLY_ID];
-      if (!requiredQuantity) return [ERROR_CODES.MISSING_REQUIRED_QUANTITY];
 
-      const reqQuaNum =
-        typeof requiredQuantity === "number"
-          ? requiredQuantity
-          : Number(requiredQuantity);
-      if (!Number.isFinite(reqQuaNum) || reqQuaNum < 0)
-        return [ERROR_CODES.INVALID_REQUIRED_QUANTITY];
+      if (!reportedQuantity) return [ERROR_CODES.MISSING_REPORTED_QUANTITY];
+
+      const reportedQuantityNum = Number(reportedQuantity);
+
+      if (
+        !/^\d+$/.test(reportedQuantity) ||
+        !Number.isSafeInteger(reportedQuantityNum)
+      )
+        return [ERROR_CODES.INVALID_REPORTED_QUANTITY];
 
       out.push({
         supplyId,
-        requiredQuantity: reqQuaNum,
+        reportedQuantity: reportedQuantityNum,
       });
     }
 

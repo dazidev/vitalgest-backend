@@ -22,7 +22,7 @@ export interface RequestAnswerInterface {
 
 export interface AnswerSupInterface {
   supplyId: string;
-  requiredQuantity: number;
+  reportedQuantity: number;
 }
 
 export interface RequestAnswerSupInterface {
