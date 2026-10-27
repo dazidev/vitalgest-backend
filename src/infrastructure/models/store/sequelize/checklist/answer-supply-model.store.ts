@@ -20,8 +20,8 @@ class AnswerSupply extends Model<
   declare checklist_id: ForeignKey<ChecklistSupply["id"]>;
   declare category: string;
   declare specification?: string;
-  declare avaible_quantity: number;
   declare min_quantity: number;
+  declare reported_quantity: number;
   declare required_quantity: number;
   declare measurement_unit: string;
 
@@ -48,9 +48,9 @@ AnswerSupply.init(
     },
     category: { type: DataTypes.STRING, allowNull: false },
     specification: { type: DataTypes.STRING, allowNull: true },
-    avaible_quantity: { type: DataTypes.INTEGER, allowNull: false },
-    min_quantity: { type: DataTypes.INTEGER, allowNull: false },
-    required_quantity: { type: DataTypes.INTEGER, allowNull: false },
+    min_quantity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    reported_quantity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+    required_quantity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     measurement_unit: { type: DataTypes.STRING, allowNull: false },
     area_id: {
       type: DataTypes.BIGINT.UNSIGNED,
@@ -67,7 +67,7 @@ AnswerSupply.init(
     timestamps: true,
     underscored: true,
     // paranoid: true //* activa borrado lógico
-  }
+  },
 );
 
 export default AnswerSupply;

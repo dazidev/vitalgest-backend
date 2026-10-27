@@ -226,8 +226,8 @@ export class ChecklistsService implements ChecklistsServiceInterface {
               "id",
               "category",
               "specification",
-              "avaible_quantity",
               "min_quantity",
+              "reported_quantity",
               "required_quantity",
               "measurement_unit",
               "createdAt",
@@ -271,56 +271,70 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
     try {
       tx = await sequelize.transaction();
+
+      const checklist = await ChecklistSupply.findOne({
+        where: { id: checklistId },
+        include: [
+          {
+            model: Shift,
+            as: "shift",
+            attributes: ["ambulance_id"],
+          },
+        ],
+        transaction: tx,
+      });
+
+      if (!checklist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+
+      const ambulanceId = checklist.shift?.ambulance_id;
+
+      if (!ambulanceId) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
+
       for (const ans of answers) {
-        //* Busca la ambulancia.
-        const shift = await ChecklistSupply.findOne({
-          where: { id: checklistId },
-          attributes: ["shift_id"],
-          include: [
-            { model: Shift, as: "shift", attributes: ["ambulance_id"] },
-          ],
+        const supply = await SupplyAmbulance.findOne({
+          where: {
+            id: ans.supplyId,
+            ambulance_id: ambulanceId,
+          },
           transaction: tx,
         });
 
-        const supply = await SupplyAmbulance.findOne({
-          where: { id: ans.supplyId },
-          transaction: tx,
-        });
         if (!supply) throw ERROR_CODES.SUPPLY_NOT_FOUND;
 
-        const newQuantity = supply?.min_quantity! - ans.requiredQuantity;
+        const minQuantity = supply.min_quantity;
+        const reportedQuantity = ans.reportedQuantity;
 
-        //* Actualiza la cantidad de elementos en la ambulancia.
+        const requiredQuantity = Math.max(0, minQuantity - reportedQuantity);
+
         await SupplyAmbulance.update(
           {
-            avaible_quantity: newQuantity,
+            avaible_quantity: reportedQuantity,
           },
           {
             where: {
-              id: ans.supplyId,
-              ambulance_id: shift?.shift?.ambulance_id,
+              id: supply.id,
+              ambulance_id: ambulanceId,
             },
             transaction: tx,
           },
         );
 
-        //* Registra la respuesta de la información de los insumos.
         await AnswerSupply.create(
-          //! categoria y especificacion deberían ser únicos?
           {
             checklist_id: checklistId,
-            category: supply?.category,
-            specification: supply?.specification,
-            avaible_quantity: newQuantity,
-            min_quantity: supply?.min_quantity,
-            required_quantity: ans.requiredQuantity,
-            measurement_unit: supply?.measurement_unit,
-            area_id: Number(supply?.area_id),
+            category: supply.category,
+            specification: supply.specification,
+            min_quantity: minQuantity,
+            reported_quantity: reportedQuantity,
+            required_quantity: requiredQuantity,
+            measurement_unit: supply.measurement_unit,
+            area_id: Number(supply.area_id),
           },
           { transaction: tx },
         );
       }
-      await tx?.commit();
+
+      await tx.commit();
 
       return { success: true };
     } catch (error) {
