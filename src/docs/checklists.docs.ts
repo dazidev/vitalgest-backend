@@ -621,16 +621,24 @@
  * /api/checklists/supply/answers/{id}:
  *   put:
  *     summary: Guardar respuestas del checklist de suministros
+ *     description: >
+ *       Registra las cantidades físicas de suministros reportadas
+ *       por el operador durante la revisión de una ambulancia.
+ *       El sistema actualiza el inventario de la ambulancia y
+ *       calcula automáticamente la cantidad faltante para alcanzar
+ *       el mínimo establecido.
+ *
+ *       requiredQuantity = max(0, minQuantity - reportedQuantity).
  *     tags:
- *     - ENDPOINTS Gestión de Checklists
+ *       - ENDPOINTS Gestión de Checklists
  *     parameters:
- *     - in: path
- *       name: id
- *       required: true
- *       description: ID del checklist de suministros
- *       schema:
- *         type: string
- *         format: uuid
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID del checklist de suministros
+ *         schema:
+ *           type: string
+ *           format: uuid
  *     requestBody:
  *       required: true
  *       content:
@@ -638,26 +646,30 @@
  *           schema:
  *             type: object
  *             required:
- *             - answers
+ *               - answers
  *             properties:
  *               answers:
  *                 type: array
  *                 minItems: 1
+ *                 description: Suministros revisados por el operador
  *                 items:
  *                   type: object
  *                   required:
- *                   - supplyId
- *                   - requiredQuantity
+ *                     - supplyId
+ *                     - reportedQuantity
  *                   properties:
  *                     supplyId:
  *                       type: string
  *                       format: uuid
- *                     requiredQuantity:
+ *                       description: ID del suministro asignado a la ambulancia
+ *                     reportedQuantity:
  *                       type: integer
  *                       minimum: 0
- *                 example:
- *                 - supplyId: 43a06473-2862-4d1a-90af-6051f20d8509
- *                   requiredQuantity: 1
+ *                       description: Cantidad física encontrada por el operador
+ *           example:
+ *             answers:
+ *               - supplyId: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                 reportedQuantity: 2
  *     responses:
  *       '200':
  *         description: Respuestas guardadas correctamente
@@ -666,19 +678,7 @@
  *             example:
  *               success: true
  *       '400':
- *         description: Solicitud inválida
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       '401':
- *         description: No autorizado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *       '404':
- *         description: Recurso no encontrado
+ *         description: Datos inválidos o suministro no encontrado
  *         content:
  *           application/json:
  *             schema:
@@ -690,6 +690,13 @@
  * /api/checklists/supply/{id}:
  *   get:
  *     summary: Obtener checklist de suministros por ID
+ *     description: >
+ *       Obtiene la información del checklist de suministros,
+ *       incluyendo la ambulancia, el turno, los responsables,
+ *       las firmas y las respuestas registradas.
+ *       Cada respuesta contiene la cantidad mínima establecida,
+ *       la cantidad reportada por el operador y la cantidad
+ *       faltante calculada automáticamente.
  *     tags:
  *     - ENDPOINTS Gestión de Checklists
  *     parameters:
@@ -741,9 +748,9 @@
  *                 - id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                   category: Estetoscopio
  *                   specification: Pediatrico
- *                   avaible_quantity: -2
  *                   min_quantity: 3
- *                   required_quantity: 5
+ *                   reported_quantity: 2
+ *                   required_quantity: 1
  *                   measurement_unit: unit
  *                   createdAt: '2026-05-20T02:59:41.000Z'
  *                   updatedAt: '2026-05-20T02:59:41.000Z'
