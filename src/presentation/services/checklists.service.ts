@@ -21,6 +21,8 @@ import {
   Shift,
   SupplyAmbulance,
   User,
+  SupplyReport,
+  SupplyReportItem,
 } from "../../infrastructure";
 
 import {
@@ -28,7 +30,7 @@ import {
   CheckListSupplyEntityDto,
 } from "../../application";
 
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 
 export class ChecklistsService implements ChecklistsServiceInterface {
   //* SUPPLIES CHECKLIST
@@ -84,22 +86,38 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const exists = await ChecklistSupply.findOne({
+      const checklist = await ChecklistSupply.findOne({
         where: { id },
+        include: [
+          {
+            model: Shift,
+            as: "shift",
+            attributes: ["ambulance_id"],
+          },
+        ],
         transaction: tx,
       });
-      if (!exists) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+
+      if (!checklist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+
+      const ambulanceId = checklist.shift?.ambulance_id;
+
+      if (!ambulanceId) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
       const deliverer = await User.findOne({
         where: { id: delivererId },
         attributes: ["id", "signature"],
+        transaction: tx,
       });
+
       if (!deliverer) throw ERROR_CODES.INVALID_DELIVERER_ID;
 
       const recipient = await User.findOne({
         where: { id: recipientId },
         attributes: ["id", "signature"],
+        transaction: tx,
       });
+
       if (!recipient) throw ERROR_CODES.INVALID_RECIPIENT_ID;
 
       await ChecklistSupply.update(
@@ -116,16 +134,75 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         },
       );
 
+      const existingReport = await SupplyReport.findOne({
+        where: { checklist_id: id },
+        attributes: ["id"],
+        transaction: tx,
+      });
+
+      if (!existingReport) {
+        const missingSupplies = await AnswerSupply.findAll({
+          where: {
+            checklist_id: id,
+            required_quantity: {
+              [Op.gt]: 0,
+            },
+          },
+          include: [
+            {
+              model: AreaAmbulance,
+              as: "area",
+              attributes: ["id", "name", "section", "order"],
+              required: true,
+            },
+          ],
+          transaction: tx,
+        });
+
+        const report = await SupplyReport.create(
+          {
+            checklist_id: id!,
+            ambulance_id: ambulanceId,
+          },
+          { transaction: tx },
+        );
+
+        if (missingSupplies.length > 0) {
+          await SupplyReportItem.bulkCreate(
+            missingSupplies.map((supply) => ({
+              report_id: report.id,
+
+              category: supply.category,
+              specification: supply.specification,
+              measurement_unit: supply.measurement_unit,
+
+              min_quantity: supply.min_quantity,
+              reported_quantity: supply.reported_quantity,
+              required_quantity: supply.required_quantity,
+
+              added_quantity: 0,
+              is_resolved: false,
+
+              area_id: Number(supply.area_id),
+              area_name: supply.area!.name,
+              section: supply.area!.section,
+              area_order: supply.area!.order,
+            })),
+            { transaction: tx },
+          );
+        }
+      }
+
       await tx.commit();
 
       return {
         success: true,
       };
     } catch (error) {
-      console.log(error);
       await tx?.rollback();
+
       if (typeof error === "string") throw error;
-      throw ERROR_CODES.DELETE_FAILED;
+      throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
