@@ -560,6 +560,14 @@
  * /api/checklists/supply/{id}/sign:
  *   put:
  *     summary: Firmar checklist de suministros
+ *     description: >
+ *       Registra las firmas del responsable que entrega y
+ *       del responsable que recibe la ambulancia.
+ *       Al firmar, genera automáticamente un reporte
+ *       informativo de reabastecimiento con los suministros
+ *       que presentan cantidades inferiores al mínimo.
+ *       Si ya existe un reporte asociado al checklist,
+ *       no se genera uno nuevo.
  *     tags:
  *     - ENDPOINTS Gestión de Checklists
  *     parameters:
