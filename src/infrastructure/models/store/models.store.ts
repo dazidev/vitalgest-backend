@@ -18,6 +18,8 @@ import AreaAmbulance from "./sequelize/supplies/area-ambulance-model.store";
 import AnswerSupply from "./sequelize/checklist/answer-supply-model.store";
 import QuestionCategory from "./sequelize/checklist/question-category-model.store";
 import QuestionSubcategory from "./sequelize/checklist/question-subcategory-model.store";
+import SupplyReport from "./sequelize/reports/supply-report-model.store";
+import SupplyReportItem from "./sequelize/reports/supply-report-item-model.store";
 
 // Definicion de asociaciones
 State.hasMany(Municipality, { foreignKey: "state_id", as: "municipalities" });
@@ -173,6 +175,38 @@ ChecklistSupply.hasMany(AnswerSupply, {
 AnswerSupply.belongsTo(AreaAmbulance, { foreignKey: "area_id", as: "area" });
 AreaAmbulance.hasMany(AnswerSupply, { foreignKey: "area_id", as: "answers" });
 
+//* Reportes de suministros
+
+SupplyReport.belongsTo(ChecklistSupply, {
+  foreignKey: "checklist_id",
+  as: "checklist",
+});
+
+ChecklistSupply.hasOne(SupplyReport, {
+  foreignKey: "checklist_id",
+  as: "supplyReport",
+});
+
+SupplyReport.belongsTo(Ambulance, {
+  foreignKey: "ambulance_id",
+  as: "ambulance",
+});
+
+Ambulance.hasMany(SupplyReport, {
+  foreignKey: "ambulance_id",
+  as: "supplyReports",
+});
+
+SupplyReportItem.belongsTo(SupplyReport, {
+  foreignKey: "report_id",
+  as: "report",
+});
+
+SupplyReport.hasMany(SupplyReportItem, {
+  foreignKey: "report_id",
+  as: "items",
+});
+
 // insumos
 Supply.belongsTo(Pharmacy, { foreignKey: "pharmacy_id", as: "pharmacy" });
 Pharmacy.hasMany(Supply, { foreignKey: "pharmacy_id", as: "supplies" });
@@ -246,4 +280,6 @@ export {
   Supply,
   SupplyAmbulance,
   AreaAmbulance,
+  SupplyReport,
+  SupplyReportItem,
 };
