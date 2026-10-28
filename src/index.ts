@@ -25,6 +25,7 @@ import {
   shiftRoutes,
   checklistsRoutes,
   suppliesRoutes,
+  supplyReportsRoutes,
   userRoutes,
   questionsRoutes,
 } from "./presentation";
@@ -110,6 +111,7 @@ app.use("/api/ambulances", ambulancesRoutes);
 app.use("/api/shifts", shiftRoutes);
 app.use("/api/checklists", checklistsRoutes);
 app.use("/api/supplies", suppliesRoutes);
+app.use("/api/supply-reports", supplyReportsRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/questions", questionsRoutes);
 
