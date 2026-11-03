@@ -4,6 +4,7 @@ import { QuestionsControllerInterface, ERROR_CODES } from "../../domain";
 
 import {
   CustomError,
+  PaginationDto,
   QuestionCategoryEntityDto,
   QuestionEntityDto,
   QuestionSubcategoryEntityDto,
@@ -216,7 +217,7 @@ export class QuestionsController implements QuestionsControllerInterface {
   //* QUESTIONS
 
   getQuestions(req: Request, res: Response, next: NextFunction): void {
-    const { categoryId, subcategoryId } = req.query;
+    const { categoryId, subcategoryId, limit, offset } = req.query;
 
     if (
       categoryId !== undefined &&
@@ -231,8 +232,16 @@ export class QuestionsController implements QuestionsControllerInterface {
     )
       throw CustomError.badRequest(ERROR_CODES.INVALID_QUESTION_SUBCATEGORY_ID);
 
+    const [error, paginationDto] = PaginationDto.validate({
+      limit,
+      offset,
+    });
+
+    if (error) throw CustomError.badRequest(error);
+
     this.questionsService
       .getQuestions(
+        paginationDto!,
         categoryId as string | undefined,
         subcategoryId as string | undefined,
       )

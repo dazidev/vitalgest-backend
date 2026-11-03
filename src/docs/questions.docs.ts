@@ -628,11 +628,15 @@
  * @openapi
  * /api/questions:
  *   get:
- *     summary: Obtener preguntas
+ *     summary: Obtener preguntas paginadas
  *     description: >
  *       Lista las preguntas con sus categorías,
- *       subcategorías y posiciones. Permite filtrar
- *       por UUID de categoría y/o subcategoría.
+ *       subcategorías y posiciones.
+ *       Permite filtrar por UUID de categoría y/o
+ *       subcategoría y paginar mediante limit y offset.
+ *       El campo total indica la cantidad de preguntas
+ *       que cumplen los filtros, independientemente
+ *       de la paginación.
  *     tags: ['ENDPOINTS Gestión de Preguntas']
  *     security: [{ bearerAuth: [] }]
  *     parameters:
@@ -642,12 +646,30 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Filtrar por categoría
  *       - in: query
  *         name: subcategoryId
  *         required: false
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Filtrar por subcategoría
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Cantidad máxima de registros
+ *         example: 10
+ *       - in: query
+ *         name: offset
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *         description: Cantidad de registros a omitir
+ *         example: 0
  *     responses:
  *       200:
  *         description: Preguntas obtenidas correctamente
@@ -663,77 +685,14 @@
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Question'
+ *                 total:
+ *                   type: integer
+ *                   minimum: 0
+ *                   example: 45
  *       400:
- *         description: Filtros inválidos
+ *         description: Filtros o parámetros de paginación inválidos
  *       401:
  *         description: No autorizado
- *
- *   post:
- *     summary: Crear pregunta
- *     description: >
- *       Crea una pregunta y asigna su orden
- *       automáticamente dentro de la categoría o
- *       subcategoría correspondiente.
- *     tags: ['ENDPOINTS Gestión de Preguntas']
- *     security: [{ bearerAuth: [] }]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - question
- *               - categoryId
- *               - typeResponse
- *             properties:
- *               question:
- *                 type: string
- *                 minLength: 1
- *                 maxLength: 255
- *               categoryId:
- *                 type: string
- *                 format: uuid
- *               subcategoryId:
- *                 type: string
- *                 format: uuid
- *                 nullable: true
- *               typeResponse:
- *                 type: string
- *                 enum:
- *                   - bool
- *                   - option
- *                   - text
- *                   - bool_option
- *                   - bool_text
- *                   - option_text
- *                   - bool_option_text
- *           example:
- *             question: "¿Funcionan correctamente las luces?"
- *             categoryId: "11111111-1111-4111-8111-111111111111"
- *             subcategoryId: null
- *             typeResponse: bool
- *     responses:
- *       201:
- *         description: Pregunta creada correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Question'
- *       400:
- *         description: Datos inválidos
- *       401:
- *         description: No autorizado
- *       404:
- *         description: Categoría o subcategoría no encontrada
- *       409:
- *         description: Conflicto con las relaciones
  */
 
 /**

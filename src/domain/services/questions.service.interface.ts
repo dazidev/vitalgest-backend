@@ -2,6 +2,7 @@ import {
   QuestionCategoryEntityDto,
   QuestionEntityDto,
   QuestionSubcategoryEntityDto,
+  PaginationDto,
 } from "../../application";
 
 export interface QuestionsServiceInterface {
@@ -24,7 +25,11 @@ export interface QuestionsServiceInterface {
   deleteSubcategory(id: string): Promise<object>;
 
   //* Questions
-  getQuestions(categoryId?: string, subcategoryId?: string): Promise<object>;
+  getQuestions(
+    paginationDto: PaginationDto,
+    categoryId?: string,
+    subcategoryId?: string,
+  ): Promise<object>;
   getQuestion(id: string): Promise<object>;
   createQuestion(questionDto: QuestionEntityDto): Promise<object>;
   editQuestion(questionDto: QuestionEntityDto): Promise<object>;

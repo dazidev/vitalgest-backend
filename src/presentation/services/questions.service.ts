@@ -5,6 +5,7 @@ import {
 } from "sequelize";
 
 import {
+  PaginationDto,
   QuestionCategoryEntityDto,
   QuestionEntityDto,
   QuestionSubcategoryEntityDto,
@@ -628,11 +629,14 @@ export class QuestionsService implements QuestionsServiceInterface {
   //* QUESTIONS
 
   async getQuestions(
+    paginationDto: PaginationDto,
     categoryId?: string,
     subcategoryId?: string,
   ): Promise<object> {
+    const { limit, offset } = paginationDto;
+
     try {
-      const questions = await Question.findAll({
+      const { count, rows: questions } = await Question.findAndCountAll({
         where: {
           ...(categoryId !== undefined ? { category_id: categoryId } : {}),
           ...(subcategoryId !== undefined
@@ -657,12 +661,17 @@ export class QuestionsService implements QuestionsServiceInterface {
           [{ model: QuestionCategory, as: "category" }, "order", "ASC"],
           [{ model: QuestionSubcategory, as: "subcategory" }, "order", "ASC"],
           ["order_question_category", "ASC"],
+          ["id", "ASC"],
         ],
+        ...(limit !== undefined ? { limit } : {}),
+        ...(offset !== undefined ? { offset } : {}),
+        distinct: true,
       });
 
       return {
         success: true,
         data: questions.map((question) => this.formatQuestion(question)),
+        total: count,
       };
     } catch (error) {
       this.handleDatabaseError(error, "question");
