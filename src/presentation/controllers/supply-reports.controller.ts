@@ -27,6 +27,24 @@ export class SupplyReportsController {
       .catch((error) => next(CustomError.badRequest(error)));
   }
 
+  getReport(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ): void {
+    const { id } = req.params;
+
+    if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_SUPPLY_REPORT_ID);
+
+    if (!regularExp.uuid.test(id))
+      throw CustomError.badRequest(ERROR_CODES.INVALID_SUPPLY_REPORT_ID);
+
+    this.supplyReportsService
+      .getReport(id)
+      .then((response) => res.json(response))
+      .catch((error) => next(CustomError.badRequest(error)));
+  }
+
   updateSupplies(req: Request, res: Response, next: NextFunction): void {
     const [error, supplyReportEntityDto] =
       SupplyReportEntityDto.updateSupplies(req);

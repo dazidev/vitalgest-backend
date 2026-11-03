@@ -79,6 +79,85 @@
 
 /**
  * @openapi
+ * /api/supply-reports/{id}:
+ *   get:
+ *     summary: Obtener reporte de reabastecimiento por ID
+ *     description: >
+ *       Obtiene la información detallada de un reporte
+ *       de reabastecimiento mediante su identificador UUID.
+ *
+ *       Incluye la ambulancia asociada, estado, fechas
+ *       y suministros agrupados por área y gabinete.
+ *
+ *       current_quantity representa la suma de
+ *       reported_quantity y added_quantity.
+ *
+ *       remaining_quantity representa la cantidad
+ *       faltante para alcanzar el mínimo esperado.
+ *
+ *       Las cantidades representan los registros
+ *       del reporte, no una verificación física
+ *       del inventario.
+ *     tags:
+ *       - ENDPOINTS Reportes de reabastecimiento
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: UUID del reporte de reabastecimiento
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       '200':
+ *         description: Reporte obtenido correctamente
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 id: d3ae8cd2-f121-4893-974e-773509d6e7e0
+ *                 checklist_id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                 ambulance:
+ *                   id: 89b576c4-e58a-499c-8bc3-5530e4464cdf
+ *                   number: AMB-01
+ *                 status: pending
+ *                 attended_at: null
+ *                 createdAt: '2026-10-27T18:00:00.000Z'
+ *                 updatedAt: '2026-10-27T18:00:00.000Z'
+ *                 areas:
+ *                   - area_id: 1
+ *                     area_name: EQUIPO DE VÍAS AÉREAS
+ *                     section: GABINETE 1
+ *                     order: 1
+ *                     supplies:
+ *                       - id: 160fc040-1612-438a-975f-ffcfa60614e3
+ *                         category: Mascarilla
+ *                         specification: Adulto
+ *                         measurement_unit: unit
+ *                         min_quantity: 3
+ *                         reported_quantity: 2
+ *                         required_quantity: 1
+ *                         added_quantity: 0
+ *                         current_quantity: 2
+ *                         remaining_quantity: 1
+ *                         is_resolved: false
+ *       '400':
+ *         description: UUID inválido o reporte no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       '500':
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
+/**
+ * @openapi
  * /api/supply-reports/{id}/supplies:
  *   put:
  *     summary: Registrar reabastecimiento de suministros

@@ -9,6 +9,8 @@ const controller = new SupplyReportsController(supplyReportsService);
 
 supplyReportsRoutes.get("/", controller.getReports.bind(controller));
 
+supplyReportsRoutes.get("/:id", controller.getReport.bind(controller));
+
 supplyReportsRoutes.put(
   "/:id/supplies",
   controller.updateSupplies.bind(controller),
