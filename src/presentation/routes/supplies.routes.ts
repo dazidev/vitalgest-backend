@@ -1,15 +1,19 @@
 import express from "express";
 import { SuppliesService } from "../services/supplies.service";
 import { SuppliesController } from "../controllers/supplies.controller";
+import { AuthMiddleware } from "../../infrastructure";
 
 const suppliesRoutes = express.Router();
 
 const suppliesService = new SuppliesService();
 const controller = new SuppliesController(suppliesService);
 
+//* Verificar autenticación de todas las rutas
+suppliesRoutes.use(AuthMiddleware.validateJWT);
+
 suppliesRoutes.post(
   "/create/pharmacy/:id",
-  controller.createSupply.bind(controller)
+  controller.createSupply.bind(controller),
 );
 
 suppliesRoutes.put("/edit/:id", controller.editSupply.bind(controller));

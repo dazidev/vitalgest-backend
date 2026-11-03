@@ -1,11 +1,15 @@
 import express from "express";
 import { ShiftsService } from "../services/shifts.service";
 import { ShiftsController } from "../controllers/shifts.controller";
+import { AuthMiddleware } from "../../infrastructure";
 
 const shiftRoutes = express.Router();
 
 const shiftService = new ShiftsService();
 const controller = new ShiftsController(shiftService);
+
+//* Verificar autenticación de todas las rutas
+shiftRoutes.use(AuthMiddleware.validateJWT);
 
 shiftRoutes.post("/create", controller.createShift.bind(controller));
 

@@ -2,11 +2,15 @@ import express from "express";
 //import { AuthMiddleware, RankMiddleware } from '../../infrastructure';
 import { DelegationsController } from "../controllers/delegations.controller";
 import { DelegationsService } from "../services/delegations.service";
+import { AuthMiddleware } from "../../infrastructure";
 
 const delegationsRoutes = express.Router();
 
 const service = new DelegationsService();
 const controller = new DelegationsController(service);
+
+//* Verificar autenticación de todas las rutas
+delegationsRoutes.use(AuthMiddleware.validateJWT);
 
 delegationsRoutes.get(
   "/states",

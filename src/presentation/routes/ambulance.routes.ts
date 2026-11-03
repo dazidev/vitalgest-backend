@@ -1,4 +1,5 @@
 import express from "express";
+import { AuthMiddleware } from "../../infrastructure";
 import { AmbulancesService } from "../services/ambulance.service";
 import { AmbulancesController } from "../controllers/ambulances.controller";
 
@@ -6,6 +7,9 @@ const AmbulanceRoutes = express.Router();
 
 const ambulanceService = new AmbulancesService();
 const controller = new AmbulancesController(ambulanceService);
+
+//* Verificar autenticación de todas las rutas
+AmbulanceRoutes.use(AuthMiddleware.validateJWT);
 
 AmbulanceRoutes.post("/create", controller.createAmbulance.bind(controller));
 

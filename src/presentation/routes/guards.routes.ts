@@ -1,11 +1,15 @@
 import express from "express";
 import { GuardsService } from "../services/guards.service";
 import { GuardsController } from "../controllers/guards.controller";
+import { AuthMiddleware } from "../../infrastructure";
 
 const guardsRoutes = express.Router();
 
 const guardService = new GuardsService();
 const controller = new GuardsController(guardService);
+
+//* Verificar autenticación de todas las rutas
+guardsRoutes.use(AuthMiddleware.validateJWT);
 
 guardsRoutes.post("/create", controller.createGuard.bind(controller));
 

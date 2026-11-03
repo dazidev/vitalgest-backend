@@ -1,12 +1,16 @@
 import express from "express";
 import { ChecklistsService } from "../services/checklists.service";
 import { ChecklistsController } from "../controllers/checklists.controller";
+import { AuthMiddleware } from "../../infrastructure";
 // import { checklistGasFile, checklistSignFiles } from "../../infrastructure";
 
 const checklistsRoutes = express.Router();
 
 const checklistsService = new ChecklistsService();
 const controller = new ChecklistsController(checklistsService);
+
+//* Verificar autenticación de todas las rutas
+checklistsRoutes.use(AuthMiddleware.validateJWT);
 
 //* Ambulances
 checklistsRoutes.get(
