@@ -44,6 +44,7 @@
  *               data:
  *                 - id: d3ae8cd2-f121-4893-974e-773509d6e7e0
  *                   checklist_id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                   notes: "Faltan algunos suministros en el gabinete 1."
  *                   ambulance:
  *                     id: 89b576c4-e58a-499c-8bc3-5530e4464cdf
  *                     number: AMB-01
@@ -118,6 +119,7 @@
  *               data:
  *                 id: d3ae8cd2-f121-4893-974e-773509d6e7e0
  *                 checklist_id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                 notes: "Faltan algunos suministros en el gabinete 1."
  *                 ambulance:
  *                   id: 89b576c4-e58a-499c-8bc3-5530e4464cdf
  *                   number: AMB-01

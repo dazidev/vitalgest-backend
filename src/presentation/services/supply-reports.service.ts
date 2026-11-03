@@ -3,6 +3,7 @@ import { PaginationDto, SupplyReportEntityDto } from "../../application";
 import { ERROR_CODES } from "../../domain";
 import {
   Ambulance,
+  ChecklistSupply,
   sequelize,
   SupplyReport,
   SupplyReportItem,
@@ -19,6 +20,12 @@ export class SupplyReportsService {
             model: Ambulance,
             as: "ambulance",
             attributes: ["id", "number"],
+          },
+          {
+            model: ChecklistSupply,
+            as: "checklist",
+            attributes: ["notes"],
+            required: false,
           },
           {
             model: SupplyReportItem,
@@ -103,6 +110,7 @@ export class SupplyReportsService {
         return {
           id: report.id,
           checklist_id: report.checklist_id,
+          notes: report.checklist?.notes ?? null,
           ambulance: report.ambulance
             ? {
                 id: report.ambulance.id,
@@ -258,6 +266,12 @@ export class SupplyReportsService {
             attributes: ["id", "number"],
           },
           {
+            model: ChecklistSupply,
+            as: "checklist",
+            attributes: ["notes"],
+            required: false,
+          },
+          {
             model: SupplyReportItem,
             as: "items",
             required: false,
@@ -334,6 +348,7 @@ export class SupplyReportsService {
       const formattedReport = {
         id: report.id,
         checklist_id: report.checklist_id,
+        notes: report.checklist?.notes ?? null,
         ambulance: report.ambulance
           ? {
               id: report.ambulance.id,
