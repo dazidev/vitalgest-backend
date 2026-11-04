@@ -27,3 +27,6 @@ export * from "./services/supplies.service.interface";
 // questions
 export * from "./controllers/questions.controller.interface";
 export * from "./services/questions.service.interface";
+
+// interfaces
+export * from "./interfaces/logs.interface";

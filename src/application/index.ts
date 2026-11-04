@@ -15,3 +15,5 @@ export * from "./dtos/questions/question-subcategory-entity.dto";
 export * from "./dtos/questions/question-entity.dto";
 export * from "./dtos/supply-report-entity.dto";
 export * from "./errors/custom.error";
+export * from "./dtos/log-entity.dto";
+export * from "./dtos/find-logs.dto";

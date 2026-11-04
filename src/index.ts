@@ -28,6 +28,7 @@ import {
   supplyReportsRoutes,
   userRoutes,
   questionsRoutes,
+  logsRoutes,
 } from "./presentation";
 import { errorHandler } from "./infrastructure";
 
@@ -114,6 +115,7 @@ app.use("/api/supplies", suppliesRoutes);
 app.use("/api/supply-reports", supplyReportsRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/questions", questionsRoutes);
+app.use("/api/logs", logsRoutes);
 
 // para ver las imagenes
 app.use(

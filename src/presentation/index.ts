@@ -11,6 +11,7 @@ export { default as suppliesRoutes } from "./routes/supplies.routes";
 export { default as userRoutes } from "./routes/user.routes";
 export { default as questionsRoutes } from "./routes/questions.routes";
 export { default as supplyReportsRoutes } from "./routes/supply-reports.routes";
+export { default as logsRoutes } from "./routes/logs.routes";
 
 // controladores
 export * from "./controllers/adm.controller";
