@@ -20,34 +20,60 @@ export class AmbulancesController implements AmbulancesControllerInterface {
   }
 
   createAmbulance(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, ambulanceEntityDto] = AmbulanceEntityDto.create(req.body);
     if (error) throw CustomError.badRequest(error);
 
     this.ambulancesService
-      .createAmbulance(ambulanceEntityDto!)
+      .createAmbulance(ambulanceEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
+
   editAmbulance(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
+
     const [error, ambulanceEntityDto] = AmbulanceEntityDto.edit({
       id,
       ...req.body,
     });
+
     if (error) throw CustomError.badRequest(error);
 
     this.ambulancesService
-      .editAmbulance(ambulanceEntityDto!)
+      .editAmbulance(ambulanceEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
+
   deleteAmbulance(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
+
     const [error, ambulanceEntityDto] = AmbulanceEntityDto.delete({ id });
     if (error) throw CustomError.badRequest(error);
 
     this.ambulancesService
-      .deleteAmbulance(ambulanceEntityDto!)
+      .deleteAmbulance(ambulanceEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
@@ -84,41 +110,69 @@ export class AmbulancesController implements AmbulancesControllerInterface {
   }
 
   //* SUPPLIES
+
   addSupply(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id: ambulanceId } = req.params;
+
     const [error, supplyAmbEntityDto] = SupplyAmbEntityDto.create({
       ...req.body,
       ambulanceId,
     });
+
     if (error) throw CustomError.badRequest(error);
 
     this.ambulancesService
-      .addSupply(supplyAmbEntityDto!)
+      .addSupply(supplyAmbEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
 
   editSupply(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
+
     const [error, supplyAmbEntityDto] = SupplyAmbEntityDto.edit({
       id,
       ...req.body,
     });
+
     if (error) throw CustomError.badRequest(error);
 
     this.ambulancesService
-      .editSupply(supplyAmbEntityDto!)
+      .editSupply(supplyAmbEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
 
   deleteSupply(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
+
     const [error, supplyAmbEntityDto] = SupplyAmbEntityDto.id({ id });
+
     if (error) throw CustomError.badRequest(error);
 
     this.ambulancesService
-      .deleteSupply(supplyAmbEntityDto!)
+      .deleteSupply(supplyAmbEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }

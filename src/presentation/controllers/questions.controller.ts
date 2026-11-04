@@ -78,6 +78,13 @@ export class QuestionsController implements QuestionsControllerInterface {
   }
 
   createCategory(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, categoryDto] = QuestionCategoryEntityDto.create(
       req.body ?? {},
     );
@@ -85,7 +92,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .createCategory(categoryDto!)
+      .createCategory(categoryDto!, userId)
       .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -95,6 +102,13 @@ export class QuestionsController implements QuestionsControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
 
     const [error, categoryDto] = QuestionCategoryEntityDto.edit({
@@ -105,7 +119,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .editCategory(categoryDto!)
+      .editCategory(categoryDto!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -115,6 +129,13 @@ export class QuestionsController implements QuestionsControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, categoryDto] = QuestionCategoryEntityDto.delete({
       id: req.params.id,
     });
@@ -122,7 +143,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .deleteCategory(categoryDto!.id!)
+      .deleteCategory(categoryDto!.id!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -165,6 +186,13 @@ export class QuestionsController implements QuestionsControllerInterface {
   }
 
   createSubcategory(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, subcategoryDto] = QuestionSubcategoryEntityDto.create(
       req.body ?? {},
     );
@@ -172,7 +200,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .createSubcategory(subcategoryDto!)
+      .createSubcategory(subcategoryDto!, userId)
       .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -182,6 +210,13 @@ export class QuestionsController implements QuestionsControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
 
     const [error, subcategoryDto] = QuestionSubcategoryEntityDto.edit({
@@ -192,7 +227,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .editSubcategory(subcategoryDto!)
+      .editSubcategory(subcategoryDto!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -202,6 +237,13 @@ export class QuestionsController implements QuestionsControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, subcategoryDto] = QuestionSubcategoryEntityDto.delete({
       id: req.params.id,
     });
@@ -209,7 +251,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .deleteSubcategory(subcategoryDto!.id!)
+      .deleteSubcategory(subcategoryDto!.id!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -268,12 +310,19 @@ export class QuestionsController implements QuestionsControllerInterface {
   }
 
   createQuestion(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, questionDto] = QuestionEntityDto.create(req.body ?? {});
 
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .createQuestion(questionDto!)
+      .createQuestion(questionDto!, userId)
       .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -283,6 +332,13 @@ export class QuestionsController implements QuestionsControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, questionDto] = QuestionEntityDto.edit({
       ...(req.body ?? {}),
       id: req.params.id,
@@ -291,7 +347,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .editQuestion(questionDto!)
+      .editQuestion(questionDto!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -301,6 +357,13 @@ export class QuestionsController implements QuestionsControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, questionDto] = QuestionEntityDto.delete({
       id: req.params.id,
     });
@@ -308,7 +371,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.questionsService
-      .deleteQuestion(questionDto!.id!)
+      .deleteQuestion(questionDto!.id!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }

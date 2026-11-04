@@ -58,7 +58,7 @@ export class UserEntityDto {
 
     if (type === "edit") {
       if (!id) return [ERROR_CODES.MISSING_USER_ID];
-      if (!status) return [ERROR_CODES.MISSING_STATUS];
+      if (typeof status !== "boolean") return [ERROR_CODES.MISSING_STATUS];
     }
     if (!name) return [ERROR_CODES.MISSING_NAME];
     if (!lastname) return [ERROR_CODES.MISSING_LASTNAME];

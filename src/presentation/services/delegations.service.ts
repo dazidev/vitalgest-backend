@@ -1,4 +1,8 @@
-import { DelegationsServiceInterface } from "../../domain";
+import {
+  DelegationsServiceInterface,
+  LogActions,
+  LogEntities,
+} from "../../domain";
 import { ERROR_CODES } from "../../domain/enums/error-codes.enum";
 import { DelegationEntity } from "../../domain/entities/delegation.entity";
 
@@ -11,7 +15,8 @@ import {
   User,
 } from "../../infrastructure";
 import { Transaction } from "sequelize";
-import { PaginationDto } from "../../application";
+import { LogEntityDto, PaginationDto } from "../../application";
+import { LogsService } from "./logs.service";
 
 const mapUserRow = (r: any): object => ({
   id: r.id,
@@ -45,14 +50,23 @@ const mapDelegationRow = (r: any): object => ({
 });
 
 export class DelegationsService implements DelegationsServiceInterface {
+  private readonly logsService = new LogsService();
+
   private async getDelegationName(
     municipalityId: number,
-  ): Promise<string | boolean> {
+    transaction?: Transaction,
+  ): Promise<string | false> {
     const municipality = await Municipality.findOne({
       where: { id: municipalityId },
       attributes: ["name"],
-      include: { model: State, as: "state", attributes: ["name"] },
+      include: {
+        model: State,
+        as: "state",
+        attributes: ["name"],
+      },
+      ...(transaction ? { transaction } : {}),
     });
+
     if (!municipality) return false;
 
     const name = `Delegación ${municipality.name}, ${municipality.state?.name}`;
@@ -117,33 +131,53 @@ export class DelegationsService implements DelegationsServiceInterface {
     return formatMunicipalities;
   }
 
-  async createDelegation(delegationEntity: DelegationEntity): Promise<object> {
+  async createDelegation(
+    delegationEntity: DelegationEntity,
+    userId: string,
+  ): Promise<object> {
     const { municipalityId } = delegationEntity;
 
     let tx: Transaction | undefined;
 
-    const name = await this.getDelegationName(municipalityId!);
-    if (!name) throw ERROR_CODES.UPDATE_FAILED;
-
     try {
       tx = await sequelize.transaction();
 
+      const name = await this.getDelegationName(Number(municipalityId), tx);
+
+      if (!name) throw ERROR_CODES.MUNICIPALITY_NOT_FOUND;
+
       const delegation = await Delegation.create(
         {
-          name: name as string,
-          municipality_id: municipalityId!,
+          name,
+          municipality_id: Number(municipalityId),
         },
         { transaction: tx },
       );
 
-      await Pharmacy.create(
+      const pharmacy = await Pharmacy.create(
         {
           delegation_id: delegation.id,
         },
         { transaction: tx },
       );
 
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: delegation.id,
+        entity: LogEntities.delegation,
+        action: LogActions.delegation.create,
+        description:
+          `Se creó la delegación ${delegation.name}. ` +
+          `Municipio: ${delegation.municipality_id}. ` +
+          `Farmacia creada: ${pharmacy.id}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
       await tx.commit();
+      tx = undefined;
 
       const formatDelegation = [delegation].map(mapDelegationRow);
 
@@ -152,90 +186,142 @@ export class DelegationsService implements DelegationsServiceInterface {
         data: formatDelegation,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.INSERT_FAILED;
     }
   }
 
-  async editDelegation(delegationEntity: DelegationEntity): Promise<object> {
+  async editDelegation(
+    delegationEntity: DelegationEntity,
+    userId: string,
+  ): Promise<object> {
     const { id, municipalityId } = delegationEntity;
-
-    const exists = await Delegation.findOne({ where: { id } }).catch(
-      (_error) => {
-        throw ERROR_CODES.UNKNOWN_DB_ERROR;
-      },
-    );
-
-    if (!exists) throw ERROR_CODES.DELEGATION_NOT_FOUND;
-
-    const existsMunicipality = await Municipality.findOne({
-      where: { id: municipalityId },
-    }).catch((_error) => {
-      throw ERROR_CODES.UNKNOWN_DB_ERROR;
-    });
-
-    if (!existsMunicipality) throw ERROR_CODES.MUNICIPALITY_NOT_FOUND;
-
-    const name = await this.getDelegationName(municipalityId!);
-    if (!name) throw ERROR_CODES.UPDATE_FAILED;
 
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const delegation = await Delegation.update(
+      const delegation = await Delegation.findOne({
+        where: { id },
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!delegation) throw ERROR_CODES.DELEGATION_NOT_FOUND;
+
+      const newMunicipalityId = Number(municipalityId);
+
+      const name = await this.getDelegationName(newMunicipalityId, tx);
+
+      if (!name) throw ERROR_CODES.MUNICIPALITY_NOT_FOUND;
+
+      const changes: string[] = [];
+
+      if (delegation.name !== name) {
+        changes.push(`nombre: ${delegation.name} -> ${name}`);
+      }
+
+      if (Number(delegation.municipality_id) !== newMunicipalityId) {
+        changes.push(
+          `municipio: ${delegation.municipality_id} -> ${newMunicipalityId}`,
+        );
+      }
+
+      if (changes.length === 0) {
+        await tx.commit();
+        tx = undefined;
+
+        return { success: true };
+      }
+
+      const previousName = delegation.name;
+
+      await delegation.update(
         {
-          name: name as string,
-          municipality_id: municipalityId,
+          name,
+          municipality_id: newMunicipalityId,
         },
-        { where: { id }, transaction: tx },
+        { transaction: tx },
       );
 
-      await tx.commit();
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: delegation.id,
+        entity: LogEntities.delegation,
+        action: LogActions.delegation.update,
+        description:
+          `Se editó la delegación ${previousName}. ` +
+          `Cambios: ${changes.join("; ")}.`,
+      });
 
-      if (!delegation) throw ERROR_CODES.UPDATE_FAILED;
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
-  async deleteDelegation(id: string): Promise<object> {
-    //! todo: eliminar luego todo lo vinculado con la farmacia y delegación.
+  async deleteDelegation(id: string, userId: string): Promise<object> {
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      await Delegation.findByPk(id, {
-        include: [{ model: Pharmacy, as: "pharmacy", attributes: ["id"] }],
+      const delegation = await Delegation.findByPk(id, {
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
 
-      const count = await Delegation.destroy({
-        where: { id },
+      if (!delegation) throw ERROR_CODES.DELEGATION_NOT_FOUND;
+
+      const pharmacy = await Pharmacy.findOne({
+        where: { delegation_id: id },
+        attributes: ["id"],
         transaction: tx,
       });
 
-      await Pharmacy.destroy({ where: { id }, transaction: tx });
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: delegation.id,
+        entity: LogEntities.delegation,
+        action: LogActions.delegation.delete,
+        description:
+          `Se eliminó la delegación ${delegation.name}. ` +
+          `Municipio: ${delegation.municipality_id}. ` +
+          `Farmacia asociada: ${pharmacy?.id ?? "Sin farmacia"}.`,
+      });
 
-      if (count === 0) throw ERROR_CODES.DELEGATION_NOT_FOUND;
+      if (logError) throw logError;
+
+      await delegation.destroy({ transaction: tx });
+
+      await this.logsService.create(logDto!, tx);
 
       await tx.commit();
+      tx = undefined;
 
       return { success: true };
     } catch (error) {
-      console.log(error);
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.DELETE_FAILED;
     }
   }

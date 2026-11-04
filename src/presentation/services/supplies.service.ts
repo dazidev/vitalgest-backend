@@ -1,10 +1,25 @@
 import { Transaction } from "sequelize";
-import { PaginationDto, SupplyEntityDto } from "../../application";
-import { ERROR_CODES, SuppliesServiceInterface } from "../../domain";
+import {
+  LogEntityDto,
+  PaginationDto,
+  SupplyEntityDto,
+} from "../../application";
+import {
+  ERROR_CODES,
+  LogActions,
+  LogEntities,
+  SuppliesServiceInterface,
+} from "../../domain";
 import { Pharmacy, sequelize, Supply } from "../../infrastructure";
+import { LogsService } from "./logs.service";
 
 export class SuppliesService implements SuppliesServiceInterface {
-  async createSupply(supplyEntityDto: SupplyEntityDto): Promise<object> {
+  private readonly logsService = new LogsService();
+
+  async createSupply(
+    supplyEntityDto: SupplyEntityDto,
+    userId: string,
+  ): Promise<object> {
     const {
       category,
       specification,
@@ -23,6 +38,7 @@ export class SuppliesService implements SuppliesServiceInterface {
         where: { id: pharmacyId },
         transaction: tx,
       });
+
       if (!pharmacy) throw ERROR_CODES.PHARMACY_NOT_FOUND;
 
       const supply = await Supply.create(
@@ -32,25 +48,49 @@ export class SuppliesService implements SuppliesServiceInterface {
           avaible_quantity: Number(avaibleQuantity!),
           expiration_date: new Date(expirationDate!),
           measurement_unit: measurementUnit!,
-          pharmacy_id: pharmacyId,
+          pharmacy_id: pharmacyId!,
         },
         { transaction: tx },
       );
 
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: supply.id,
+        entity: LogEntities.supply,
+        action: LogActions.supply.create,
+        description:
+          `Se creó el suministro ${supply.category}` +
+          ` (${supply.specification ?? "Sin especificación"}). ` +
+          `Cantidad inicial: ${supply.avaible_quantity} ` +
+          `${supply.measurement_unit}. ` +
+          `Caducidad: ${supply.expiration_date.toISOString()}. ` +
+          `Farmacia: ${supply.pharmacy_id}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
       await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
         data: supply,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UNKNOWN_DB_ERROR;
     }
   }
 
-  async editSupply(supplyEntityDto: SupplyEntityDto): Promise<object> {
+  async editSupply(
+    supplyEntityDto: SupplyEntityDto,
+    userId: string,
+  ): Promise<object> {
     const {
       id,
       category,
@@ -66,47 +106,155 @@ export class SuppliesService implements SuppliesServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const supply = await Supply.findOne({ where: { id }, transaction: tx });
-      if (!supply) throw ERROR_CODES.SUPPLY_NOT_FOUND;
-
-      await Supply.update(
-        {
-          category: category,
-          specification: specification,
-          avaible_quantity: Number(avaibleQuantity),
-          expiration_date: expirationDate,
-          measurement_unit: measurementUnit,
-          pharmacy_id: pharmacyId,
-        },
-        { where: { id }, transaction: tx },
-      );
-
-      await tx.commit();
-
-      return { success: true };
-    } catch (error) {
-      await tx?.rollback();
-      if (typeof error === "string") throw error;
-      throw ERROR_CODES.UNKNOWN_DB_ERROR;
-    }
-  }
-
-  async deleteSupply(supplyEntityDto: SupplyEntityDto): Promise<object> {
-    const { id } = supplyEntityDto;
-
-    try {
       const supply = await Supply.findOne({
         where: { id },
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
       });
 
       if (!supply) throw ERROR_CODES.SUPPLY_NOT_FOUND;
 
-      const row = await Supply.destroy({ where: { id } });
-      if (row === 0) throw ERROR_CODES.SUPPLY_NOT_FOUND;
+      const newQuantity = Number(avaibleQuantity!);
+      const newExpirationDate = new Date(expirationDate!);
+
+      const newSpecification =
+        specification === undefined ? supply.specification : specification;
+
+      const changes: string[] = [];
+
+      if (supply.category !== category) {
+        changes.push(`categoría: ${supply.category} -> ${category}`);
+      }
+
+      if ((supply.specification ?? null) !== (newSpecification ?? null)) {
+        changes.push(
+          `especificación: ${supply.specification ?? "Sin especificación"} -> ` +
+            `${newSpecification ?? "Sin especificación"}`,
+        );
+      }
+
+      if (supply.avaible_quantity !== newQuantity) {
+        changes.push(
+          `cantidad disponible: ${supply.avaible_quantity} -> ${newQuantity}`,
+        );
+      }
+
+      if (
+        new Date(supply.expiration_date).getTime() !==
+        newExpirationDate.getTime()
+      ) {
+        changes.push(
+          `caducidad: ${new Date(supply.expiration_date).toISOString()} -> ` +
+            `${newExpirationDate.toISOString()}`,
+        );
+      }
+
+      if (supply.measurement_unit !== measurementUnit) {
+        changes.push(
+          `unidad de medida: ${supply.measurement_unit} -> ${measurementUnit}`,
+        );
+      }
+
+      if (supply.pharmacy_id !== pharmacyId) {
+        changes.push(`farmacia: ${supply.pharmacy_id} -> ${pharmacyId}`);
+      }
+
+      if (changes.length === 0) {
+        await tx.commit();
+        tx = undefined;
+
+        return { success: true };
+      }
+
+      const previousCategory = supply.category;
+
+      await supply.update(
+        {
+          category: category!,
+          specification: newSpecification,
+          avaible_quantity: newQuantity,
+          expiration_date: newExpirationDate,
+          measurement_unit: measurementUnit!,
+          pharmacy_id: pharmacyId!,
+        },
+        { transaction: tx },
+      );
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: supply.id,
+        entity: LogEntities.supply,
+        action: LogActions.supply.update,
+        description:
+          `Se editó el suministro ${previousCategory}. ` +
+          `Cambios: ${changes.join("; ")}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
 
       return { success: true };
     } catch (error) {
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
+      throw ERROR_CODES.UNKNOWN_DB_ERROR;
+    }
+  }
+
+  async deleteSupply(
+    supplyEntityDto: SupplyEntityDto,
+    userId: string,
+  ): Promise<object> {
+    const { id } = supplyEntityDto;
+
+    let tx: Transaction | undefined;
+
+    try {
+      tx = await sequelize.transaction();
+
+      const supply = await Supply.findOne({
+        where: { id },
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!supply) throw ERROR_CODES.SUPPLY_NOT_FOUND;
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: supply.id,
+        entity: LogEntities.supply,
+        action: LogActions.supply.delete,
+        description:
+          `Se eliminó el suministro ${supply.category}` +
+          ` (${supply.specification ?? "Sin especificación"}). ` +
+          `Cantidad disponible: ${supply.avaible_quantity} ` +
+          `${supply.measurement_unit}. ` +
+          `Caducidad: ${new Date(supply.expiration_date).toISOString()}. ` +
+          `Farmacia: ${supply.pharmacy_id}.`,
+      });
+
+      if (logError) throw logError;
+
+      await supply.destroy({ transaction: tx });
+
+      await this.logsService.create(logDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
+
+      return { success: true };
+    } catch (error) {
+      if (tx) await tx.rollback();
+
+      if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UNKNOWN_DB_ERROR;
     }
   }

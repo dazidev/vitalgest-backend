@@ -9,20 +9,28 @@ export interface QuestionsServiceInterface {
   //* Categories
   getCategories(): Promise<object>;
   getCategory(id: string): Promise<object>;
-  createCategory(categoryDto: QuestionCategoryEntityDto): Promise<object>;
-  editCategory(categoryDto: QuestionCategoryEntityDto): Promise<object>;
-  deleteCategory(id: string): Promise<object>;
+  createCategory(
+    categoryDto: QuestionCategoryEntityDto,
+    userId: string,
+  ): Promise<object>;
+  editCategory(
+    categoryDto: QuestionCategoryEntityDto,
+    userId: string,
+  ): Promise<object>;
+  deleteCategory(id: string, userId: string): Promise<object>;
 
   //* Subcategories
   getSubcategories(categoryId?: string): Promise<object>;
   getSubcategory(id: string): Promise<object>;
   createSubcategory(
     subcategoryDto: QuestionSubcategoryEntityDto,
+    userId: string,
   ): Promise<object>;
   editSubcategory(
     subcategoryDto: QuestionSubcategoryEntityDto,
+    userId: string,
   ): Promise<object>;
-  deleteSubcategory(id: string): Promise<object>;
+  deleteSubcategory(id: string, userId: string): Promise<object>;
 
   //* Questions
   getQuestions(
@@ -31,7 +39,10 @@ export interface QuestionsServiceInterface {
     subcategoryId?: string,
   ): Promise<object>;
   getQuestion(id: string): Promise<object>;
-  createQuestion(questionDto: QuestionEntityDto): Promise<object>;
-  editQuestion(questionDto: QuestionEntityDto): Promise<object>;
-  deleteQuestion(id: string): Promise<object>;
+  createQuestion(
+    questionDto: QuestionEntityDto,
+    userId: string,
+  ): Promise<object>;
+  editQuestion(questionDto: QuestionEntityDto, userId: string): Promise<object>;
+  deleteQuestion(id: string, userId: string): Promise<object>;
 }

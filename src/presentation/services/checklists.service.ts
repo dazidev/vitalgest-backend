@@ -1,5 +1,10 @@
 //import { promises as fs } from "fs";
-import { ChecklistsServiceInterface, ERROR_CODES } from "../../domain";
+import {
+  ChecklistsServiceInterface,
+  ERROR_CODES,
+  LogActions,
+  LogEntities,
+} from "../../domain";
 
 import {
   Ambulance,
@@ -28,14 +33,20 @@ import {
 import {
   CheckListAmbulanceEntityDto,
   CheckListSupplyEntityDto,
+  LogEntityDto,
 } from "../../application";
 
 import { Op, Transaction } from "sequelize";
+import { LogsService } from "./logs.service";
 
 export class ChecklistsService implements ChecklistsServiceInterface {
+  private readonly logsService = new LogsService();
+
   //* SUPPLIES CHECKLIST
+
   async createSupChecklist(
     checkListSupplyEntityDto: CheckListSupplyEntityDto,
+    userId: string,
   ): Promise<object> {
     const { shiftId } = checkListSupplyEntityDto;
 
@@ -44,40 +55,61 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const existsShift = await Shift.findOne({
+      const shift = await Shift.findOne({
         where: { id: shiftId },
         transaction: tx,
       });
-      if (!existsShift) throw ERROR_CODES.SHIFT_NOT_FOUND;
+
+      if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
       const exists = await ChecklistSupply.findOne({
         where: { shift_id: shiftId },
         transaction: tx,
       });
+
       if (exists) throw ERROR_CODES.CHECKLIST_ALREADY_EXISTS;
 
       const checklist = await ChecklistSupply.create(
         {
-          shift_id: shiftId,
+          shift_id: shiftId!,
         },
         { transaction: tx },
       );
 
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.supplyChecklist,
+        action: LogActions.checklist.supply.create,
+        description:
+          `Se creó el checklist de suministros ${checklist.id}. ` +
+          `Turno: ${shift.id}. ` +
+          `Ambulancia: ${shift.ambulance_id}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
       await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
         data: checklist,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.INSERT_FAILED;
     }
   }
 
   async signSupChecklist(
     checkListSupplyEntityDto: CheckListSupplyEntityDto,
+    userId: string,
   ): Promise<object> {
     const { id, recipientId, delivererId, notes } = checkListSupplyEntityDto;
 
@@ -86,21 +118,21 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistSupply.findOne({
-        where: { id },
-        include: [
-          {
-            model: Shift,
-            as: "shift",
-            attributes: ["ambulance_id"],
-          },
-        ],
+      const checklist = await ChecklistSupply.findByPk(id!, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!checklist) {
+        throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+      }
+
+      const shift = await Shift.findByPk(checklist.shift_id, {
+        attributes: ["ambulance_id"],
         transaction: tx,
       });
 
-      if (!checklist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
-
-      const ambulanceId = checklist.shift?.ambulance_id;
+      const ambulanceId = shift?.ambulance_id;
 
       if (!ambulanceId) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
@@ -120,7 +152,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       if (!recipient) throw ERROR_CODES.INVALID_RECIPIENT_ID;
 
-      await ChecklistSupply.update(
+      await checklist.update(
         {
           deliverer_id: deliverer.id,
           sign_deliverer_path: deliverer.signature,
@@ -128,14 +160,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           sign_recipient_path: recipient.signature,
           notes: notes ?? undefined,
         },
-        {
-          where: { id },
-          transaction: tx,
-        },
+        { transaction: tx },
       );
 
       const existingReport = await SupplyReport.findOne({
-        where: { checklist_id: id },
+        where: { checklist_id: checklist.id },
         attributes: ["id"],
         transaction: tx,
       });
@@ -143,7 +172,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       if (!existingReport) {
         const missingSupplies = await AnswerSupply.findAll({
           where: {
-            checklist_id: id,
+            checklist_id: checklist.id,
             required_quantity: {
               [Op.gt]: 0,
             },
@@ -161,7 +190,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
         const report = await SupplyReport.create(
           {
-            checklist_id: id!,
+            checklist_id: checklist.id,
             ambulance_id: ambulanceId,
           },
           { transaction: tx },
@@ -171,18 +200,14 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           await SupplyReportItem.bulkCreate(
             missingSupplies.map((supply) => ({
               report_id: report.id,
-
               category: supply.category,
               specification: supply.specification,
               measurement_unit: supply.measurement_unit,
-
               min_quantity: supply.min_quantity,
               reported_quantity: supply.reported_quantity,
               required_quantity: supply.required_quantity,
-
               added_quantity: 0,
               is_resolved: false,
-
               area_id: Number(supply.area_id),
               area_name: supply.area!.name,
               section: supply.area!.section,
@@ -191,23 +216,68 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             { transaction: tx },
           );
         }
+
+        const totalMissing = missingSupplies.reduce(
+          (total, supply) => total + supply.required_quantity,
+          0,
+        );
+
+        const [reportLogError, reportLogDto] = LogEntityDto.create({
+          userId,
+          affected: report.id,
+          entity: LogEntities.supplyReport,
+          action: LogActions.supplyReport.create,
+          description:
+            `Se generó el reporte de reabastecimiento ${report.id} ` +
+            `al firmar el checklist ${checklist.id}. ` +
+            `Ambulancia: ${ambulanceId}. ` +
+            `Suministros faltantes: ${missingSupplies.length}. ` +
+            `Total de unidades faltantes: ${totalMissing}. ` +
+            `Estado inicial: pending.`,
+        });
+
+        if (reportLogError) throw reportLogError;
+
+        await this.logsService.create(reportLogDto!, tx);
       }
 
-      await tx.commit();
+      const [signLogError, signLogDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.supplyChecklist,
+        action: LogActions.checklist.supply.sign,
+        description:
+          `Se registraron las firmas del checklist de suministros ` +
+          `${checklist.id}. ` +
+          `Ambulancia: ${ambulanceId}. ` +
+          `Usuario que entrega: ${deliverer.id}. ` +
+          `Usuario que recibe: ${recipient.id}. ` +
+          `Observaciones proporcionadas: ${notes ? "Sí" : "No"}. ` +
+          `Reporte generado en esta operación: ${
+            existingReport ? "No" : "Sí"
+          }.`,
+      });
 
-      return {
-        success: true,
-      };
+      if (signLogError) throw signLogError;
+
+      await this.logsService.create(signLogDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
+
+      return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
 
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
   async deleteSupChecklist(
     checkListSupplyEntityDto: CheckListSupplyEntityDto,
+    userId: string,
   ): Promise<object> {
     const { id } = checkListSupplyEntityDto;
 
@@ -216,26 +286,49 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const exist = await ChecklistSupply.findOne({
-        where: { id },
+      const checklist = await ChecklistSupply.findByPk(id!, {
         transaction: tx,
+        lock: tx.LOCK.UPDATE,
       });
-      if (!exist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
 
-      const row = await ChecklistSupply.destroy({
-        where: { id },
+      if (!checklist) {
+        throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
+      }
+
+      const answersCount = await AnswerSupply.count({
+        where: { checklist_id: checklist.id },
         transaction: tx,
       });
-      if (row === 0) throw ERROR_CODES.DELETE_FAILED;
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.supplyChecklist,
+        action: LogActions.checklist.supply.delete,
+        description:
+          `Se eliminó el checklist de suministros ${checklist.id}. ` +
+          `Turno: ${checklist.shift_id}. ` +
+          `Respuestas registradas: ${answersCount}. ` +
+          `Firmas registradas: ${
+            checklist.deliverer_id || checklist.recipient_id ? "Sí" : "No"
+          }.`,
+      });
+
+      if (logError) throw logError;
+
+      await checklist.destroy({ transaction: tx });
+
+      await this.logsService.create(logDto!, tx);
 
       await tx.commit();
+      tx = undefined;
 
-      return {
-        success: true,
-      };
+      return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.DELETE_FAILED;
     }
   }
@@ -341,7 +434,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     }
   }
 
-  async putSupAnswers(object: RequestAnswerSupInterface): Promise<object> {
+  async putSupAnswers(
+    object: RequestAnswerSupInterface,
+    userId: string,
+  ): Promise<object> {
     const { checklistId, answers } = object;
 
     let tx: Transaction | undefined;
@@ -349,23 +445,26 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistSupply.findOne({
-        where: { id: checklistId },
-        include: [
-          {
-            model: Shift,
-            as: "shift",
-            attributes: ["ambulance_id"],
-          },
-        ],
+      const checklist = await ChecklistSupply.findByPk(checklistId, {
         transaction: tx,
+        lock: tx.LOCK.UPDATE,
       });
 
       if (!checklist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
 
-      const ambulanceId = checklist.shift?.ambulance_id;
+      const shift = await Shift.findByPk(checklist.shift_id, {
+        attributes: ["ambulance_id"],
+        transaction: tx,
+      });
 
-      if (!ambulanceId) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
+      if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
+
+      const ambulanceId = shift.ambulance_id;
+
+      let suppliesWithShortage = 0;
+      let totalMissingQuantity = 0;
+
+      const changes: string[] = [];
 
       for (const ans of answers) {
         const supply = await SupplyAmbulance.findOne({
@@ -374,26 +473,27 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             ambulance_id: ambulanceId,
           },
           transaction: tx,
+          lock: tx.LOCK.UPDATE,
         });
 
         if (!supply) throw ERROR_CODES.SUPPLY_NOT_FOUND;
 
         const minQuantity = supply.min_quantity;
+        const previousQuantity = supply.avaible_quantity;
         const reportedQuantity = ans.reportedQuantity;
 
         const requiredQuantity = Math.max(0, minQuantity - reportedQuantity);
 
-        await SupplyAmbulance.update(
+        if (requiredQuantity > 0) {
+          suppliesWithShortage++;
+          totalMissingQuantity += requiredQuantity;
+        }
+
+        await supply.update(
           {
             avaible_quantity: reportedQuantity,
           },
-          {
-            where: {
-              id: supply.id,
-              ambulance_id: ambulanceId,
-            },
-            transaction: tx,
-          },
+          { transaction: tx },
         );
 
         await AnswerSupply.create(
@@ -409,15 +509,49 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           },
           { transaction: tx },
         );
+
+        // Resumen de los primeros 10 suministros procesados.
+        if (changes.length < 10) {
+          changes.push(
+            `${supply.id}: ${previousQuantity} -> ${reportedQuantity}, ` +
+              `mínimo ${minQuantity}, faltante ${requiredQuantity}`,
+          );
+        }
       }
 
+      const omitted = Math.max(0, answers.length - changes.length);
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.supplyChecklist,
+        action: LogActions.checklist.supply.saveAnswers,
+        description:
+          `Se registraron ${answers.length} respuestas ` +
+          `del checklist de suministros ${checklist.id}. ` +
+          `Ambulancia: ${ambulanceId}. ` +
+          `Registros con faltantes: ${suppliesWithShortage}. ` +
+          `Total de unidades faltantes: ${totalMissingQuantity}. ` +
+          `Detalle de cantidades: ${changes.join("; ")}.` +
+          (omitted > 0
+            ? ` Se omitieron ${omitted} registros del detalle del log.`
+            : ""),
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
       await tx.commit();
+      tx = undefined;
 
       return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
-      throw error;
+
+      throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
@@ -487,9 +621,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   //* AMBULANCE CHECKLIST
+
   async createAmbChecklist(
     checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
-  ) {
+    userId: string,
+  ): Promise<object> {
     const { ambulanceId, shiftId, km } = checkListAmbulanceEntityDto;
 
     let tx: Transaction | undefined;
@@ -501,18 +637,24 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         where: { id: ambulanceId },
         transaction: tx,
       });
+
       if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
       const shift = await Shift.findOne({
         where: { id: shiftId },
         transaction: tx,
       });
+
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
       const exists = await ChecklistAmbulance.findOne({
-        where: { ambulance_id: ambulanceId, shift_id: shiftId },
+        where: {
+          ambulance_id: ambulanceId,
+          shift_id: shiftId,
+        },
         transaction: tx,
       });
+
       if (exists) throw ERROR_CODES.CHECKLIST_ALREADY_EXISTS;
 
       const checklist = await ChecklistAmbulance.create(
@@ -526,48 +668,76 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         { transaction: tx },
       );
 
-      await tx?.commit();
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.ambulanceChecklist,
+        action: LogActions.checklist.ambulance.create,
+        description:
+          `Se creó el checklist de ambulancia ${checklist.id}. ` +
+          `Ambulancia: ${ambulance.number} (${ambulance.id}). ` +
+          `Turno: ${shift.id}. ` +
+          `Kilometraje: ${checklist.km}. ` +
+          `Hora registrada: ${checklist.time}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
         data: checklist,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
-      throw error; //! todo: cambiar
+
+      throw ERROR_CODES.INSERT_FAILED;
     }
   }
 
   async signAmbChecklist(
     checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
-  ) {
+    userId: string,
+  ): Promise<object> {
     const { id, recipientId, delivererId, notes } = checkListAmbulanceEntityDto;
-
-    const checklist = await ChecklistAmbulance.findOne({
-      where: { id },
-      attributes: ["ambulance_id"],
-    });
-    if (!checklist) throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
 
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
+      const checklist = await ChecklistAmbulance.findByPk(id!, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!checklist) {
+        throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
+      }
+
       const deliverer = await User.findOne({
         where: { id: delivererId },
         attributes: ["id", "signature"],
+        transaction: tx,
       });
+
       if (!deliverer) throw ERROR_CODES.INVALID_DELIVERER_ID;
 
       const recipient = await User.findOne({
         where: { id: recipientId },
         attributes: ["id", "signature"],
+        transaction: tx,
       });
+
       if (!recipient) throw ERROR_CODES.INVALID_RECIPIENT_ID;
 
-      await ChecklistAmbulance.update(
+      await checklist.update(
         {
           deliverer_id: deliverer.id,
           sign_deliverer_path: deliverer.signature,
@@ -575,40 +745,89 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           sign_recipient_path: recipient.signature,
           notes: notes ?? undefined,
         },
-        { where: { id }, transaction: tx },
+        { transaction: tx },
       );
 
-      await tx?.commit();
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.ambulanceChecklist,
+        action: LogActions.checklist.ambulance.sign,
+        description:
+          `Se registraron las firmas del checklist ${checklist.id}. ` +
+          `Ambulancia: ${checklist.ambulance_id}. ` +
+          `Usuario que entrega: ${deliverer.id}. ` +
+          `Usuario que recibe: ${recipient.id}. ` +
+          `Observaciones proporcionadas: ${notes ? "Sí" : "No"}.`,
+      });
 
-      return {
-        success: true,
-      };
-    } catch (err) {
-      await tx?.rollback();
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
+
+      return { success: true };
+    } catch (error) {
+      if (tx) await tx.rollback();
+
+      if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
   async deleteAmbChecklist(
     checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
-  ) {
+    userId: string,
+  ): Promise<object> {
     const { id } = checkListAmbulanceEntityDto;
 
     let tx: Transaction | undefined;
+
     try {
       tx = await sequelize.transaction();
 
-      const row = await ChecklistAmbulance.destroy({
-        where: { id },
+      const checklist = await ChecklistAmbulance.findByPk(id!, {
         transaction: tx,
+        lock: tx.LOCK.UPDATE,
       });
-      if (row === 0) throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
 
-      tx.commit();
+      if (!checklist) {
+        throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
+      }
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.ambulanceChecklist,
+        action: LogActions.checklist.ambulance.delete,
+        description:
+          `Se eliminó el checklist de ambulancia ${checklist.id}. ` +
+          `Ambulancia: ${checklist.ambulance_id}. ` +
+          `Turno: ${checklist.shift_id}. ` +
+          `Kilometraje: ${checklist.km}. ` +
+          `Firmas registradas: ${
+            checklist.deliverer_id || checklist.recipient_id ? "Sí" : "No"
+          }.`,
+      });
+
+      if (logError) throw logError;
+
+      await checklist.destroy({ transaction: tx });
+
+      await this.logsService.create(logDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
 
       return { success: true };
     } catch (error) {
-      tx?.rollback();
+      if (tx) await tx.rollback();
+
+      if (typeof error === "string") throw error;
+
       throw ERROR_CODES.DELETE_FAILED;
     }
   }
@@ -763,13 +982,29 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     }
   }
 
-  async putAmbAnswers(object: RequestAnswerInterface) {
+  async putAmbAnswers(
+    object: RequestAnswerInterface,
+    userId: string,
+  ): Promise<object> {
     const { checklistAmbulanceId, answers } = object;
 
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
+
+      const checklist = await ChecklistAmbulance.findByPk(
+        checklistAmbulanceId,
+        {
+          transaction: tx,
+          lock: tx.LOCK.UPDATE,
+        },
+      );
+
+      if (!checklist) {
+        throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
+      }
+
       for (const ans of answers) {
         const questionId = ans.questionId;
 
@@ -796,13 +1031,37 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           { transaction: tx },
         );
       }
-      await tx?.commit();
+
+      const uniqueQuestionIds = new Set(
+        answers.map((answer) => answer.questionId),
+      );
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: checklist.id,
+        entity: LogEntities.ambulanceChecklist,
+        action: LogActions.checklist.ambulance.saveAnswers,
+        description:
+          `Se guardaron ${answers.length} componentes de respuesta ` +
+          `correspondientes a ${uniqueQuestionIds.size} preguntas ` +
+          `del checklist ${checklist.id}. ` +
+          `Ambulancia: ${checklist.ambulance_id}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
+
+      await tx.commit();
+      tx = undefined;
 
       return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
-      throw error;
+
+      throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 }

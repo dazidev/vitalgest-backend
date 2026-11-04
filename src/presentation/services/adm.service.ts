@@ -1,12 +1,13 @@
 import { AdmServiceInterface } from "../../domain/services/adm.service.interface";
 import { Delegation, sequelize, User } from "../../infrastructure";
-import { UserEntityDto } from "../../application";
-import { ERROR_CODES, UserEntity } from "../../domain";
+import { LogEntityDto, UserEntityDto } from "../../application";
+import { ERROR_CODES, LogActions, LogEntities, UserEntity } from "../../domain";
 
 // librerias externas
 import bcrypt from "bcrypt";
 import { Transaction } from "sequelize";
 import { PaginationDto } from "../../application/dtos/pagination.dto";
+import { LogsService } from "./logs.service";
 
 const mapUserRow = (r: any): object => ({
   id: r.id,
@@ -27,8 +28,12 @@ const mapUserRow = (r: any): object => ({
 });
 
 export class AdmService implements AdmServiceInterface {
-  public async createUser(userEntityDto: UserEntityDto): Promise<object> {
-    let tx: Transaction | undefined;
+  private readonly logsService = new LogsService();
+
+  public async createUser(
+    userEntityDto: UserEntityDto,
+    userId: string,
+  ): Promise<object> {
     const {
       name,
       lastname,
@@ -39,22 +44,28 @@ export class AdmService implements AdmServiceInterface {
       delegationId: delegation_id,
     } = userEntityDto;
 
+    let tx: Transaction | undefined;
+
     try {
       tx = await sequelize.transaction();
+
       const exists = await User.findOne({
-        where: { email: email },
+        where: { email },
         transaction: tx,
       });
+
       if (exists) throw ERROR_CODES.EMAIL_ALREADY_REGISTERED;
 
       const existsDelegation = await Delegation.findOne({
         where: { id: delegation_id },
+        transaction: tx,
       });
+
       if (!existsDelegation) throw ERROR_CODES.INVALID_DELEGATION_ID;
 
       const hashedPassword = await bcrypt.hash(password as string, 10);
 
-      const UserHashed = {
+      const userEntity = UserEntity.create({
         name,
         lastname,
         email,
@@ -62,9 +73,7 @@ export class AdmService implements AdmServiceInterface {
         role,
         position,
         delegation_id,
-      };
-
-      const userEntity = UserEntity.create(UserHashed);
+      });
 
       const user = await User.create(
         {
@@ -80,86 +89,195 @@ export class AdmService implements AdmServiceInterface {
         { transaction: tx },
       );
 
-      await tx.commit();
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: user.id,
+        entity: LogEntities.user,
+        action: LogActions.user.create,
+        description:
+          `Se creó el usuario ${user.name} ${user.lastname}. ` +
+          `ID: ${user.id}. Rol: ${user.role}. ` +
+          `Cargo: ${user.position}. ` +
+          `Delegación: ${user.delegation_id}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
 
       const userSafe = await User.findByPk(user.id, {
         attributes: { exclude: ["password"] },
+        transaction: tx,
       });
+
+      await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
         data: userSafe,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.INSERT_FAILED;
     }
   }
 
-  public async editUser(userEntityDto: UserEntityDto): Promise<object> {
+  public async editUser(
+    userEntityDto: UserEntityDto,
+    userId: string,
+  ): Promise<object> {
     const { id, name, lastname, email, role, position, delegationId, status } =
       userEntityDto;
+
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const exists = await User.findOne({ where: { id }, transaction: tx });
-      if (!exists) throw ERROR_CODES.USER_NOT_FOUND;
+      const user = await User.findByPk(id!, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
+
+      if (!user) throw ERROR_CODES.USER_NOT_FOUND;
 
       const existsDelegation = await Delegation.findOne({
         where: { id: delegationId },
+        transaction: tx,
       });
+
       if (!existsDelegation) throw ERROR_CODES.INVALID_DELEGATION_ID;
 
-      await User.update(
-        {
-          name,
-          lastname,
-          email,
-          role,
-          position,
-          delegation_id: delegationId,
-          status: status,
-        },
-        { where: { id }, transaction: tx },
-      );
+      const changes: string[] = [];
+
+      if (user.name !== name) {
+        changes.push(`nombre: ${user.name} -> ${name}`);
+      }
+
+      if (user.lastname !== lastname) {
+        changes.push(`apellido: ${user.lastname} -> ${lastname}`);
+      }
+
+      if (user.email !== email) {
+        changes.push(`correo: ${user.email} -> ${email}`);
+      }
+
+      if (user.role !== role) {
+        changes.push(`rol: ${user.role} -> ${role}`);
+      }
+
+      if (user.position !== position) {
+        changes.push(`cargo: ${user.position} -> ${position}`);
+      }
+
+      if (user.delegation_id !== delegationId) {
+        changes.push(`delegación: ${user.delegation_id} -> ${delegationId}`);
+      }
+
+      if (user.status !== status) {
+        changes.push(`estado: ${user.status} -> ${status}`);
+      }
+
+      if (changes.length > 0) {
+        await user.update(
+          {
+            name: name!,
+            lastname: lastname!,
+            email: email!,
+            role: role!,
+            position: position!,
+            delegation_id: delegationId!,
+            status: status!,
+          },
+          { transaction: tx },
+        );
+
+        const [logError, logDto] = LogEntityDto.create({
+          userId,
+          affected: user.id,
+          entity: LogEntities.user,
+          action: LogActions.user.update,
+          description:
+            `Se editó el usuario ${user.id}. ` +
+            `Cambios: ${changes.join("; ")}.`,
+        });
+
+        if (logError) throw logError;
+
+        await this.logsService.create(logDto!, tx);
+      }
+
+      const userSafe = await User.findByPk(user.id, {
+        attributes: { exclude: ["password"] },
+        transaction: tx,
+      });
 
       await tx.commit();
-
-      const userSafe = await User.findByPk(id, {
-        attributes: { exclude: ["password"] },
-      });
+      tx = undefined;
 
       return {
         success: true,
         data: userSafe,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
-  async deleteUser(id: string): Promise<object> {
+  async deleteUser(id: string, userId: string): Promise<object> {
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const exists = await User.findOne({ where: { id }, transaction: tx });
-      if (!exists) throw ERROR_CODES.USER_NOT_FOUND;
+      const user = await User.findByPk(id, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
 
-      await User.update({ status: false }, { where: { id }, transaction: tx });
+      if (!user) throw ERROR_CODES.USER_NOT_FOUND;
+
+      if (user.status === false) {
+        await tx.commit();
+        tx = undefined;
+
+        return { success: true };
+      }
+
+      await user.update({ status: false }, { transaction: tx });
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: user.id,
+        entity: LogEntities.user,
+        action: LogActions.user.delete,
+        description:
+          `Se desactivó el usuario ${user.name} ${user.lastname}. ` +
+          `ID: ${user.id}. Rol: ${user.role}. ` +
+          `Estado: activo -> inactivo.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
 
       await tx.commit();
+      tx = undefined;
 
       return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.DELETE_FAILED;
     }
   }
@@ -193,31 +311,50 @@ export class AdmService implements AdmServiceInterface {
     }
   }
 
-  async changePasswordUser(id: string, password: string): Promise<object> {
+  async changePasswordUser(
+    id: string,
+    password: string,
+    userId: string,
+  ): Promise<object> {
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const exists = await User.findOne({ where: { id }, transaction: tx });
-      if (!exists) throw ERROR_CODES.USER_NOT_FOUND;
+      const user = await User.findByPk(id, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
 
-      const hashedPassword = await bcrypt.hash(password as string, 10);
+      if (!user) throw ERROR_CODES.USER_NOT_FOUND;
 
-      await User.update(
-        { password: hashedPassword },
-        { where: { id }, transaction: tx },
-      );
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await user.update({ password: hashedPassword }, { transaction: tx });
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId,
+        affected: user.id,
+        entity: LogEntities.user,
+        action: LogActions.user.resetPassword,
+        description:
+          `Un administrador restableció la contraseña ` +
+          `del usuario ${user.id}.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
 
       await tx.commit();
+      tx = undefined;
 
-      return {
-        success: true,
-      };
+      return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
-      console.log(error);
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }

@@ -11,64 +11,77 @@ import {
 
 export class ChecklistsController implements CheckListsControllerInterface {
   constructor(public readonly checklistsService: ChecklistsService) {}
+
   createSupChecklist(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const { shiftId } = req.body;
+    const userId = req.user?.id;
 
-      const payload = {
-        shiftId,
-      };
-
-      const [error, checkListSupplyEntityDto] =
-        CheckListSupplyEntityDto.create(payload);
-      if (error) throw next(CustomError.badRequest(error));
-
-      this.checklistsService
-        .createSupChecklist(checkListSupplyEntityDto!)
-        .then((response) => res.json(response))
-        .catch((err) => next(CustomError.badRequest(err)));
-    } catch (error) {
-      if (typeof error === "string") return next(CustomError.badRequest(error));
-      return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR));
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
     }
+
+    const [error, checkListSupplyEntityDto] = CheckListSupplyEntityDto.create(
+      req.body,
+    );
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
+
+    this.checklistsService
+      .createSupChecklist(checkListSupplyEntityDto!, userId)
+      .then((response) => res.json(response))
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
   signSupChecklist(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const { id } = req.params;
-      const { recipientId, delivererId, notes } = req.body;
+    const userId = req.user?.id;
 
-      const payload = {
-        id,
-        recipientId,
-        delivererId,
-        notes,
-      };
-
-      const [error, checkListSupplyEntityDto] =
-        CheckListSupplyEntityDto.sign(payload);
-      if (error) return next(CustomError.badRequest(error));
-
-      this.checklistsService
-        .signSupChecklist(checkListSupplyEntityDto!)
-        .then((response) => res.json(response))
-        .catch((err) => next(CustomError.badRequest(err)));
-    } catch (error) {
-      if (typeof error === "string") return next(CustomError.badRequest(error));
-      return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR));
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
     }
+
+    const { id } = req.params;
+
+    const [error, checkListSupplyEntityDto] = CheckListSupplyEntityDto.sign({
+      ...req.body,
+      id,
+    });
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
+
+    this.checklistsService
+      .signSupChecklist(checkListSupplyEntityDto!, userId)
+      .then((response) => res.json(response))
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
   deleteSupChecklist(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
 
     const [error, checkListSupplyEntityDto] = CheckListSupplyEntityDto.delete({
       id,
     });
-    if (error) throw CustomError.badRequest(error);
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
 
     this.checklistsService
-      .deleteSupChecklist(checkListSupplyEntityDto!)
+      .deleteSupChecklist(checkListSupplyEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
@@ -90,11 +103,22 @@ export class ChecklistsController implements CheckListsControllerInterface {
   }
 
   putSupAnswers(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, dto] = SupAnswersDto.fromRequest(req);
-    if (error) return next(CustomError.badRequest(error));
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
 
     this.checklistsService
-      .putSupAnswers(dto!)
+      .putSupAnswers(dto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
@@ -125,64 +149,74 @@ export class ChecklistsController implements CheckListsControllerInterface {
   }
 
   createAmbChecklist(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const { ambulanceId, shiftId, km } = req.body;
+    const userId = req.user?.id;
 
-      const payload = {
-        ambulanceId,
-        shiftId,
-        km,
-      };
-
-      const [error, checkListAmbulanceEntityDto] =
-        CheckListAmbulanceEntityDto.create(payload);
-      if (error) throw next(CustomError.badRequest(error));
-
-      this.checklistsService
-        .createAmbChecklist(checkListAmbulanceEntityDto!)
-        .then((response) => res.json(response))
-        .catch((err) => next(CustomError.badRequest(err)));
-    } catch (error) {
-      if (typeof error === "string") return next(CustomError.badRequest(error));
-      return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR));
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
     }
+
+    const [error, checkListAmbulanceEntityDto] =
+      CheckListAmbulanceEntityDto.create(req.body);
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
+
+    this.checklistsService
+      .createAmbChecklist(checkListAmbulanceEntityDto!, userId)
+      .then((response) => res.json(response))
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
   signAmbChecklist(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const { id } = req.params;
-      const { recipientId, delivererId, notes } = req.body;
+    const userId = req.user?.id;
 
-      const payload = {
-        id,
-        recipientId,
-        delivererId,
-        notes,
-      };
-
-      const [error, checkListAmbulanceEntityDto] =
-        CheckListAmbulanceEntityDto.sign(payload);
-      if (error) return next(CustomError.badRequest(error));
-
-      this.checklistsService
-        .signAmbChecklist(checkListAmbulanceEntityDto!)
-        .then((response) => res.json(response))
-        .catch((err) => next(CustomError.badRequest(err)));
-    } catch (error) {
-      if (typeof error === "string") return next(CustomError.badRequest(error));
-      return next(CustomError.badRequest(ERROR_CODES.UNKNOWN_ERROR));
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
     }
+
+    const { id } = req.params;
+
+    const [error, checkListAmbulanceEntityDto] =
+      CheckListAmbulanceEntityDto.sign({
+        ...req.body,
+        id,
+      });
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
+
+    this.checklistsService
+      .signAmbChecklist(checkListAmbulanceEntityDto!, userId)
+      .then((response) => res.json(response))
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
   deleteAmbChecklist(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
 
     const [error, checkListAmbulanceEntityDto] =
       CheckListAmbulanceEntityDto.delete({ id });
-    if (error) throw CustomError.badRequest(error);
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
 
     this.checklistsService
-      .deleteAmbChecklist(checkListAmbulanceEntityDto!)
+      .deleteAmbChecklist(checkListAmbulanceEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
@@ -203,11 +237,22 @@ export class ChecklistsController implements CheckListsControllerInterface {
   }
 
   putAmbAnswers(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, dto] = AmbAnswersDto.fromRequest(req);
-    if (error) return next(CustomError.badRequest(error));
+
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
 
     this.checklistsService
-      .putAmbAnswers(dto!)
+      .putAmbAnswers(dto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }

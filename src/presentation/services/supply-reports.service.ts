@@ -1,6 +1,10 @@
 import { Transaction } from "sequelize";
-import { PaginationDto, SupplyReportEntityDto } from "../../application";
-import { ERROR_CODES } from "../../domain";
+import {
+  LogEntityDto,
+  PaginationDto,
+  SupplyReportEntityDto,
+} from "../../application";
+import { ERROR_CODES, LogActions, LogEntities } from "../../domain";
 import {
   Ambulance,
   ChecklistSupply,
@@ -8,8 +12,11 @@ import {
   SupplyReport,
   SupplyReportItem,
 } from "../../infrastructure";
+import { LogsService } from "./logs.service";
 
 export class SupplyReportsService {
+  private readonly logsService = new LogsService();
+
   async getReports(paginationDto: PaginationDto): Promise<object> {
     const { limit, offset } = paginationDto;
 
@@ -138,6 +145,7 @@ export class SupplyReportsService {
 
   async updateSupplies(
     supplyReportEntityDto: SupplyReportEntityDto,
+    userId: string,
   ): Promise<object> {
     const { reportId, items } = supplyReportEntityDto;
 
@@ -149,11 +157,15 @@ export class SupplyReportsService {
       const report = await SupplyReport.findOne({
         where: { id: reportId },
         transaction: tx,
+        lock: tx.LOCK.UPDATE,
       });
 
       if (!report) throw ERROR_CODES.SUPPLY_REPORT_NOT_FOUND;
 
       const updatedItems = [];
+
+      const changes: string[] = [];
+      let changedCount = 0;
 
       for (const answer of items) {
         const item = await SupplyReportItem.findOne({
@@ -162,16 +174,24 @@ export class SupplyReportsService {
             report_id: reportId,
           },
           transaction: tx,
+          lock: tx.LOCK.UPDATE,
         });
 
         if (!item) throw ERROR_CODES.SUPPLY_REPORT_ITEM_NOT_FOUND;
 
         const addedQuantity = answer.addedQuantity;
 
+        const previousAddedQuantity = item.added_quantity;
+        const previousRemainingQuantity = Math.max(
+          0,
+          item.min_quantity - (item.reported_quantity + previousAddedQuantity),
+        );
+
         const currentQuantity = item.reported_quantity + addedQuantity;
 
-        if (!Number.isSafeInteger(currentQuantity))
+        if (!Number.isSafeInteger(currentQuantity)) {
           throw ERROR_CODES.INVALID_ADDED_QUANTITY;
+        }
 
         const remainingQuantity = Math.max(
           0,
@@ -180,13 +200,30 @@ export class SupplyReportsService {
 
         const isResolved = remainingQuantity === 0;
 
-        await item.update(
-          {
-            added_quantity: addedQuantity,
-            is_resolved: isResolved,
-          },
-          { transaction: tx },
-        );
+        const hasChanges =
+          previousAddedQuantity !== addedQuantity ||
+          item.is_resolved !== isResolved;
+
+        if (hasChanges) {
+          await item.update(
+            {
+              added_quantity: addedQuantity,
+              is_resolved: isResolved,
+            },
+            { transaction: tx },
+          );
+
+          changedCount++;
+
+          // Mantener la descripción del log dentro de 2000 caracteres.
+          if (changes.length < 6) {
+            changes.push(
+              `${item.category.slice(0, 40)} (${item.id}): ` +
+                `agregado ${previousAddedQuantity} -> ${addedQuantity}, ` +
+                `faltante ${previousRemainingQuantity} -> ${remainingQuantity}`,
+            );
+          }
+        }
 
         updatedItems.push({
           id: item.id,
@@ -201,21 +238,46 @@ export class SupplyReportsService {
         });
       }
 
+      if (changedCount > 0) {
+        const omitted = Math.max(0, changedCount - changes.length);
+
+        const [logError, logDto] = LogEntityDto.create({
+          userId,
+          affected: report.id,
+          entity: LogEntities.supplyReport,
+          action: LogActions.supplyReport.updateItems,
+          description:
+            `Se actualizaron ${changedCount} registros de suministro ` +
+            `del reporte de reabastecimiento ${report.id}. ` +
+            `Ambulancia: ${report.ambulance_id}. ` +
+            `Cambios: ${changes.join("; ")}.` +
+            (omitted > 0
+              ? ` Se omitieron ${omitted} cambios del detalle del log.`
+              : ""),
+        });
+
+        if (logError) throw logError;
+
+        await this.logsService.create(logDto!, tx);
+      }
+
       await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
         data: updatedItems,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
 
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
-  async attendReport(id: string): Promise<object> {
+  async attendReport(id: string, userId: string): Promise<object> {
     let tx: Transaction | undefined;
 
     try {
@@ -224,21 +286,44 @@ export class SupplyReportsService {
       const report = await SupplyReport.findOne({
         where: { id },
         transaction: tx,
+        lock: tx.LOCK.UPDATE,
       });
 
       if (!report) throw ERROR_CODES.SUPPLY_REPORT_NOT_FOUND;
 
       if (report.status === "pending") {
+        const previousStatus = report.status;
+        const attendedAt = new Date();
+
         await report.update(
           {
             status: "attended",
-            attended_at: new Date(),
+            attended_at: attendedAt,
           },
           { transaction: tx },
         );
+
+        const [logError, logDto] = LogEntityDto.create({
+          userId,
+          affected: report.id,
+          entity: LogEntities.supplyReport,
+          action: LogActions.supplyReport.attend,
+          description:
+            `Se marcó como atendido el reporte de reabastecimiento ` +
+            `${report.id}. ` +
+            `Ambulancia: ${report.ambulance_id}. ` +
+            `Checklist: ${report.checklist_id}. ` +
+            `Estado: ${previousStatus} -> attended. ` +
+            `Fecha de atención: ${attendedAt.toISOString()}.`,
+        });
+
+        if (logError) throw logError;
+
+        await this.logsService.create(logDto!, tx);
       }
 
       await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
@@ -249,9 +334,10 @@ export class SupplyReportsService {
         },
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
 
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }

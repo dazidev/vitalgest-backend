@@ -13,27 +13,39 @@ export interface ChecklistsServiceInterface {
   getAmbQuestionPerCategory(category: number): Promise<object>;
 
   createAmbChecklist(
-    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
+    userId: string,
   ): Promise<object>;
   signAmbChecklist(
-    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
+    userId: string,
   ): Promise<object>;
   deleteAmbChecklist(
-    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto
+    checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
+    userId: string,
+  ): Promise<object>;
+  putAmbAnswers(
+    object: RequestAnswerInterface,
+    userId: string,
   ): Promise<object>;
   getAmbChecklist(id: string): Promise<object>;
-  putAmbAnswers(object: RequestAnswerInterface): Promise<object>;
 
   //* Checklist supplies
   createSupChecklist(
-    checkListSupplyEntityDto: CheckListSupplyEntityDto
+    checkListSupplyEntityDto: CheckListSupplyEntityDto,
+    userId: string,
   ): Promise<object>;
   signSupChecklist(
-    checkListSupplyEntityDto: CheckListSupplyEntityDto
+    checkListSupplyEntityDto: CheckListSupplyEntityDto,
+    userId: string,
   ): Promise<object>;
   deleteSupChecklist(
-    checkListSupplyEntityDto: CheckListSupplyEntityDto
+    checkListSupplyEntityDto: CheckListSupplyEntityDto,
+    userId: string,
+  ): Promise<object>;
+  putSupAnswers(
+    object: RequestAnswerSupInterface,
+    userId: string,
   ): Promise<object>;
   getSupChecklist(id: string): Promise<object>;
-  putSupAnswers(object: RequestAnswerSupInterface): Promise<object>;
 }

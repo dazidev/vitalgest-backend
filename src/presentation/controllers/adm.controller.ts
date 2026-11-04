@@ -18,23 +18,43 @@ export class AdmController implements AdmControllerInterface {
   };
 
   createUser(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, userEntityDto] = UserEntityDto.create(req.body);
+
     if (error) throw CustomError.badRequest(error);
 
     this.admService
-      .createUser(userEntityDto!)
-      .then((user) => res.status(201).json(user))
+      .createUser(userEntityDto!, userId)
+      .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
 
   editUser(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
-    const [error, userEntityDto] = UserEntityDto.edit({ id, ...req.body });
+
+    const [error, userEntityDto] = UserEntityDto.edit({
+      ...req.body,
+      id,
+    });
+
     if (error) throw CustomError.badRequest(error);
 
     this.admService
-      .editUser(userEntityDto!)
-      .then((user) => res.status(200).json(user))
+      .editUser(userEntityDto!, userId)
+      .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
 
@@ -43,14 +63,23 @@ export class AdmController implements AdmControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
+
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_USER_ID);
+
     if (!regularExp.uuid.test(id))
       throw CustomError.badRequest(ERROR_CODES.INVALID_USER_ID);
 
     this.admService
-      .deleteUser(id!)
-      .then((user) => res.status(200).json(user))
+      .deleteUser(id, userId)
+      .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
 
@@ -75,18 +104,29 @@ export class AdmController implements AdmControllerInterface {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
     const { password } = req.body;
+
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_USER_ID);
+
     if (!password) throw CustomError.badRequest(ERROR_CODES.MISSING_PASSWORD);
+
     if (!regularExp.uuid.test(id))
       throw CustomError.badRequest(ERROR_CODES.INVALID_USER_ID);
+
     if (!regularExp.password.test(password))
       throw CustomError.badRequest(ERROR_CODES.INVALID_PASSWORD_FORMAT);
 
     this.admService
-      .changePasswordUser(id!, password!)
-      .then((user) => res.status(200).json(user))
+      .changePasswordUser(id, password, userId)
+      .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
 

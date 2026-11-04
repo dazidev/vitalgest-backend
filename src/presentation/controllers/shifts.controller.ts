@@ -1,11 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ERROR_CODES, ShiftsControllerInterface } from "../../domain";
-import {
-  CustomError,
-  GuardsEntityDto,
-  PaginationDto,
-  ShiftEntityDto,
-} from "../../application";
+import { CustomError, PaginationDto, ShiftEntityDto } from "../../application";
 import { regularExp } from "../../infrastructure";
 import { ShiftsService } from "../services/shifts.service";
 
@@ -13,33 +8,62 @@ export class ShiftsController implements ShiftsControllerInterface {
   constructor(public readonly shiftsService: ShiftsService) {}
 
   createShift(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, shiftEntityDto] = ShiftEntityDto.create(req.body);
+
     if (error) throw CustomError.badRequest(error);
 
     this.shiftsService
-      .createShift(shiftEntityDto!)
+      .createShift(shiftEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
 
   editShift(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
-    const [error, guardsEntityDto] = GuardsEntityDto.edit({ id, ...req.body });
+
+    const [error, shiftEntityDto] = ShiftEntityDto.edit({
+      ...req.body,
+      id,
+    });
+
     if (error) throw CustomError.badRequest(error);
 
     this.shiftsService
-      .editShift(guardsEntityDto!)
+      .editShift(shiftEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
 
   deleteShift(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
+
     const [error, shiftEntityDto] = ShiftEntityDto.delete({ id });
+
     if (error) throw CustomError.badRequest(error);
 
     this.shiftsService
-      .deleteShift(shiftEntityDto!)
+      .deleteShift(shiftEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }

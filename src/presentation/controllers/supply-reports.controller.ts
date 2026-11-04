@@ -46,15 +46,25 @@ export class SupplyReportsController {
   }
 
   updateSupplies(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, supplyReportEntityDto] =
       SupplyReportEntityDto.updateSupplies(req);
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) {
+      next(CustomError.badRequest(error));
+      return;
+    }
 
     this.supplyReportsService
-      .updateSupplies(supplyReportEntityDto!)
+      .updateSupplies(supplyReportEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 
   attendReport(
@@ -62,16 +72,28 @@ export class SupplyReportsController {
     res: Response,
     next: NextFunction,
   ): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
 
-    if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_SUPPLY_REPORT_ID);
+    if (!id) {
+      next(CustomError.badRequest(ERROR_CODES.MISSING_SUPPLY_REPORT_ID));
+      return;
+    }
 
-    if (!regularExp.uuid.test(id))
-      throw CustomError.badRequest(ERROR_CODES.INVALID_SUPPLY_REPORT_ID);
+    if (!regularExp.uuid.test(id)) {
+      next(CustomError.badRequest(ERROR_CODES.INVALID_SUPPLY_REPORT_ID));
+      return;
+    }
 
     this.supplyReportsService
-      .attendReport(id)
+      .attendReport(id, userId)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((err) => next(CustomError.badRequest(err)));
   }
 }

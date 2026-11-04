@@ -47,6 +47,13 @@ export class DelegationsController implements DelegationsControllerInterface {
   }
 
   createDelegation(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, delegateEntityDto] = DelegationEntityDto.create({
       ...req.body,
     });
@@ -54,29 +61,42 @@ export class DelegationsController implements DelegationsControllerInterface {
     if (error) throw CustomError.badRequest(error);
 
     this.delegationsService
-      .createDelegation(delegateEntityDto!)
+      .createDelegation(delegateEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }
 
   editDelegation(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, delegateEntityDto] = DelegationEntityDto.edit({
-      ...req.params,
       ...req.body,
+      ...req.params,
     });
 
     if (error) throw CustomError.badRequest(error);
 
     this.delegationsService
-      .editDelegation(delegateEntityDto!)
+      .editDelegation(delegateEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }
 
   deleteDelegation(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const [error, delegateEntityDto] = DelegationEntityDto.delete({
       ...req.params,
-      ...req.body,
     });
 
     if (error) throw CustomError.badRequest(error);
@@ -84,7 +104,7 @@ export class DelegationsController implements DelegationsControllerInterface {
     const { id } = delegateEntityDto!;
 
     this.delegationsService
-      .deleteDelegation(id!)
+      .deleteDelegation(id!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }

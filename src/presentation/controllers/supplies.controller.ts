@@ -9,36 +9,67 @@ export class SuppliesController implements SuppliesControllerInterface {
   constructor(public readonly suppliesService: SuppliesService) {}
 
   createSupply(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id: pharmacyId } = req.params;
+
     const [error, supplyEntityDto] = SupplyEntityDto.create({
       ...req.body,
       pharmacyId,
     });
+
     if (error) throw CustomError.badRequest(error);
 
     this.suppliesService
-      .createSupply(supplyEntityDto!)
+      .createSupply(supplyEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
+
   editSupply(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
 
-    const [error, supplyEntityDto] = SupplyEntityDto.edit({ id, ...req.body });
+    const [error, supplyEntityDto] = SupplyEntityDto.edit({
+      ...req.body,
+      id,
+    });
+
     if (error) throw CustomError.badRequest(error);
 
     this.suppliesService
-      .editSupply(supplyEntityDto!)
+      .editSupply(supplyEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }
+
   deleteSupply(req: Request, res: Response, next: NextFunction): void {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
     const { id } = req.params;
+
     const [error, supplyEntityDto] = SupplyEntityDto.id({ id });
+
     if (error) throw CustomError.badRequest(error);
 
     this.suppliesService
-      .deleteSupply(supplyEntityDto!)
+      .deleteSupply(supplyEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.badRequest(err)));
   }

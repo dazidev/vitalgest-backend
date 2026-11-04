@@ -1,9 +1,15 @@
 import { PaginationDto, SupplyEntityDto } from "../../application";
 
 export interface SuppliesServiceInterface {
-  createSupply(supplyEntityDto: SupplyEntityDto): Promise<object>;
-  editSupply(supplyEntityDto: SupplyEntityDto): Promise<object>;
-  deleteSupply(supplyEntityDto: SupplyEntityDto): Promise<object>;
+  createSupply(
+    supplyEntityDto: SupplyEntityDto,
+    userId: string,
+  ): Promise<object>;
+  editSupply(supplyEntityDto: SupplyEntityDto, userId: string): Promise<object>;
+  deleteSupply(
+    supplyEntityDto: SupplyEntityDto,
+    userId: string,
+  ): Promise<object>;
   getSupplies(
     pharmacyId: string,
     paginationDto: PaginationDto,

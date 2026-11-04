@@ -1,14 +1,18 @@
 import { sequelize, User } from "../../infrastructure";
-import { ERROR_CODES } from "../../domain";
+import { ERROR_CODES, LogActions, LogEntities } from "../../domain";
 
 // librerias externas
 import bcrypt from "bcrypt";
 import { Transaction } from "sequelize";
 import { config } from "dotenv";
+import { LogsService } from "./logs.service";
+import { LogEntityDto } from "../../application";
 
 config();
 
 export class UserService {
+  private readonly logsService = new LogsService();
+
   async changePassword(
     id: string,
     currentPass: string,
@@ -19,32 +23,47 @@ export class UserService {
     try {
       tx = await sequelize.transaction();
 
-      const exists = await User.findOne({ where: { id }, transaction: tx });
-      if (!exists) throw ERROR_CODES.USER_NOT_FOUND;
+      const user = await User.findByPk(id, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
 
-      const isMatching = await bcrypt.compare(currentPass!, exists.password!);
+      if (!user) throw ERROR_CODES.USER_NOT_FOUND;
+
+      const isMatching = await bcrypt.compare(currentPass, user.password);
+
       if (!isMatching) throw ERROR_CODES.CREDENTIALS_NOT_MATCH;
 
-      const hashedPassword = await bcrypt.hash(newPass as string, 10);
+      const hashedPassword = await bcrypt.hash(newPass, 10);
 
-      await User.update(
-        { password: hashedPassword },
-        { where: { id }, transaction: tx },
-      );
+      await user.update({ password: hashedPassword }, { transaction: tx });
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId: id,
+        affected: user.id,
+        entity: LogEntities.user,
+        action: LogActions.user.changePassword,
+        description: `El usuario ${user.id} cambió su contraseña personal.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
 
       await tx.commit();
+      tx = undefined;
 
-      return {
-        success: true,
-      };
+      return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
-  public async changeInfo(
+  async changeInfo(
     id: string,
     name: string,
     lastname: string,
@@ -54,58 +73,112 @@ export class UserService {
     try {
       tx = await sequelize.transaction();
 
-      const exists = await User.findOne({ where: { id }, transaction: tx });
-      if (!exists) throw ERROR_CODES.USER_NOT_FOUND;
+      const user = await User.findByPk(id, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
 
-      await User.update(
-        {
-          name,
-          lastname,
-        },
-        { where: { id }, transaction: tx },
-      );
+      if (!user) throw ERROR_CODES.USER_NOT_FOUND;
 
-      await tx.commit();
+      const changes: string[] = [];
+
+      if (user.name !== name) {
+        changes.push(`nombre: ${user.name} -> ${name}`);
+      }
+
+      if (user.lastname !== lastname) {
+        changes.push(`apellido: ${user.lastname} -> ${lastname}`);
+      }
+
+      if (changes.length > 0) {
+        await user.update({ name, lastname }, { transaction: tx });
+
+        const [logError, logDto] = LogEntityDto.create({
+          userId: id,
+          affected: user.id,
+          entity: LogEntities.user,
+          action: LogActions.user.update,
+          description:
+            `El usuario ${user.id} actualizó su información personal. ` +
+            `Cambios: ${changes.join("; ")}.`,
+        });
+
+        if (logError) throw logError;
+
+        await this.logsService.create(logDto!, tx);
+      }
 
       const userSafe = await User.findByPk(id, {
         attributes: { exclude: ["password"] },
+        transaction: tx,
       });
+
+      await tx.commit();
+      tx = undefined;
 
       return {
         success: true,
         data: userSafe,
       };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }
 
-  public async attachSignatureImage(id: string, key: string) {
+  async attachSignatureImage(id: string, key: string): Promise<object> {
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const exists = await User.findOne({ where: { id }, transaction: tx });
-      if (!exists) throw ERROR_CODES.USER_NOT_FOUND;
+      const user = await User.findByPk(id, {
+        transaction: tx,
+        lock: tx.LOCK.UPDATE,
+      });
 
-      await User.update(
-        {
-          signature: key,
-        },
-        { where: { id }, transaction: tx },
-      );
+      if (!user) throw ERROR_CODES.USER_NOT_FOUND;
+
+      if (user.signature === key) {
+        await tx.commit();
+        tx = undefined;
+
+        return { success: true };
+      }
+
+      const hadPreviousSignature = Boolean(user.signature);
+
+      await user.update({ signature: key }, { transaction: tx });
+
+      const [logError, logDto] = LogEntityDto.create({
+        userId: id,
+        affected: user.id,
+        entity: LogEntities.user,
+        action: LogActions.user.updateSignature,
+        description:
+          `El usuario ${user.id} actualizó su firma digital. ` +
+          `Firma anterior: ${
+            hadPreviousSignature ? "Existente" : "No registrada"
+          }. ` +
+          `Firma nueva: Registrada.`,
+      });
+
+      if (logError) throw logError;
+
+      await this.logsService.create(logDto!, tx);
 
       await tx.commit();
+      tx = undefined;
 
-      return {
-        success: true,
-      };
+      return { success: true };
     } catch (error) {
-      await tx?.rollback();
+      if (tx) await tx.rollback();
+
       if (typeof error === "string") throw error;
+
       throw ERROR_CODES.UPDATE_FAILED;
     }
   }

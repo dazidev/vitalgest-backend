@@ -31,17 +31,31 @@ export class UserController {
     next: NextFunction,
   ): void {
     const { id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
+    if (id !== userId) {
+      next(new CustomError(403, ERROR_CODES.UNAUTHORIZED_RANK));
+      return;
+    }
+
     const { currentPass, newPass } = req.body;
 
-    const [error, _userEntityDto] = UserEntityDto.changePassword({
+    const [error] = UserEntityDto.changePassword({
       id,
-      ...req.body,
+      currentPass,
+      newPass,
     });
+
     if (error) throw CustomError.badRequest(error);
 
     this.userService
-      .changePassword(id, currentPass!, newPass!)
-      .then((user) => res.status(200).json(user))
+      .changePassword(id, currentPass, newPass)
+      .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
 
@@ -51,30 +65,62 @@ export class UserController {
     next: NextFunction,
   ): void {
     const { id } = req.params;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
+    if (id !== userId) {
+      next(new CustomError(403, ERROR_CODES.UNAUTHORIZED_RANK));
+      return;
+    }
+
     const { name, lastname } = req.body;
-    const [error, _userEntityDto] = UserEntityDto.changeInfo({
+
+    const [error] = UserEntityDto.changeInfo({
       id,
       name,
       lastname,
     });
+
     if (error) throw CustomError.badRequest(error);
 
     this.userService
       .changeInfo(id, name, lastname)
-      .then((user) => res.status(200).json(user))
+      .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
 
   uploadSign = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
+    const userId = req.user?.id;
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
+
+    if (id !== userId) {
+      next(new CustomError(403, ERROR_CODES.UNAUTHORIZED_RANK));
+      return;
+    }
     const { mime, ext, size } = req.body;
 
     //validaciones
     const allow = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
-    if (!allow.includes(mime)) return CustomError.badRequest("INVALID_MIME");
-    if (!ext || ext.length > 8) return CustomError.badRequest("INVALID_EXT");
-    if (!size || size > MAX_BYTES)
-      return CustomError.badRequest("INVALID_SIZE");
+    if (!allow.includes(mime)) {
+      next(CustomError.badRequest("INVALID_MIME"));
+      return;
+    }
+    if (typeof ext !== "string" || !/^[a-zA-Z0-9]{1,8}$/.test(ext)) {
+      next(CustomError.badRequest("INVALID_EXT"));
+      return;
+    }
+    if (!Number.isSafeInteger(size) || size <= 0 || size > MAX_BYTES) {
+      next(CustomError.badRequest("INVALID_SIZE"));
+      return;
+    }
 
     const key = `users/signatures/images/${id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
@@ -104,20 +150,46 @@ export class UserController {
     req: Request<{ id: string }>,
     res: Response,
     next: NextFunction,
-  ) => {
+  ): Promise<void> => {
     const { id } = req.params;
     const { key } = req.body;
+    const userId = req.user?.id;
 
-    if (!id) throw this.handleError(ERROR_CODES.MISSING_USER_ID);
-    if (!key) throw this.handleError(ERROR_CODES.MISSING_KEY);
+    if (!userId) {
+      next(CustomError.unauthorized(ERROR_CODES.INVALID_TOKEN_USER));
+      return;
+    }
 
-    r2.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key })).catch(() =>
-      next(CustomError.badRequest("OBJECT_NOT_FOUND")),
-    );
+    if (id !== userId) {
+      next(new CustomError(403, ERROR_CODES.UNAUTHORIZED_RANK));
+      return;
+    }
 
-    this.userService
-      .attachSignatureImage(id, key)
-      .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+    if (typeof key !== "string" || !key.trim()) {
+      next(CustomError.badRequest(ERROR_CODES.MISSING_KEY));
+      return;
+    }
+
+    const expectedPrefix = `users/signatures/images/${id}/`;
+
+    if (!key.startsWith(expectedPrefix)) {
+      next(CustomError.badRequest("INVALID_SIGNATURE_KEY"));
+      return;
+    }
+
+    try {
+      await r2.send(
+        new HeadObjectCommand({
+          Bucket: BUCKET,
+          Key: key,
+        }),
+      );
+
+      const response = await this.userService.attachSignatureImage(id, key);
+
+      res.json(response);
+    } catch (error) {
+      next(CustomError.badRequest("SIGNATURE_UPDATE_FAILED"));
+    }
   };
 }
