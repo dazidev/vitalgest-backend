@@ -221,5 +221,6 @@ export const swaggerSpec = swaggerJSDoc({
     path.resolve("build/docs/supplies.docs.js"),
     path.resolve("build/docs/users.docs.js"),
     path.resolve("build/docs/supply-reports.docs.js"),
+    path.resolve("build/docs/logs.docs.js"),
   ],
 });
