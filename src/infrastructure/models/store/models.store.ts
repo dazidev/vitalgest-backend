@@ -20,6 +20,7 @@ import QuestionCategory from "./sequelize/checklist/question-category-model.stor
 import QuestionSubcategory from "./sequelize/checklist/question-subcategory-model.store";
 import SupplyReport from "./sequelize/reports/supply-report-model.store";
 import SupplyReportItem from "./sequelize/reports/supply-report-item-model.store";
+import Log from "./sequelize/log-model.store";
 
 // Definicion de asociaciones
 State.hasMany(Municipality, { foreignKey: "state_id", as: "municipalities" });
@@ -49,6 +50,17 @@ User.hasMany(Guard, { foreignKey: "guard_chief", as: "guardsAsChief" });
 
 Guard.belongsTo(Delegation, { foreignKey: "delegation_id", as: "delegation" });
 Delegation.hasMany(Guard, { foreignKey: "delegation_id", as: "guards" });
+
+//* Logs
+Log.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+
+User.hasMany(Log, {
+  foreignKey: "user_id",
+  as: "logs",
+});
 
 // Ambulancias
 Ambulance.belongsTo(Delegation, {
@@ -282,4 +294,5 @@ export {
   AreaAmbulance,
   SupplyReport,
   SupplyReportItem,
+  Log,
 };
