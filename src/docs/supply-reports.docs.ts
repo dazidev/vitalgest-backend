@@ -5,9 +5,13 @@
  *     summary: Obtener reportes de reabastecimiento
  *     description: >
  *       Obtiene los reportes generados al firmar los checklists
- *       de suministros. Incluye la ambulancia, el estado,
+ *       de suministros. Incluye la delegación y su farmacia, la ambulancia, el estado,
  *       las fechas y los suministros faltantes agrupados
  *       por área y gabinete.
+ *
+ *       delegation se obtiene mediante la ambulancia del reporte.
+ *       delegation.pharmacy contiene el ID de la farmacia de esa delegación.
+ *       Si no existe la relación, delegation o su pharmacy se devuelven como null.
  *
  *       Las cantidades actuales y faltantes son calculadas
  *       a partir de los valores registrados en el reporte.
@@ -45,6 +49,11 @@
  *                 - id: d3ae8cd2-f121-4893-974e-773509d6e7e0
  *                   checklist_id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                   notes: "Faltan algunos suministros en el gabinete 1."
+ *                   delegation:
+ *                     id: 63a5ed18-6bf9-4df8-a193-426d73d82dab
+ *                     name: "Delegación Ameca, Jalisco"
+ *                     pharmacy:
+ *                       id: 8a8af973-88f8-4729-a973-c4cb0efac347
  *                   ambulance:
  *                     id: 89b576c4-e58a-499c-8bc3-5530e4464cdf
  *                     number: AMB-01
@@ -87,8 +96,12 @@
  *       Obtiene la información detallada de un reporte
  *       de reabastecimiento mediante su identificador UUID.
  *
- *       Incluye la ambulancia asociada, estado, fechas
+ *       Incluye la delegación y su farmacia, la ambulancia asociada, estado, fechas
  *       y suministros agrupados por área y gabinete.
+ *
+ *       delegation se obtiene mediante la ambulancia del reporte.
+ *       delegation.pharmacy contiene el ID de la farmacia de esa delegación.
+ *       Si no existe la relación, delegation o su pharmacy se devuelven como null.
  *
  *       current_quantity representa la suma de
  *       reported_quantity y added_quantity.
@@ -120,6 +133,11 @@
  *                 id: d3ae8cd2-f121-4893-974e-773509d6e7e0
  *                 checklist_id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                 notes: "Faltan algunos suministros en el gabinete 1."
+ *                 delegation:
+ *                   id: 63a5ed18-6bf9-4df8-a193-426d73d82dab
+ *                   name: "Delegación Ameca, Jalisco"
+ *                   pharmacy:
+ *                     id: 8a8af973-88f8-4729-a973-c4cb0efac347
  *                 ambulance:
  *                   id: 89b576c4-e58a-499c-8bc3-5530e4464cdf
  *                   number: AMB-01

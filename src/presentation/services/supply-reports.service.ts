@@ -10,6 +10,8 @@ import { ERROR_CODES, LogActions, LogEntities } from "../../domain";
 import {
   Ambulance,
   ChecklistSupply,
+  Delegation,
+  Pharmacy,
   sequelize,
   SupplyReport,
   SupplyReportItem,
@@ -30,6 +32,20 @@ export class SupplyReportsService {
             model: Ambulance,
             as: "ambulance",
             attributes: ["id", "number"],
+            include: [
+              {
+                model: Delegation,
+                as: "delegation",
+                attributes: ["id", "name"],
+                include: [
+                  {
+                    model: Pharmacy,
+                    as: "pharmacy",
+                    attributes: ["id"],
+                  },
+                ],
+              },
+            ],
           },
           {
             model: ChecklistSupply,
@@ -121,6 +137,15 @@ export class SupplyReportsService {
           id: report.id,
           checklist_id: report.checklist_id,
           notes: report.checklist?.notes ?? null,
+          delegation: report.ambulance?.delegation
+            ? {
+                id: report.ambulance.delegation.id,
+                name: report.ambulance.delegation.name,
+                pharmacy: report.ambulance.delegation.pharmacy
+                  ? { id: report.ambulance.delegation.pharmacy.id }
+                  : null,
+              }
+            : null,
           ambulance: report.ambulance
             ? {
                 id: report.ambulance.id,
@@ -357,6 +382,20 @@ export class SupplyReportsService {
             model: Ambulance,
             as: "ambulance",
             attributes: ["id", "number"],
+            include: [
+              {
+                model: Delegation,
+                as: "delegation",
+                attributes: ["id", "name"],
+                include: [
+                  {
+                    model: Pharmacy,
+                    as: "pharmacy",
+                    attributes: ["id"],
+                  },
+                ],
+              },
+            ],
           },
           {
             model: ChecklistSupply,
@@ -442,6 +481,15 @@ export class SupplyReportsService {
         id: report.id,
         checklist_id: report.checklist_id,
         notes: report.checklist?.notes ?? null,
+        delegation: report.ambulance?.delegation
+          ? {
+              id: report.ambulance.delegation.id,
+              name: report.ambulance.delegation.name,
+              pharmacy: report.ambulance.delegation.pharmacy
+                ? { id: report.ambulance.delegation.pharmacy.id }
+                : null,
+            }
+          : null,
         ambulance: report.ambulance
           ? {
               id: report.ambulance.id,

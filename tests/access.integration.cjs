@@ -165,7 +165,19 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
       const update = validated(dto.SupplyReportEntityDto, "updateSupplies", { params: { id: report.id }, body: { items: [{ itemId: item.id, addedQuantity: 2 }] } });
       await reports.updateSupplies(local, update, local.id);
       await reports.attendReport(local, report.id, local.id);
-      assert.equal((await reports.getReport(local, report.id)).data.status, "attended");
+      const reportDetail = await reports.getReport(local, report.id);
+      assert.equal(reportDetail.data.status, "attended");
+      const expectedDelegation = {
+        id: local.delegationId,
+        name: (await db.Delegation.findByPk(local.delegationId)).name,
+        pharmacy: { id: localPharmacy.id },
+      };
+      assert.deepEqual(reportDetail.data.delegation, expectedDelegation);
+      const reportList = await reports.getReports(local, pagination());
+      assert.deepEqual(reportList.data.find((entry) => entry.id === report.id).delegation, expectedDelegation);
+      assert.equal(reportList.total, 1);
+      // The report's territory must not be replaced by the requesting administrator's.
+      assert.deepEqual((await reports.getReport({ ...general, delegationId: foreign.delegationId }, report.id)).data.delegation, expectedDelegation);
       assert.equal((await reports.getReports(foreign, pagination())).total, 0);
       await denied(() => reports.getReport(foreign, report.id), "SUPPLY_REPORT_NOT_FOUND");
       const logFilter = validated(dto.FindLogsDto, "validate", { limit: "100" });
@@ -233,7 +245,17 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
         assert.equal(loginData.data.delegationId, local.delegationId);
         assert.ok(!("accessToken" in loginData));
         assert.ok(login.headers.get("set-cookie").includes("refresh"));
+        const reportId = (await db.SupplyReport.findOne({ where: { checklist_id: supChecklist.id } })).id;
+        const httpReport = await (await fetch(`${url}/api/supply-reports/${reportId}`, { headers })).json();
+        const httpReports = await (await fetch(`${url}/api/supply-reports`, { headers })).json();
+        assert.equal(httpReport.data.delegation.id, local.delegationId);
+        assert.equal(httpReport.data.delegation.pharmacy.id, localPharmacy.id);
+        assert.deepEqual(httpReports.data.find((entry) => entry.id === reportId).delegation, httpReport.data.delegation);
         const documentation = await (await fetch(`${url}/api/docs.json`)).json();
+        const listExample = documentation.paths["/api/supply-reports"].get.responses["200"].content["application/json"].example;
+        const detailExample = documentation.paths["/api/supply-reports/{id}"].get.responses["200"].content["application/json"].example;
+        assert.deepEqual(listExample.data[0].delegation, detailExample.data.delegation);
+        assert.ok(detailExample.data.delegation.pharmacy.id);
         assert.ok(documentation.paths["/api/questions"].post.responses["403"]);
         for (const path of ["/api/dev/seed", "/api/dev/seed-questions"]) {
           assert.equal((await fetch(url + path, { method: "POST" })).status, 404);
