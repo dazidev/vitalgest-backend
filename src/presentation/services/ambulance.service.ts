@@ -573,20 +573,31 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     }
   }
 
-  async getAmbSupplies(actor: AccessContext, ambulanceId: string): Promise<object> {
+  async getAmbSupplies(
+    actor: AccessContext,
+    ambulanceId: string,
+    paginationDto: PaginationDto,
+  ): Promise<object> {
     const scope = new DelegationScope(actor);
+    const { limit, offset } = paginationDto;
     try {
-      const pharmacy = await Ambulance.findOne({ where: scope.where("Ambulance", { id: ambulanceId }) });
-      if (!pharmacy) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
+      const ambulance = await Ambulance.findOne({ where: scope.where("Ambulance", { id: ambulanceId }) });
+      if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
-      const supplies = await SupplyAmbulance.findAll({
+      const { count, rows: supplies } = await SupplyAmbulance.findAndCountAll({
         where: scope.where("SupplyAmbulance", { ambulance_id: ambulanceId }),
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "ASC"],
+        ],
+        ...(limit !== undefined ? { limit } : {}),
+        ...(offset !== undefined ? { offset } : {}),
       });
-      if (supplies.length === 0) throw ERROR_CODES.SUPPLIES_NOT_FOUND;
 
       return {
         success: true,
         data: supplies,
+        total: count,
       };
     } catch (error) {
       if (typeof error === "string") throw error;

@@ -183,13 +183,17 @@ export class AmbulancesController implements AmbulancesControllerInterface {
     next: NextFunction,
   ): void {
     const { id } = req.params;
+    const { limit, offset } = req.query;
 
     if (!id) throw CustomError.badRequest(ERROR_CODES.MISSING_AMBULANCE_ID);
     if (!regularExp.uuid.test(id))
       throw CustomError.badRequest(ERROR_CODES.INVALID_AMBULANCE_ID);
 
+    const [error, paginationDto] = PaginationDto.validate({ limit, offset });
+    if (error) throw CustomError.from(error);
+
     this.ambulancesService
-      .getAmbSupplies(req.user!, id)
+      .getAmbSupplies(req.user!, id, paginationDto!)
       .then((response) => res.json(response))
       .catch((err) => next(CustomError.from(err)));
   }

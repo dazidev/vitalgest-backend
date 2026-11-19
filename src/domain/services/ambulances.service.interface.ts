@@ -38,7 +38,7 @@ export interface AmbulancesServiceInterface {
     supplyAmbEntityDto: SupplyAmbEntityDto,
     userId: string,
   ): Promise<object>;
-  getAmbSupplies(actor: AccessContext, ambulanceId: string): Promise<object>;
+  getAmbSupplies(actor: AccessContext, ambulanceId: string, paginationDto: PaginationDto): Promise<object>;
   getOneAmbSupply(actor: AccessContext, supplyAmbEntityDto: SupplyAmbEntityDto): Promise<object>;
   getAreas(): Promise<object>;
 }

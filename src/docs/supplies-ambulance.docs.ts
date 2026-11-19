@@ -143,6 +143,12 @@
  * /api/ambulances/supplies/{ambulanceId}:
  *   get:
  *     summary: Obtener suministros de una ambulancia
+ *     description: >
+ *       Permite paginación opcional mediante limit y offset. Sin esos parámetros,
+ *       devuelve todos los suministros de la ambulancia. total cuenta todos los
+ *       registros accesibles de esa ambulancia antes de paginar. Se ordenan por
+ *       createdAt descendente e id ascendente. Si la ambulancia no tiene suministros
+ *       o la página solicitada está vacía, data es un arreglo vacío.
  *     tags: ['ENDPOINTS Gestión de ambulancias (SUMINISTROS)']
  *     security: [{ bearerAuth: [] }]
  *     parameters:
@@ -152,20 +158,46 @@
  *         description: ID de la ambulancia de la que se desean obtener los suministros
  *         schema:
  *           type: string
+ *           format: uuid
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         description: Número máximo de suministros a devolver.
+ *         schema: { type: integer, minimum: 1 }
+ *         example: 10
+ *       - in: query
+ *         name: offset
+ *         required: false
+ *         description: Número de suministros a omitir.
+ *         schema: { type: integer, minimum: 0 }
+ *         example: 0
  *     responses:
  *       200:
  *         description: Lista de suministros de la ambulancia
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [success, data, total]
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data:
+ *                   type: array
+ *                   items: { type: object }
+ *                 total:
+ *                   type: integer
+ *                   minimum: 0
+ *                   description: Total de suministros de la ambulancia antes de aplicar limit y offset.
  *             examples:
- *               response:
+ *               withoutPagination:
+ *                 summary: Todos los suministros, sin paginación
  *                 value:
  *                   success: true
  *                   data:
  *                     - id: "1b3adde3-6b30-4e20-9ecd-dcab985201a3"
  *                       category: "Bolsa de válvula"
  *                       specification: "niño"
- *                       avialble_quantity: 1
+ *                       avaible_quantity: 1
  *                       min_quantity: 1
  *                       expiration_date: "2027-10-11T00:00:00.000Z"
  *                       measurement_unit: "lbs"
@@ -173,8 +205,25 @@
  *                       ambulance_id: "b5f5c2be-759e-49a0-bf47-b55202669270"
  *                       createdAt: "2025-11-07T04:50:03.000Z"
  *                       updatedAt: "2025-11-07T04:53:44.000Z"
+ *                   total: 1
+ *               withPagination:
+ *                 summary: Página con limit=1 y offset=0 de un total de dos suministros
+ *                 value:
+ *                   success: true
+ *                   data:
+ *                     - id: "1b3adde3-6b30-4e20-9ecd-dcab985201a3"
+ *                       category: "Bolsa de válvula"
+ *                       avaible_quantity: 1
+ *                       ambulance_id: "b5f5c2be-759e-49a0-bf47-b55202669270"
+ *                   total: 2
+ *               emptyPage:
+ *                 summary: Página sin resultados
+ *                 value: { success: true, data: [], total: 2 }
+ *               noSupplies:
+ *                 summary: Ambulancia sin suministros
+ *                 value: { success: true, data: [], total: 0 }
  *       400:
- *         description: Datos inválidos
+ *         description: ID, limit u offset inválidos, o ambulancia no encontrada.
  *         content:
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }

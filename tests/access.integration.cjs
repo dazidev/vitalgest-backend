@@ -142,6 +142,26 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
     const supChecklist = await result("ChecklistSupply", checklists.createSupChecklist(local, validated(dto.CheckListSupplyEntityDto, "create", { shiftId: shift.id }), local.id));
     const foreignSupChecklist = await result("ChecklistSupply", checklists.createSupChecklist(foreign, validated(dto.CheckListSupplyEntityDto, "create", { shiftId: foreignShift.id }), foreign.id));
 
+    await t.test("ambulance supplies support optional pagination, stable totals and empty pages", async () => {
+      const secondSupply = await create("SupplyAmbulance", { ...supplyValues, category: `${tag}-second`, ambulance_id: ambulance.id });
+      const emptyAmbulance = await create("Ambulance", { number: `${tag}-empty`, brand: "Test", model: "Test", delegation_id: local.delegationId });
+      const noPagination = validated(dto.PaginationDto, "validate", {});
+      const all = await ambulances.getAmbSupplies(local, ambulance.id, noPagination);
+      assert.equal(all.total, 2);
+      assert.equal(all.data.length, 2);
+      assert.ok(all.data.some((entry) => entry.id === ambSupply.id));
+      assert.ok(all.data.some((entry) => entry.id === secondSupply.id));
+      const first = await ambulances.getAmbSupplies(local, ambulance.id, validated(dto.PaginationDto, "validate", { limit: "1", offset: "0" }));
+      const second = await ambulances.getAmbSupplies(local, ambulance.id, validated(dto.PaginationDto, "validate", { limit: "1", offset: "1" }));
+      assert.equal(first.total, 2);
+      assert.equal(second.total, 2);
+      assert.deepEqual([...first.data, ...second.data].map((entry) => entry.id), all.data.map((entry) => entry.id));
+      const beyond = await ambulances.getAmbSupplies(local, ambulance.id, validated(dto.PaginationDto, "validate", { limit: "1", offset: "999" }));
+      assert.deepEqual(beyond, { success: true, data: [], total: 2 });
+      assert.deepEqual(await ambulances.getAmbSupplies(local, emptyAmbulance.id, noPagination), { success: true, data: [], total: 0 });
+      await denied(() => ambulances.getAmbSupplies(local, foreignAmbulance.id, noPagination), "AMBULANCE_NOT_FOUND");
+    });
+
     await t.test("indirect resource lookups and the reserved checklist GETs enforce scope", async () => {
       await denied(() => checklists.getAmbChecklist(local, foreignChecklist.id), "CHECKLIST_AMBULANCE_NOT_FOUND");
       await denied(() => checklists.getSupChecklist(local, foreignSupChecklist.id), "CHECKLIST_SUPPLY_NOT_FOUND");
@@ -251,6 +271,16 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
         assert.equal(httpReport.data.delegation.id, local.delegationId);
         assert.equal(httpReport.data.delegation.pharmacy.id, localPharmacy.id);
         assert.deepEqual(httpReports.data.find((entry) => entry.id === reportId).delegation, httpReport.data.delegation);
+        const suppliesResponse = await fetch(`${url}/api/ambulances/supplies/${ambulance.id}?limit=1&offset=0`, { headers });
+        assert.equal(suppliesResponse.status, 200);
+        const suppliesPage = await suppliesResponse.json();
+        assert.equal(suppliesPage.total, 2);
+        assert.equal(suppliesPage.data.length, 1);
+        for (const [query, error] of [["limit=0", "INVALID_LIMIT"], ["offset=-1", "INVALID_OFFSET"]]) {
+          const invalid = await fetch(`${url}/api/ambulances/supplies/${ambulance.id}?${query}`, { headers });
+          assert.equal(invalid.status, 400);
+          assert.deepEqual(await invalid.json(), { success: false, error });
+        }
         const documentation = await (await fetch(`${url}/api/docs.json`)).json();
         const listExample = documentation.paths["/api/supply-reports"].get.responses["200"].content["application/json"].example;
         const detailExample = documentation.paths["/api/supply-reports/{id}"].get.responses["200"].content["application/json"].example;

@@ -98,3 +98,36 @@ test("Swagger documents the same 78 operations and their authorization failures"
   }
   assert.equal(count, 78);
 });
+
+
+test("ambulance supply pagination is documented and validates the same limits as pharmacy", async () => {
+  const { swaggerSpec } = require("../src/docs/swagger");
+  const operation = swaggerSpec.paths["/api/ambulances/supplies/{ambulanceId}"].get;
+  const limit = operation.parameters.find((parameter) => parameter.name === "limit");
+  const offset = operation.parameters.find((parameter) => parameter.name === "offset");
+  assert.equal(limit.required, false);
+  assert.equal(limit.schema.minimum, 1);
+  assert.equal(offset.required, false);
+  assert.equal(offset.schema.minimum, 0);
+  assert.ok(operation.responses["200"].content["application/json"].schema.required.includes("total"));
+  const { AmbulancesController } = require("../src/presentation/controllers/ambulances.controller");
+  const id = "11111111-1111-4111-8111-111111111111";
+  const actor = { id: "user", role: "admin", delegationId: "delegation" };
+  const controller = new AmbulancesController({
+    getAmbSupplies: async (user, ambulanceId, pagination) => {
+      assert.equal(user, actor);
+      assert.equal(ambulanceId, id);
+      assert.equal(pagination.limit, 1);
+      assert.equal(pagination.offset, 2);
+      return { success: true, data: [], total: 2 };
+    },
+  });
+  for (const [query, code] of [[{ limit: "0" }, "INVALID_LIMIT"], [{ offset: "-1" }, "INVALID_OFFSET"]]) {
+    assert.throws(() => controller.getAmbSupplies({ params: { id }, query, user: actor }, {}, () => {}), (error) => error.statusCode === 400 && error.message === code);
+  }
+  const response = await new Promise((resolve, reject) => controller.getAmbSupplies(
+    { params: { id }, query: { limit: "1", offset: "2" }, user: actor },
+    { json: resolve }, reject,
+  ));
+  assert.deepEqual(response, { success: true, data: [], total: 2 });
+});
