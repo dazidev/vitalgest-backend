@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import { Op, Transaction, WhereOptions } from "sequelize";
 
 import { FindLogsDto, LogEntityDto } from "../../application";
@@ -10,7 +12,7 @@ type LogCategory = {
 };
 
 export class LogsService {
-  async create(logEntityDto: LogEntityDto, tx: Transaction): Promise<Log> {
+  async create(logEntityDto: LogEntityDto, tx: Transaction, delegationId: string): Promise<Log> {
     const { userId, affected, entity, action, description } = logEntityDto;
 
     const category = this.getFilters().categories.find(
@@ -26,6 +28,7 @@ export class LogsService {
     return await Log.create(
       {
         user_id: userId,
+        delegation_id: delegationId,
         affected,
         entity,
         action,
@@ -35,7 +38,8 @@ export class LogsService {
     );
   }
 
-  async findAll(findLogsDto: FindLogsDto): Promise<object> {
+  async findAll(actor: AccessContext, findLogsDto: FindLogsDto): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset, entity, action, userId, userSearch, from, to } =
       findLogsDto;
 
@@ -82,7 +86,7 @@ export class LogsService {
     }
 
     const { count, rows } = await Log.findAndCountAll({
-      where,
+      where: scope.where("Log", where),
       include: [
         {
           model: User,

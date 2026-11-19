@@ -17,12 +17,12 @@ export class ShiftsController implements ShiftsControllerInterface {
 
     const [error, shiftEntityDto] = ShiftEntityDto.create(req.body);
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.shiftsService
-      .createShift(shiftEntityDto!, userId)
+      .createShift(req.user!, shiftEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   editShift(req: Request, res: Response, next: NextFunction): void {
@@ -40,12 +40,12 @@ export class ShiftsController implements ShiftsControllerInterface {
       id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.shiftsService
-      .editShift(shiftEntityDto!, userId)
+      .editShift(req.user!, shiftEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   deleteShift(req: Request, res: Response, next: NextFunction): void {
@@ -60,12 +60,12 @@ export class ShiftsController implements ShiftsControllerInterface {
 
     const [error, shiftEntityDto] = ShiftEntityDto.delete({ id });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.shiftsService
-      .deleteShift(shiftEntityDto!, userId)
+      .deleteShift(req.user!, shiftEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getShifts(
@@ -87,12 +87,12 @@ export class ShiftsController implements ShiftsControllerInterface {
       offset,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.shiftsService
-      .getShifts(id, paginationDto!)
+      .getShifts(req.user!, id, paginationDto!)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 
   getOneShift(
@@ -106,8 +106,8 @@ export class ShiftsController implements ShiftsControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_GUARD_ID);
 
     this.shiftsService
-      .getOneShift(id)
+      .getOneShift(req.user!, id)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 }

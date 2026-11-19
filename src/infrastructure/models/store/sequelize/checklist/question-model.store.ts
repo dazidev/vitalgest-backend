@@ -29,6 +29,13 @@ class Question extends Model<
   InferCreationAttributes<Question>
 > {
   declare id: CreationOptional<string>;
+  declare delegation_id: string;
+
+  toJSON(): any {
+    const values = { ...this.get({ plain: true }) };
+    delete (values as Partial<typeof values>).delegation_id;
+    return values;
+  }
   declare question: string;
 
   declare category_id: ForeignKey<QuestionCategory["id"]>;
@@ -43,6 +50,11 @@ class Question extends Model<
 
 Question.init(
   {
+    delegation_id: {
+      type: DataTypes.UUID, allowNull: false,
+      references: { model: "delegations", key: "id" },
+      onUpdate: "CASCADE", onDelete: "CASCADE",
+    },
     id: {
       type: DataTypes.UUID,
       primaryKey: true,

@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import { Transaction } from "sequelize";
 import { LogEntityDto, PaginationDto, ShiftEntityDto } from "../../application";
 import {
@@ -14,32 +16,34 @@ export class ShiftsService implements ShiftsServiceInterface {
   private readonly logsService = new LogsService();
 
   private validateData = async (
+    actor: AccessContext,
     ambulanceId: string,
     guardId: string,
     paramedicalId: string,
     driverId: string,
     tx: Transaction,
   ): Promise<true | ERROR_CODES> => {
+    const scope = new DelegationScope(actor);
     const [amb, grd, prm, drv] = await Promise.all([
-      Ambulance.findByPk(ambulanceId, {
+      Ambulance.findOne({
         attributes: ["id"],
         transaction: tx,
-      }),
+       where: scope.where("Ambulance", { id: ambulanceId }) }),
 
-      Guard.findByPk(guardId, {
+      Guard.findOne({
         attributes: ["id"],
         transaction: tx,
-      }),
+       where: scope.where("Guard", { id: guardId }) }),
 
-      User.findByPk(paramedicalId, {
+      User.findOne({
         attributes: ["id"],
         transaction: tx,
-      }),
+       where: scope.where("User", { id: paramedicalId }) }),
 
-      User.findByPk(driverId, {
+      User.findOne({
         attributes: ["id"],
         transaction: tx,
-      }),
+       where: scope.where("User", { id: driverId }) }),
     ]);
 
     if (!amb) return ERROR_CODES.AMBULANCE_NOT_FOUND;
@@ -51,9 +55,11 @@ export class ShiftsService implements ShiftsServiceInterface {
   };
 
   async createShift(
+    actor: AccessContext,
     shiftEntityDto: ShiftEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { ambulanceId, guardId, paramedicalId, driverId } = shiftEntityDto;
 
     let tx: Transaction | undefined;
@@ -61,7 +67,9 @@ export class ShiftsService implements ShiftsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const ok = await this.validateData(
+      await scope.assertShiftLinks(ambulanceId!, guardId!, paramedicalId!, driverId!, tx);
+
+      const ok = await this.validateData(actor,
         ambulanceId!,
         guardId!,
         paramedicalId!,
@@ -71,10 +79,10 @@ export class ShiftsService implements ShiftsServiceInterface {
 
       if (ok !== true) throw ok;
 
-      const ambulance = await Ambulance.findByPk(ambulanceId!, {
+      const ambulance = await Ambulance.findOne({
         attributes: ["number"],
         transaction: tx,
-      });
+       where: scope.where("Ambulance", { id: ambulanceId! }) });
 
       if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
@@ -111,7 +119,7 @@ export class ShiftsService implements ShiftsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Guard", shift.guard_id, tx));
 
       const formatShift = {
         id: shift.id,
@@ -149,9 +157,11 @@ export class ShiftsService implements ShiftsServiceInterface {
   }
 
   async editShift(
+    actor: AccessContext,
     shiftEntityDto: ShiftEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, name, ambulanceId, guardId, paramedicalId, driverId } =
       shiftEntityDto;
 
@@ -160,14 +170,17 @@ export class ShiftsService implements ShiftsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const shift = await Shift.findByPk(id!, {
+      await scope.assertShiftLinks(ambulanceId!, guardId!, paramedicalId!, driverId!, tx);
+      await scope.assertShiftChecklist(id!, ambulanceId!, tx);
+
+      const shift = await Shift.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("Shift", { id: id! }) });
 
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
-      const ok = await this.validateData(
+      const ok = await this.validateData(actor,
         ambulanceId!,
         guardId!,
         paramedicalId!,
@@ -239,7 +252,7 @@ export class ShiftsService implements ShiftsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Guard", shift.guard_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -255,9 +268,11 @@ export class ShiftsService implements ShiftsServiceInterface {
   }
 
   async deleteShift(
+    actor: AccessContext,
     shiftEntityDto: ShiftEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id } = shiftEntityDto;
 
     let tx: Transaction | undefined;
@@ -265,10 +280,10 @@ export class ShiftsService implements ShiftsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const shift = await Shift.findByPk(id!, {
+      const shift = await Shift.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("Shift", { id: id! }) });
 
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
@@ -289,7 +304,7 @@ export class ShiftsService implements ShiftsServiceInterface {
 
       await shift.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Guard", shift.guard_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -305,14 +320,16 @@ export class ShiftsService implements ShiftsServiceInterface {
   }
 
   async getShifts(
+    actor: AccessContext,
     guardId: string,
     paginationDto: PaginationDto,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset } = paginationDto;
 
     try {
       const { count, rows: shifts } = await Shift.findAndCountAll({
-        where: { guard_id: guardId },
+        where: scope.where("Shift", { guard_id: guardId }),
 
         order: [
           ["createdAt", "DESC"],
@@ -363,9 +380,10 @@ export class ShiftsService implements ShiftsServiceInterface {
     }
   }
 
-  async getOneShift(id: string): Promise<object> {
+  async getOneShift(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     const shift = await Shift.findOne({
-      where: { id },
+      where: scope.where("Shift", { id }),
       attributes: ["id", "name", "created_at", "updated_at"],
       include: [
         { model: Ambulance, as: "ambulance", attributes: ["id", "number"] },

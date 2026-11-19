@@ -16,6 +16,7 @@ class Log extends Model<InferAttributes<Log>, InferCreationAttributes<Log>> {
   declare id: CreationOptional<string>;
 
   declare user_id: ForeignKey<User["id"]> | null;
+  declare delegation_id: string;
   declare affected: string | null;
   declare entity: string;
   declare action: string;
@@ -44,6 +45,10 @@ Log.init(
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+    delegation_id: {
+      // Snapshot of event territory; intentionally retained after delegation deletion.
+      type: DataTypes.UUID, allowNull: false,
     },
     affected: {
       type: DataTypes.STRING(100),
@@ -77,6 +82,7 @@ Log.init(
     underscored: true,
     indexes: [
       { fields: ["user_id"] },
+      { fields: ["delegation_id", "created_at"] },
       { fields: ["entity", "action"] },
       { fields: ["created_at"] },
     ],

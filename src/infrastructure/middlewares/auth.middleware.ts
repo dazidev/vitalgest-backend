@@ -39,7 +39,7 @@ export class AuthMiddleware {
       }
 
       Object.defineProperty(req, "user", {
-        value: userEntity,
+        value: { ...userEntity, delegationId: user.delegation_id },
         writable: false,
         enumerable: false,
         configurable: false,

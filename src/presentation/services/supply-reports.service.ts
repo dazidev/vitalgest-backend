@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import { Transaction } from "sequelize";
 import {
   LogEntityDto,
@@ -17,11 +19,12 @@ import { LogsService } from "./logs.service";
 export class SupplyReportsService {
   private readonly logsService = new LogsService();
 
-  async getReports(paginationDto: PaginationDto): Promise<object> {
+  async getReports(actor: AccessContext, paginationDto: PaginationDto): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset } = paginationDto;
 
     try {
-      const { count, rows: reports } = await SupplyReport.findAndCountAll({
+      const { count, rows: reports } = await SupplyReport.findAndCountAll({ where: scope.where("SupplyReport"),
         include: [
           {
             model: Ambulance,
@@ -144,9 +147,11 @@ export class SupplyReportsService {
   }
 
   async updateSupplies(
+    actor: AccessContext,
     supplyReportEntityDto: SupplyReportEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { reportId, items } = supplyReportEntityDto;
 
     let tx: Transaction | undefined;
@@ -155,7 +160,7 @@ export class SupplyReportsService {
       tx = await sequelize.transaction();
 
       const report = await SupplyReport.findOne({
-        where: { id: reportId },
+        where: scope.where("SupplyReport", { id: reportId }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -169,10 +174,10 @@ export class SupplyReportsService {
 
       for (const answer of items) {
         const item = await SupplyReportItem.findOne({
-          where: {
+          where: scope.where("SupplyReportItem", {
             id: answer.itemId,
             report_id: reportId,
-          },
+          }),
           transaction: tx,
           lock: tx.LOCK.UPDATE,
         });
@@ -258,7 +263,7 @@ export class SupplyReportsService {
 
         if (logError) throw logError;
 
-        await this.logsService.create(logDto!, tx);
+        await this.logsService.create(logDto!, tx, await scope.delegationOf("Ambulance", report.ambulance_id, tx));
       }
 
       await tx.commit();
@@ -277,14 +282,15 @@ export class SupplyReportsService {
     }
   }
 
-  async attendReport(id: string, userId: string): Promise<object> {
+  async attendReport(actor: AccessContext, id: string, userId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
       const report = await SupplyReport.findOne({
-        where: { id },
+        where: scope.where("SupplyReport", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -319,7 +325,7 @@ export class SupplyReportsService {
 
         if (logError) throw logError;
 
-        await this.logsService.create(logDto!, tx);
+        await this.logsService.create(logDto!, tx, await scope.delegationOf("Ambulance", report.ambulance_id, tx));
       }
 
       await tx.commit();
@@ -342,9 +348,10 @@ export class SupplyReportsService {
     }
   }
 
-  async getReport(id: string): Promise<object> {
+  async getReport(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const report = await SupplyReport.findByPk(id, {
+      const report = await SupplyReport.findOne({
         include: [
           {
             model: Ambulance,
@@ -363,7 +370,7 @@ export class SupplyReportsService {
             required: false,
           },
         ],
-      });
+       where: scope.where("SupplyReport", { id: id }) });
 
       if (!report) throw ERROR_CODES.SUPPLY_REPORT_NOT_FOUND;
 

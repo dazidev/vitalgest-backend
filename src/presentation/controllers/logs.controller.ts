@@ -21,16 +21,16 @@ export class LogsController {
     });
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.logsService
-      .findAll(findLogsDto!)
+      .findAll(req.user!, findLogsDto!)
       .then((response) => res.json(response))
       .catch((error) => {
         if (typeof error === "string") {
-          return next(CustomError.badRequest(error));
+          return next(CustomError.from(error));
         }
 
         return next(error);

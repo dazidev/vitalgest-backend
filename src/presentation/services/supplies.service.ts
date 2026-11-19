@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import { Transaction } from "sequelize";
 import {
   LogEntityDto,
@@ -17,9 +19,11 @@ export class SuppliesService implements SuppliesServiceInterface {
   private readonly logsService = new LogsService();
 
   async createSupply(
+    actor: AccessContext,
     supplyEntityDto: SupplyEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const {
       category,
       specification,
@@ -35,7 +39,7 @@ export class SuppliesService implements SuppliesServiceInterface {
       tx = await sequelize.transaction();
 
       const pharmacy = await Pharmacy.findOne({
-        where: { id: pharmacyId },
+        where: scope.where("Pharmacy", { id: pharmacyId }),
         transaction: tx,
       });
 
@@ -69,7 +73,7 @@ export class SuppliesService implements SuppliesServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Pharmacy", supply.pharmacy_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -88,9 +92,11 @@ export class SuppliesService implements SuppliesServiceInterface {
   }
 
   async editSupply(
+    actor: AccessContext,
     supplyEntityDto: SupplyEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const {
       id,
       category,
@@ -106,8 +112,10 @@ export class SuppliesService implements SuppliesServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      DelegationScope.same(await scope.delegationOf("Supply", id!, tx), await scope.delegationOf("Pharmacy", pharmacyId!, tx));
+
       const supply = await Supply.findOne({
-        where: { id },
+        where: scope.where("Supply", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -192,7 +200,7 @@ export class SuppliesService implements SuppliesServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Pharmacy", supply.pharmacy_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -208,9 +216,11 @@ export class SuppliesService implements SuppliesServiceInterface {
   }
 
   async deleteSupply(
+    actor: AccessContext,
     supplyEntityDto: SupplyEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id } = supplyEntityDto;
 
     let tx: Transaction | undefined;
@@ -219,7 +229,7 @@ export class SuppliesService implements SuppliesServiceInterface {
       tx = await sequelize.transaction();
 
       const supply = await Supply.findOne({
-        where: { id },
+        where: scope.where("Supply", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -244,7 +254,7 @@ export class SuppliesService implements SuppliesServiceInterface {
 
       await supply.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Pharmacy", supply.pharmacy_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -261,20 +271,22 @@ export class SuppliesService implements SuppliesServiceInterface {
 
   //! falta hacer uno por todos
   async getSupplies(
+    actor: AccessContext,
     pharmacyId: string,
     paginationDto: PaginationDto,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset } = paginationDto;
 
     try {
       const pharmacy = await Pharmacy.findOne({
-        where: { id: pharmacyId },
+        where: scope.where("Pharmacy", { id: pharmacyId }),
       });
 
       if (!pharmacy) throw ERROR_CODES.PHARMACY_NOT_FOUND;
 
       const { count, rows: supplies } = await Supply.findAndCountAll({
-        where: { pharmacy_id: pharmacyId },
+        where: scope.where("Supply", { pharmacy_id: pharmacyId }),
         order: [
           ["createdAt", "DESC"],
           ["id", "ASC"],
@@ -294,9 +306,10 @@ export class SuppliesService implements SuppliesServiceInterface {
     }
   }
 
-  async getOneSupply(id: string): Promise<object> {
+  async getOneSupply(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const supply = await Supply.findOne({ where: { id } });
+      const supply = await Supply.findOne({ where: scope.where("Supply", { id }) });
       if (!supply) throw ERROR_CODES.SUPPLIES_NOT_FOUND;
 
       return {

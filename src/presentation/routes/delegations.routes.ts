@@ -1,5 +1,5 @@
+import { PermissionMiddleware } from "../../infrastructure/middlewares/permission.middleware";
 import express from "express";
-//import { AuthMiddleware, RankMiddleware } from '../../infrastructure';
 import { DelegationsController } from "../controllers/delegations.controller";
 import { DelegationsService } from "../services/delegations.service";
 import { AuthMiddleware } from "../../infrastructure";
@@ -14,49 +14,49 @@ delegationsRoutes.use(AuthMiddleware.validateJWT);
 
 delegationsRoutes.get(
   "/states",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin"),
   controller.getStates.bind(controller),
 );
 
 delegationsRoutes.get(
   "/state/:stateId/municipalities",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin"),
   controller.getMunicipalities.bind(controller),
 );
 
 delegationsRoutes.post(
   "/create",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin"),
   controller.createDelegation.bind(controller),
 );
 
 delegationsRoutes.put(
   "/edit/:id",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin"),
   controller.editDelegation.bind(controller),
 );
 
 delegationsRoutes.delete(
   "/delete/:id",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin"),
   controller.deleteDelegation.bind(controller),
 );
 
 delegationsRoutes.get(
   "/many",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin", "admin", "head_guard", "vehicle_operator", "paramedical"),
   controller.getDelegations.bind(controller),
 );
 
 delegationsRoutes.get(
   "/one/:id",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin", "admin", "head_guard", "vehicle_operator", "paramedical"),
   controller.getDelegation.bind(controller),
 );
 
 delegationsRoutes.get(
   "/members/:id",
-  //[AuthMiddleware.validateJWT, RankMiddleware.validate('admin')],
+  PermissionMiddleware.allow("general_admin", "admin", "head_guard", "vehicle_operator", "paramedical"),
   controller.getMembers.bind(controller),
 );
 

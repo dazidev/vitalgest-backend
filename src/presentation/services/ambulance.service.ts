@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import { Transaction } from "sequelize";
 import {
   AmbulanceEntityDto,
@@ -37,9 +39,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async createAmbulance(
+    actor: AccessContext,
     ambulanceEntityDto: AmbulanceEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { delegationId, number } = ambulanceEntityDto;
 
     const ambulanceEntity = AmbulanceEntity.create(ambulanceEntityDto);
@@ -50,15 +54,17 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      scope.assertDelegation(delegationId!);
+
       const existsDelegation = await Delegation.findOne({
-        where: { id: delegationId },
+        where: scope.where("Delegation", { id: delegationId }),
         transaction: tx,
       });
 
       if (!existsDelegation) throw ERROR_CODES.DELEGATION_NOT_FOUND;
 
       const exists = await Ambulance.findOne({
-        where: { number },
+        where: scope.where("Ambulance", { number }),
         transaction: tx,
       });
 
@@ -84,7 +90,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, ambulance.delegation_id);
 
       const formatAmbulance = {
         id: ambulance.id,
@@ -116,9 +122,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async editAmbulance(
+    actor: AccessContext,
     ambulanceEntityDto: AmbulanceEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, delegationId } = ambulanceEntityDto;
 
     const ambulanceEntity = AmbulanceEntity.edit(ambulanceEntityDto);
@@ -129,8 +137,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      scope.assertDelegation(delegationId!);
+      await scope.assertAmbulanceMove(id!, delegationId!, tx);
+
       const ambulance = await Ambulance.findOne({
-        where: { id },
+        where: scope.where("Ambulance", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -138,7 +149,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
       if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
       const existsDelegation = await Delegation.findOne({
-        where: { id: delegationId },
+        where: scope.where("Delegation", { id: delegationId }),
         transaction: tx,
       });
 
@@ -193,7 +204,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, ambulance.delegation_id);
 
       await tx.commit();
 
@@ -208,9 +219,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async deleteAmbulance(
+    actor: AccessContext,
     ambulanceEntityDto: AmbulanceEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id } = ambulanceEntityDto;
 
     let tx: Transaction | undefined;
@@ -219,7 +232,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
       tx = await sequelize.transaction();
 
       const ambulance = await Ambulance.findOne({
-        where: { id },
+        where: scope.where("Ambulance", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -238,7 +251,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
       await ambulance.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, ambulance.delegation_id);
 
       await tx.commit();
 
@@ -252,10 +265,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     }
   }
 
-  async getAmbulances(paginationDto: PaginationDto): Promise<object> {
+  async getAmbulances(actor: AccessContext, paginationDto: PaginationDto): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset } = paginationDto;
 
-    const { count, rows: ambulances } = await Ambulance.findAndCountAll({
+    const { count, rows: ambulances } = await Ambulance.findAndCountAll({ where: scope.where("Ambulance"),
       order: [
         ["createdAt", "DESC"],
         ["id", "ASC"],
@@ -289,9 +303,10 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     };
   }
 
-  async getOneAmbulance(id: string): Promise<object> {
+  async getOneAmbulance(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     const ambulance = await Ambulance.findOne({
-      where: { id },
+      where: scope.where("Ambulance", { id }),
       include: [
         { model: Delegation, as: "delegation", attributes: ["id", "name"] },
       ],
@@ -319,9 +334,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async addSupply(
+    actor: AccessContext,
     supplyAmbEntityDto: SupplyAmbEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { avaibleQuantity, minQuantity, areaId, ambulanceId, supplyId } =
       supplyAmbEntityDto;
 
@@ -330,8 +347,10 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      DelegationScope.same(await scope.delegationOf("Supply", supplyId!, tx), await scope.delegationOf("Ambulance", ambulanceId!, tx));
+
       const supplyInfo = await Supply.findOne({
-        where: { id: supplyId },
+        where: scope.where("Supply", { id: supplyId }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -390,7 +409,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Ambulance", ambulanceId!, tx));
 
       await tx.commit();
 
@@ -408,9 +427,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async editSupply(
+    actor: AccessContext,
     supplyAmbEntityDto: SupplyAmbEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, avaibleQuantity, minQuantity, areaId, ambulanceId } =
       supplyAmbEntityDto;
 
@@ -419,8 +440,10 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      DelegationScope.same(await scope.delegationOf("SupplyAmbulance", id!, tx), await scope.delegationOf("Ambulance", ambulanceId!, tx));
+
       const supply = await SupplyAmbulance.findOne({
-        where: { id },
+        where: scope.where("SupplyAmbulance", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -482,7 +505,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Ambulance", supply.ambulance_id, tx));
 
       await tx.commit();
 
@@ -497,9 +520,11 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async deleteSupply(
+    actor: AccessContext,
     supplyAmbEntityDto: SupplyAmbEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id } = supplyAmbEntityDto;
 
     let tx: Transaction | undefined;
@@ -508,7 +533,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
       tx = await sequelize.transaction();
 
       const supply = await SupplyAmbulance.findOne({
-        where: { id },
+        where: scope.where("SupplyAmbulance", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -534,7 +559,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
       await supply.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Ambulance", supply.ambulance_id, tx));
 
       await tx.commit();
 
@@ -548,13 +573,14 @@ export class AmbulancesService implements AmbulancesServiceInterface {
     }
   }
 
-  async getAmbSupplies(ambulanceId: string): Promise<object> {
+  async getAmbSupplies(actor: AccessContext, ambulanceId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const pharmacy = Ambulance.findOne({ where: { id: ambulanceId } });
+      const pharmacy = await Ambulance.findOne({ where: scope.where("Ambulance", { id: ambulanceId }) });
       if (!pharmacy) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
       const supplies = await SupplyAmbulance.findAll({
-        where: { ambulance_id: ambulanceId },
+        where: scope.where("SupplyAmbulance", { ambulance_id: ambulanceId }),
       });
       if (supplies.length === 0) throw ERROR_CODES.SUPPLIES_NOT_FOUND;
 
@@ -569,11 +595,13 @@ export class AmbulancesService implements AmbulancesServiceInterface {
   }
 
   async getOneAmbSupply(
+    actor: AccessContext,
     supplyAmbEntityDto: SupplyAmbEntityDto,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id } = supplyAmbEntityDto;
     try {
-      const supply = await SupplyAmbulance.findOne({ where: { id } });
+      const supply = await SupplyAmbulance.findOne({ where: scope.where("SupplyAmbulance", { id }) });
       if (!supply) throw ERROR_CODES.SUPPLIES_NOT_FOUND;
 
       return {

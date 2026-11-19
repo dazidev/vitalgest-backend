@@ -18,12 +18,12 @@ export class AuthController implements AuthControllerInterface {
       return CustomError.internalServer(error);
     if (error === ERROR_CODES.TOO_MANY_REQUESTS)
       return CustomError.tooManyRequests(error);
-    return CustomError.badRequest(error);
+    return CustomError.from(error);
   };
 
   loginUser(req: Request, res: Response, next: NextFunction): void {
     const [error, userEntityDto] = UserEntityDto.login(req.body);
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.authService
       .loginUser(userEntityDto!)

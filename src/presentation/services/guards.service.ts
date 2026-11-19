@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import { Transaction, UniqueConstraintError } from "sequelize";
 import {
   GuardsEntityDto,
@@ -26,11 +28,13 @@ export class GuardsService implements GuardsServiceInterface {
   private readonly logsService = new LogsService();
 
   private async existsGuard(
+    actor: AccessContext,
     date: string,
     delegationId: string,
   ): Promise<boolean> {
+    const scope = new DelegationScope(actor);
     const exists = await Guard.findOne({
-      where: { delegation_id: delegationId, date },
+      where: scope.where("Guard", { delegation_id: delegationId, date }),
     });
     if (exists) return true;
 
@@ -38,13 +42,15 @@ export class GuardsService implements GuardsServiceInterface {
   }
 
   async createGuard(
+    actor: AccessContext,
     guardEntityDto: GuardsEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { guardChief, delegationId, date } = guardEntityDto;
 
     const existsGuardChief = await User.findOne({
-      where: { id: guardChief, role: "head_guard" },
+      where: scope.where("User", { id: guardChief, role: "head_guard" }),
     }).catch(() => {
       throw ERROR_CODES.UNKNOWN_DB_ERROR;
     });
@@ -52,20 +58,23 @@ export class GuardsService implements GuardsServiceInterface {
     if (!existsGuardChief) throw ERROR_CODES.USER_NOT_GUARD_CHIEF;
 
     const existsDelegation = await Delegation.findOne({
-      where: { id: delegationId },
+      where: scope.where("Delegation", { id: delegationId }),
     }).catch(() => {
       throw ERROR_CODES.UNKNOWN_DB_ERROR;
     });
 
     if (!existsDelegation) throw ERROR_CODES.DELEGATION_NOT_FOUND;
 
-    const exists = await this.existsGuard(date!, delegationId!);
+    const exists = await this.existsGuard(actor, date!, delegationId!);
     if (exists) throw ERROR_CODES.GUARD_ALREADY_EXISTS;
 
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
+
+      scope.assertDelegation(delegationId!);
+      DelegationScope.same(delegationId!, await scope.delegationOf("User", guardChief!, tx));
 
       const guard = await Guard.create(
         {
@@ -91,7 +100,7 @@ export class GuardsService implements GuardsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, guard.delegation_id);
 
       const formatGuard = {
         id: guard.id,
@@ -125,9 +134,11 @@ export class GuardsService implements GuardsServiceInterface {
   }
 
   async editGuard(
+    actor: AccessContext,
     guardEntityDto: GuardsEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, guardChief, date, delegationId, state } = guardEntityDto;
 
     let tx: Transaction | undefined;
@@ -135,8 +146,12 @@ export class GuardsService implements GuardsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      scope.assertDelegation(delegationId!);
+      DelegationScope.same(delegationId!, await scope.delegationOf("User", guardChief!, tx));
+      await scope.assertGuardMove(id!, delegationId!, tx);
+
       const guard = await Guard.findOne({
-        where: { id },
+        where: scope.where("Guard", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -144,7 +159,7 @@ export class GuardsService implements GuardsServiceInterface {
       if (!guard) throw ERROR_CODES.GUARD_NOT_FOUND;
 
       const existsGuardChief = await User.findOne({
-        where: { id: guardChief, role: "head_guard" },
+        where: scope.where("User", { id: guardChief, role: "head_guard" }),
         transaction: tx,
       });
 
@@ -153,7 +168,7 @@ export class GuardsService implements GuardsServiceInterface {
       }
 
       const existsDelegation = await Delegation.findOne({
-        where: { id: delegationId },
+        where: scope.where("Delegation", { id: delegationId }),
         transaction: tx,
       });
 
@@ -211,7 +226,7 @@ export class GuardsService implements GuardsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, guard.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -230,14 +245,15 @@ export class GuardsService implements GuardsServiceInterface {
     }
   }
 
-  async deleteGuard(id: string, userId: string): Promise<object> {
+  async deleteGuard(actor: AccessContext, id: string, userId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
       const guard = await Guard.findOne({
-        where: { id },
+        where: scope.where("Guard", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -265,7 +281,7 @@ export class GuardsService implements GuardsServiceInterface {
 
       await guard.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, guard.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -280,11 +296,12 @@ export class GuardsService implements GuardsServiceInterface {
     }
   }
 
-  async getGuards(paginationDto: PaginationDto): Promise<object> {
+  async getGuards(actor: AccessContext, paginationDto: PaginationDto): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset } = paginationDto;
 
     try {
-      const { count, rows: guards } = await Guard.findAndCountAll({
+      const { count, rows: guards } = await Guard.findAndCountAll({ where: scope.where("Guard"),
         distinct: true,
         order: [
           ["createdAt", "DESC"],
@@ -349,9 +366,10 @@ export class GuardsService implements GuardsServiceInterface {
     }
   }
 
-  async getOneGuard(id: string): Promise<object> {
+  async getOneGuard(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     const guard = await Guard.findOne({
-      where: { id },
+      where: scope.where("Guard", { id }),
       include: [
         {
           model: User,

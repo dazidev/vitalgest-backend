@@ -16,7 +16,7 @@ export class AmbulancesController implements AmbulancesControllerInterface {
     this.ambulancesService
       .getAreas()
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   createAmbulance(req: Request, res: Response, next: NextFunction): void {
@@ -28,12 +28,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
     }
 
     const [error, ambulanceEntityDto] = AmbulanceEntityDto.create(req.body);
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .createAmbulance(ambulanceEntityDto!, userId)
+      .createAmbulance(req.user!, ambulanceEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   editAmbulance(req: Request, res: Response, next: NextFunction): void {
@@ -51,12 +51,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       ...req.body,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .editAmbulance(ambulanceEntityDto!, userId)
+      .editAmbulance(req.user!, ambulanceEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   deleteAmbulance(req: Request, res: Response, next: NextFunction): void {
@@ -70,12 +70,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
     const { id } = req.params;
 
     const [error, ambulanceEntityDto] = AmbulanceEntityDto.delete({ id });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .deleteAmbulance(ambulanceEntityDto!, userId)
+      .deleteAmbulance(req.user!, ambulanceEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getAmbulances(req: Request, res: Response, next: NextFunction): void {
@@ -85,12 +85,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       limit,
       offset,
     });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .getAmbulances(paginationDto!)
+      .getAmbulances(req.user!, paginationDto!)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 
   getOneAmbulance(
@@ -104,9 +104,9 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_AMBULANCE_ID);
 
     this.ambulancesService
-      .getOneAmbulance(id)
+      .getOneAmbulance(req.user!, id)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 
   //* SUPPLIES
@@ -126,12 +126,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       ambulanceId,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .addSupply(supplyAmbEntityDto!, userId)
+      .addSupply(req.user!, supplyAmbEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   editSupply(req: Request, res: Response, next: NextFunction): void {
@@ -149,12 +149,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       ...req.body,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .editSupply(supplyAmbEntityDto!, userId)
+      .editSupply(req.user!, supplyAmbEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   deleteSupply(req: Request, res: Response, next: NextFunction): void {
@@ -169,12 +169,12 @@ export class AmbulancesController implements AmbulancesControllerInterface {
 
     const [error, supplyAmbEntityDto] = SupplyAmbEntityDto.id({ id });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .deleteSupply(supplyAmbEntityDto!, userId)
+      .deleteSupply(req.user!, supplyAmbEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getAmbSupplies(
@@ -189,20 +189,20 @@ export class AmbulancesController implements AmbulancesControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_AMBULANCE_ID);
 
     this.ambulancesService
-      .getAmbSupplies(id)
+      .getAmbSupplies(req.user!, id)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getOneAmbSupply(req: Request, res: Response, next: NextFunction): void {
     const { id } = req.params;
 
     const [error, supplyAmbEntityDto] = SupplyAmbEntityDto.id({ id });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.ambulancesService
-      .getOneAmbSupply(supplyAmbEntityDto!)
+      .getOneAmbSupply(req.user!, supplyAmbEntityDto!)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 }

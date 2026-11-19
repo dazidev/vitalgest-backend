@@ -14,7 +14,7 @@ export class AdmController implements AdmControllerInterface {
       return CustomError.internalServer(error);
     if (error === ERROR_CODES.TOO_MANY_REQUESTS)
       return CustomError.tooManyRequests(error);
-    return CustomError.badRequest(error);
+    return CustomError.from(error);
   };
 
   createUser(req: Request, res: Response, next: NextFunction): void {
@@ -27,10 +27,10 @@ export class AdmController implements AdmControllerInterface {
 
     const [error, userEntityDto] = UserEntityDto.create(req.body);
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.admService
-      .createUser(userEntityDto!, userId)
+      .createUser(req.user!, userEntityDto!, userId)
       .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -50,10 +50,10 @@ export class AdmController implements AdmControllerInterface {
       id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.admService
-      .editUser(userEntityDto!, userId)
+      .editUser(req.user!, userEntityDto!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -78,7 +78,7 @@ export class AdmController implements AdmControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_USER_ID);
 
     this.admService
-      .deleteUser(id, userId)
+      .deleteUser(req.user!, id, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -91,10 +91,10 @@ export class AdmController implements AdmControllerInterface {
       offset,
       role,
     });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.admService
-      .getAllUsers(paginationDto!)
+      .getAllUsers(req.user!, paginationDto!)
       .then((user) => res.status(200).json(user))
       .catch((error) => next(this.handleError(error)));
   }
@@ -125,7 +125,7 @@ export class AdmController implements AdmControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_PASSWORD_FORMAT);
 
     this.admService
-      .changePasswordUser(id, password, userId)
+      .changePasswordUser(req.user!, id, password, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -141,7 +141,7 @@ export class AdmController implements AdmControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_USER_ID);
 
     this.admService
-      .getUserById(id!)
+      .getUserById(req.user!, id!)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }

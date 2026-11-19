@@ -13,12 +13,24 @@ class QuestionCategory extends Model<
   InferCreationAttributes<QuestionCategory>
 > {
   declare id: CreationOptional<string>;
+  declare delegation_id: string;
+
+  toJSON(): any {
+    const values = { ...this.get({ plain: true }) };
+    delete (values as Partial<typeof values>).delegation_id;
+    return values;
+  }
   declare name: string;
   declare order: number;
 }
 
 QuestionCategory.init(
   {
+    delegation_id: {
+      type: DataTypes.UUID, allowNull: false,
+      references: { model: "delegations", key: "id" },
+      onUpdate: "CASCADE", onDelete: "CASCADE",
+    },
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -28,18 +40,20 @@ QuestionCategory.init(
     name: {
       type: DataTypes.STRING(150),
       allowNull: false,
-      unique: true,
     },
     order: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
-      unique: true,
     },
   },
   {
     sequelize,
     modelName: "QuestionCategory",
     tableName: "question_categories",
+    indexes: [
+      { unique: true, fields: ["delegation_id", "name"] },
+      { unique: true, fields: ["delegation_id", "order"] },
+    ],
     timestamps: true,
     underscored: true,
   },

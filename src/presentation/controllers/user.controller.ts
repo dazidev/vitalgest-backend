@@ -22,7 +22,7 @@ export class UserController {
       return CustomError.internalServer(error);
     if (error === ERROR_CODES.TOO_MANY_REQUESTS)
       return CustomError.tooManyRequests(error);
-    return CustomError.badRequest(error);
+    return CustomError.from(error);
   };
 
   changePassword(
@@ -51,7 +51,7 @@ export class UserController {
       newPass,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.userService
       .changePassword(id, currentPass, newPass)
@@ -85,7 +85,7 @@ export class UserController {
       lastname,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.userService
       .changeInfo(id, name, lastname)
@@ -143,7 +143,7 @@ export class UserController {
         };
         return res.json(payload);
       })
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   };
 
   attachSignatureImage = async (

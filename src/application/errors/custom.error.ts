@@ -6,7 +6,16 @@ export class CustomError extends Error {
     super(message);
   }
 
+  static from(error: unknown): CustomError {
+    if (error instanceof CustomError) return error;
+    if (error === "DELEGATION_ACCESS_DENIED" || error === "DELEGATION_MISMATCH" || error === "ADMIN_ROLE_RESTRICTED") {
+      return new CustomError(403, error);
+    }
+    return CustomError.badRequest(typeof error === "string" ? error : "UNKNOWN_ERROR");
+  }
+
   static badRequest(message: string) {
+    if (message === "DELEGATION_ACCESS_DENIED" || message === "DELEGATION_MISMATCH" || message === "ADMIN_ROLE_RESTRICTED") return new CustomError(403, message);
     return new CustomError(400, message);
   }
 

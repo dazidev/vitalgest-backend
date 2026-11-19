@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 //import { promises as fs } from "fs";
 import {
   ChecklistsServiceInterface,
@@ -45,9 +47,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   //* SUPPLIES CHECKLIST
 
   async createSupChecklist(
+    actor: AccessContext,
     checkListSupplyEntityDto: CheckListSupplyEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { shiftId } = checkListSupplyEntityDto;
 
     let tx: Transaction | undefined;
@@ -56,14 +60,14 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       tx = await sequelize.transaction();
 
       const shift = await Shift.findOne({
-        where: { id: shiftId },
+        where: scope.where("Shift", { id: shiftId }),
         transaction: tx,
       });
 
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
       const exists = await ChecklistSupply.findOne({
-        where: { shift_id: shiftId },
+        where: scope.where("ChecklistSupply", { shift_id: shiftId }),
         transaction: tx,
       });
 
@@ -89,7 +93,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -108,9 +112,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async signSupChecklist(
+    actor: AccessContext,
     checkListSupplyEntityDto: CheckListSupplyEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, recipientId, delivererId, notes } = checkListSupplyEntityDto;
 
     let tx: Transaction | undefined;
@@ -118,26 +124,29 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistSupply.findByPk(id!, {
+      const eventDelegationId = await scope.delegationOf("ChecklistSupply", id!, tx);
+      DelegationScope.same(eventDelegationId, await scope.delegationOf("User", delivererId!, tx), await scope.delegationOf("User", recipientId!, tx));
+
+      const checklist = await ChecklistSupply.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("ChecklistSupply", { id: id! }) });
 
       if (!checklist) {
         throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
       }
 
-      const shift = await Shift.findByPk(checklist.shift_id, {
+      const shift = await Shift.findOne({
         attributes: ["ambulance_id"],
         transaction: tx,
-      });
+       where: scope.where("Shift", { id: checklist.shift_id }) });
 
       const ambulanceId = shift?.ambulance_id;
 
       if (!ambulanceId) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
       const deliverer = await User.findOne({
-        where: { id: delivererId },
+        where: scope.where("User", { id: delivererId }),
         attributes: ["id", "signature"],
         transaction: tx,
       });
@@ -145,7 +154,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       if (!deliverer) throw ERROR_CODES.INVALID_DELIVERER_ID;
 
       const recipient = await User.findOne({
-        where: { id: recipientId },
+        where: scope.where("User", { id: recipientId }),
         attributes: ["id", "signature"],
         transaction: tx,
       });
@@ -164,7 +173,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       );
 
       const existingReport = await SupplyReport.findOne({
-        where: { checklist_id: checklist.id },
+        where: scope.where("SupplyReport", { checklist_id: checklist.id }),
         attributes: ["id"],
         transaction: tx,
       });
@@ -238,7 +247,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
         if (reportLogError) throw reportLogError;
 
-        await this.logsService.create(reportLogDto!, tx);
+        await this.logsService.create(reportLogDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
       }
 
       const [signLogError, signLogDto] = LogEntityDto.create({
@@ -260,7 +269,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       if (signLogError) throw signLogError;
 
-      await this.logsService.create(signLogDto!, tx);
+      await this.logsService.create(signLogDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -276,9 +285,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async deleteSupChecklist(
+    actor: AccessContext,
     checkListSupplyEntityDto: CheckListSupplyEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id } = checkListSupplyEntityDto;
 
     let tx: Transaction | undefined;
@@ -286,10 +297,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistSupply.findByPk(id!, {
+      const checklist = await ChecklistSupply.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("ChecklistSupply", { id: id! }) });
 
       if (!checklist) {
         throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
@@ -318,7 +329,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       await checklist.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -333,9 +344,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     }
   }
 
-  async getSupChecklist(id: string): Promise<object> {
+  async getSupChecklist(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const checklist = await ChecklistSupply.findByPk(id, {
+      const checklist = await ChecklistSupply.findOne({
         attributes: [
           "id",
           "sign_deliverer_path",
@@ -420,7 +432,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             "ASC",
           ],
         ],
-      });
+       where: scope.where("ChecklistSupply", { id: id }) });
       if (!checklist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
 
       return {
@@ -435,9 +447,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async putSupAnswers(
+    actor: AccessContext,
     object: RequestAnswerSupInterface,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { checklistId, answers } = object;
 
     let tx: Transaction | undefined;
@@ -445,17 +459,17 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistSupply.findByPk(checklistId, {
+      const checklist = await ChecklistSupply.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("ChecklistSupply", { id: checklistId }) });
 
       if (!checklist) throw ERROR_CODES.CHECKLIST_SUPPLY_NOT_FOUND;
 
-      const shift = await Shift.findByPk(checklist.shift_id, {
+      const shift = await Shift.findOne({
         attributes: ["ambulance_id"],
         transaction: tx,
-      });
+       where: scope.where("Shift", { id: checklist.shift_id }) });
 
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
@@ -468,10 +482,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       for (const ans of answers) {
         const supply = await SupplyAmbulance.findOne({
-          where: {
+          where: scope.where("SupplyAmbulance", {
             id: ans.supplyId,
             ambulance_id: ambulanceId,
-          },
+          }),
           transaction: tx,
           lock: tx.LOCK.UPDATE,
         });
@@ -540,7 +554,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -557,9 +571,9 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
   //* QUESTIONS
 
-  private async findAmbQuestions(categoryId?: string) {
-    const questions = await Question.findAll({
-      ...(categoryId ? { where: { category_id: categoryId } } : {}),
+  private async findAmbQuestions(actor: AccessContext, categoryIds?: string[]) {
+    const scope = new DelegationScope(actor);
+    const questions = await Question.findAll({ where: scope.where("Question", categoryIds ? { category_id: { [Op.in]: categoryIds } } : {}),
       include: [
         {
           model: QuestionCategory,
@@ -590,8 +604,9 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     }));
   }
 
-  async getAmbQuestions(): Promise<object> {
-    const questions = await this.findAmbQuestions();
+  async getAmbQuestions(actor: AccessContext): Promise<object> {
+
+    const questions = await this.findAmbQuestions(actor);
 
     return {
       success: true,
@@ -599,20 +614,21 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     };
   }
 
-  async getAmbQuestionPerCategory(categoryOrder: number): Promise<object> {
-    const category = await QuestionCategory.findOne({
-      where: { order: categoryOrder },
+  async getAmbQuestionPerCategory(actor: AccessContext, categoryOrder: number): Promise<object> {
+    const scope = new DelegationScope(actor);
+    const categories = await QuestionCategory.findAll({
+      where: scope.where("QuestionCategory", { order: categoryOrder }),
       attributes: ["id"],
     });
 
-    if (!category) {
+    if (categories.length === 0) {
       return {
         success: true,
         data: [],
       };
     }
 
-    const questions = await this.findAmbQuestions(category.id);
+    const questions = await this.findAmbQuestions(actor, categories.map((category) => category.id));
 
     return {
       success: true,
@@ -623,9 +639,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   //* AMBULANCE CHECKLIST
 
   async createAmbChecklist(
+    actor: AccessContext,
     checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { ambulanceId, shiftId, km } = checkListAmbulanceEntityDto;
 
     let tx: Transaction | undefined;
@@ -633,25 +651,30 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      const linkedShift = await Shift.findOne({ where: scope.where("Shift", { id: shiftId }), transaction: tx, lock: tx.LOCK.UPDATE });
+      if (!linkedShift) throw ERROR_CODES.SHIFT_NOT_FOUND;
+      if (linkedShift.ambulance_id !== ambulanceId) throw "DELEGATION_MISMATCH";
+      DelegationScope.same(await scope.delegationOf("Shift", shiftId!, tx), await scope.delegationOf("Ambulance", ambulanceId!, tx));
+
       const ambulance = await Ambulance.findOne({
-        where: { id: ambulanceId },
+        where: scope.where("Ambulance", { id: ambulanceId }),
         transaction: tx,
       });
 
       if (!ambulance) throw ERROR_CODES.AMBULANCE_NOT_FOUND;
 
       const shift = await Shift.findOne({
-        where: { id: shiftId },
+        where: scope.where("Shift", { id: shiftId }),
         transaction: tx,
       });
 
       if (!shift) throw ERROR_CODES.SHIFT_NOT_FOUND;
 
       const exists = await ChecklistAmbulance.findOne({
-        where: {
+        where: scope.where("ChecklistAmbulance", {
           ambulance_id: ambulanceId,
           shift_id: shiftId,
-        },
+        }),
         transaction: tx,
       });
 
@@ -683,7 +706,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -702,9 +725,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async signAmbChecklist(
+    actor: AccessContext,
     checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, recipientId, delivererId, notes } = checkListAmbulanceEntityDto;
 
     let tx: Transaction | undefined;
@@ -712,17 +737,20 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistAmbulance.findByPk(id!, {
+      const eventDelegationId = await scope.delegationOf("ChecklistAmbulance", id!, tx);
+      DelegationScope.same(eventDelegationId, await scope.delegationOf("User", delivererId!, tx), await scope.delegationOf("User", recipientId!, tx));
+
+      const checklist = await ChecklistAmbulance.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("ChecklistAmbulance", { id: id! }) });
 
       if (!checklist) {
         throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
       }
 
       const deliverer = await User.findOne({
-        where: { id: delivererId },
+        where: scope.where("User", { id: delivererId }),
         attributes: ["id", "signature"],
         transaction: tx,
       });
@@ -730,7 +758,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
       if (!deliverer) throw ERROR_CODES.INVALID_DELIVERER_ID;
 
       const recipient = await User.findOne({
-        where: { id: recipientId },
+        where: scope.where("User", { id: recipientId }),
         attributes: ["id", "signature"],
         transaction: tx,
       });
@@ -763,7 +791,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -779,9 +807,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async deleteAmbChecklist(
+    actor: AccessContext,
     checkListAmbulanceEntityDto: CheckListAmbulanceEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id } = checkListAmbulanceEntityDto;
 
     let tx: Transaction | undefined;
@@ -789,10 +819,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistAmbulance.findByPk(id!, {
+      const checklist = await ChecklistAmbulance.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("ChecklistAmbulance", { id: id! }) });
 
       if (!checklist) {
         throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
@@ -817,7 +847,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       await checklist.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;
@@ -832,9 +862,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     }
   }
 
-  async getAmbChecklist(id: string) {
+  async getAmbChecklist(actor: AccessContext, id: string) {
+    const scope = new DelegationScope(actor);
     try {
-      const checklist = await ChecklistAmbulance.findByPk(id, {
+      const checklist = await ChecklistAmbulance.findOne({
         attributes: { exclude: ["ambulance_id", "shift_id", "recipient_id"] },
         include: [
           { model: Ambulance, as: "ambulance", attributes: ["id", "number"] },
@@ -946,7 +977,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             "ASC",
           ],
         ],
-      });
+       where: scope.where("ChecklistAmbulance", { id: id }) });
       if (!checklist) throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
 
       const answers = (checklist.get("answers") as Answer[] | undefined) ?? [];
@@ -983,9 +1014,11 @@ export class ChecklistsService implements ChecklistsServiceInterface {
   }
 
   async putAmbAnswers(
+    actor: AccessContext,
     object: RequestAnswerInterface,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { checklistAmbulanceId, answers } = object;
 
     let tx: Transaction | undefined;
@@ -993,13 +1026,15 @@ export class ChecklistsService implements ChecklistsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const checklist = await ChecklistAmbulance.findByPk(
-        checklistAmbulanceId,
-        {
+      const eventDelegationId = await scope.delegationOf("ChecklistAmbulance", checklistAmbulanceId, tx);
+      for (const answer of answers) {
+        DelegationScope.same(eventDelegationId, await scope.delegationOf("Question", answer.questionId, tx));
+      }
+
+      const checklist = await ChecklistAmbulance.findOne({
           transaction: tx,
           lock: tx.LOCK.UPDATE,
-        },
-      );
+         where: scope.where("ChecklistAmbulance", { id: checklistAmbulanceId }) });
 
       if (!checklist) {
         throw ERROR_CODES.CHECKLIST_AMBULANCE_NOT_FOUND;
@@ -1050,7 +1085,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
 
       await tx.commit();
       tx = undefined;

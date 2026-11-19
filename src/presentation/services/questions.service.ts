@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import {
   Transaction,
   UniqueConstraintError,
@@ -31,9 +33,12 @@ export class QuestionsService implements QuestionsServiceInterface {
   private readonly logsService = new LogsService();
 
   private async getOrderedCategories(
+    actor: AccessContext,
     tx: Transaction,
+    delegationId: string,
   ): Promise<QuestionCategory[]> {
-    return QuestionCategory.findAll({
+    const scope = new DelegationScope(actor);
+    return QuestionCategory.findAll({ where: scope.where("QuestionCategory", { delegation_id: delegationId }),
       order: [["order", "ASC"]],
       transaction: tx,
       lock: tx.LOCK.UPDATE,
@@ -91,11 +96,13 @@ export class QuestionsService implements QuestionsServiceInterface {
   }
 
   private async getOrderedSubcategories(
+    actor: AccessContext,
     categoryId: string,
     tx: Transaction,
   ): Promise<QuestionSubcategory[]> {
+    const scope = new DelegationScope(actor);
     return QuestionSubcategory.findAll({
-      where: { category_id: categoryId },
+      where: scope.where("QuestionSubcategory", { category_id: categoryId }),
       order: [["order", "ASC"]],
       transaction: tx,
       lock: tx.LOCK.UPDATE,
@@ -123,15 +130,17 @@ export class QuestionsService implements QuestionsServiceInterface {
   }
 
   private async getGroupQuestions(
+    actor: AccessContext,
     categoryId: string,
     subcategoryId: string | null,
     tx: Transaction,
   ): Promise<Question[]> {
+    const scope = new DelegationScope(actor);
     return Question.findAll({
-      where: {
+      where: scope.where("Question", {
         category_id: categoryId,
         subcategory_id: subcategoryId,
-      },
+      }),
       order: [
         ["order_question_category", "ASC"],
         ["id", "ASC"],
@@ -169,9 +178,10 @@ export class QuestionsService implements QuestionsServiceInterface {
 
   //* CATEGORIES
 
-  async getCategories(): Promise<object> {
+  async getCategories(actor: AccessContext): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const categories = await QuestionCategory.findAll({
+      const categories = await QuestionCategory.findAll({ where: scope.where("QuestionCategory"),
         order: [["order", "ASC"]],
       });
 
@@ -184,9 +194,10 @@ export class QuestionsService implements QuestionsServiceInterface {
     }
   }
 
-  async getCategory(id: string): Promise<object> {
+  async getCategory(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const category = await QuestionCategory.findByPk(id);
+      const category = await QuestionCategory.findOne({ where: scope.where("QuestionCategory", { id: id }) });
 
       if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
 
@@ -200,9 +211,11 @@ export class QuestionsService implements QuestionsServiceInterface {
   }
 
   async createCategory(
+    actor: AccessContext,
     categoryDto: QuestionCategoryEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { name } = categoryDto;
 
     let tx: Transaction | undefined;
@@ -210,10 +223,10 @@ export class QuestionsService implements QuestionsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const categories = await this.getOrderedCategories(tx);
+      const categories = await this.getOrderedCategories(actor, tx, actor.delegationId);
 
       const exists = await QuestionCategory.findOne({
-        where: { name: name! },
+        where: scope.where("QuestionCategory", { name: name!, delegation_id: actor.delegationId }),
         transaction: tx,
       });
 
@@ -229,6 +242,7 @@ export class QuestionsService implements QuestionsServiceInterface {
       const category = await QuestionCategory.create(
         {
           name: name!,
+          delegation_id: actor.delegationId,
           order: nextOrder,
         },
         { transaction: tx },
@@ -246,7 +260,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, category.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -263,9 +277,11 @@ export class QuestionsService implements QuestionsServiceInterface {
   }
 
   async editCategory(
+    actor: AccessContext,
     categoryDto: QuestionCategoryEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, name, order } = categoryDto;
 
     let tx: Transaction | undefined;
@@ -273,7 +289,11 @@ export class QuestionsService implements QuestionsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const categories = await this.getOrderedCategories(tx);
+      const target = await QuestionCategory.findOne({
+        where: scope.where("QuestionCategory", { id }), transaction: tx, lock: tx.LOCK.UPDATE,
+      });
+      if (!target) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
+      const categories = await this.getOrderedCategories(actor, tx, target.delegation_id);
 
       const category = categories.find((item) => item.id === id);
 
@@ -283,7 +303,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (name !== undefined && name !== category.name) {
         const exists = await QuestionCategory.findOne({
-          where: { name },
+          where: scope.where("QuestionCategory", { name, delegation_id: category.delegation_id }),
           transaction: tx,
         });
 
@@ -350,7 +370,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, category.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -366,13 +386,18 @@ export class QuestionsService implements QuestionsServiceInterface {
     }
   }
 
-  async deleteCategory(id: string, userId: string): Promise<object> {
+  async deleteCategory(actor: AccessContext, id: string, userId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const categories = await this.getOrderedCategories(tx);
+      const target = await QuestionCategory.findOne({
+        where: scope.where("QuestionCategory", { id }), transaction: tx, lock: tx.LOCK.UPDATE,
+      });
+      if (!target) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
+      const categories = await this.getOrderedCategories(actor, tx, target.delegation_id);
 
       const category = categories.find((item) => item.id === id);
 
@@ -381,12 +406,12 @@ export class QuestionsService implements QuestionsServiceInterface {
       }
 
       const questionsCount = await Question.count({
-        where: { category_id: id },
+        where: scope.where("Question", { category_id: id }),
         transaction: tx,
       });
 
       const subcategoriesCount = await QuestionSubcategory.count({
-        where: { category_id: id },
+        where: scope.where("QuestionSubcategory", { category_id: id }),
         transaction: tx,
       });
 
@@ -416,7 +441,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, category.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -433,16 +458,16 @@ export class QuestionsService implements QuestionsServiceInterface {
 
   //* SUBCATEGORIES
 
-  async getSubcategories(categoryId?: string): Promise<object> {
+  async getSubcategories(actor: AccessContext, categoryId?: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
       if (categoryId !== undefined) {
-        const category = await QuestionCategory.findByPk(categoryId);
+        const category = await QuestionCategory.findOne({ where: scope.where("QuestionCategory", { id: categoryId }) });
 
         if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
       }
 
-      const subcategories = await QuestionSubcategory.findAll({
-        ...(categoryId ? { where: { category_id: categoryId } } : {}),
+      const subcategories = await QuestionSubcategory.findAll({ where: scope.where("QuestionSubcategory", categoryId ? { category_id: categoryId } : {}),
         include: [
           {
             model: QuestionCategory,
@@ -465,9 +490,10 @@ export class QuestionsService implements QuestionsServiceInterface {
     }
   }
 
-  async getSubcategory(id: string): Promise<object> {
+  async getSubcategory(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const subcategory = await QuestionSubcategory.findByPk(id, {
+      const subcategory = await QuestionSubcategory.findOne({
         include: [
           {
             model: QuestionCategory,
@@ -475,7 +501,7 @@ export class QuestionsService implements QuestionsServiceInterface {
             attributes: ["id", "name", "order"],
           },
         ],
-      });
+       where: scope.where("QuestionSubcategory", { id: id }) });
 
       if (!subcategory) throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
 
@@ -489,9 +515,11 @@ export class QuestionsService implements QuestionsServiceInterface {
   }
 
   async createSubcategory(
+    actor: AccessContext,
     subcategoryDto: QuestionSubcategoryEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { categoryId, name } = subcategoryDto;
 
     let tx: Transaction | undefined;
@@ -499,14 +527,14 @@ export class QuestionsService implements QuestionsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const category = await QuestionCategory.findByPk(categoryId!, {
+      const category = await QuestionCategory.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("QuestionCategory", { id: categoryId! }) });
 
       if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
 
-      const subcategories = await this.getOrderedSubcategories(categoryId!, tx);
+      const subcategories = await this.getOrderedSubcategories(actor, categoryId!, tx);
 
       const exists = subcategories.some((item) => item.name === name);
 
@@ -522,6 +550,7 @@ export class QuestionsService implements QuestionsServiceInterface {
       const subcategory = await QuestionSubcategory.create(
         {
           category_id: categoryId!,
+          delegation_id: category.delegation_id,
           name: name!,
           order: nextOrder,
         },
@@ -541,7 +570,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, subcategory.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -558,9 +587,11 @@ export class QuestionsService implements QuestionsServiceInterface {
   }
 
   async editSubcategory(
+    actor: AccessContext,
     subcategoryDto: QuestionSubcategoryEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, categoryId, name, order } = subcategoryDto;
 
     let tx: Transaction | undefined;
@@ -568,9 +599,9 @@ export class QuestionsService implements QuestionsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const original = await QuestionSubcategory.findByPk(id!, {
+      const original = await QuestionSubcategory.findOne({
         transaction: tx,
-      });
+       where: scope.where("QuestionSubcategory", { id: id! }) });
 
       if (!original) {
         throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
@@ -584,20 +615,20 @@ export class QuestionsService implements QuestionsServiceInterface {
       ].sort();
 
       for (const currentId of categoryIds) {
-        const category = await QuestionCategory.findByPk(currentId, {
+        const category = await QuestionCategory.findOne({
           transaction: tx,
           lock: tx.LOCK.UPDATE,
-        });
+         where: scope.where("QuestionCategory", { id: currentId }) });
 
         if (!category) {
           throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
         }
       }
 
-      const subcategory = await QuestionSubcategory.findByPk(id!, {
+      const subcategory = await QuestionSubcategory.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("QuestionSubcategory", { id: id! }) });
 
       if (!subcategory) {
         throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
@@ -612,10 +643,11 @@ export class QuestionsService implements QuestionsServiceInterface {
       const previousOrder = subcategory.order;
       const previousCategoryId = subcategory.category_id;
 
+      const targetDelegationId = await scope.delegationOf("QuestionCategory", targetCategoryId, tx);
       const movingCategory = sourceCategoryId !== targetCategoryId;
       const targetName = name ?? subcategory.name;
 
-      const targetSubcategories = await this.getOrderedSubcategories(
+      const targetSubcategories = await this.getOrderedSubcategories(actor,
         targetCategoryId,
         tx,
       );
@@ -630,7 +662,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (movingCategory) {
         const questionsCount = await Question.count({
-          where: { subcategory_id: id! },
+          where: scope.where("Question", { subcategory_id: id! }),
           transaction: tx,
         });
 
@@ -638,7 +670,7 @@ export class QuestionsService implements QuestionsServiceInterface {
           throw ERROR_CODES.QUESTION_SUBCATEGORY_HAS_QUESTIONS;
         }
 
-        const sourceSubcategories = await this.getOrderedSubcategories(
+        const sourceSubcategories = await this.getOrderedSubcategories(actor,
           sourceCategoryId,
           tx,
         );
@@ -660,6 +692,7 @@ export class QuestionsService implements QuestionsServiceInterface {
         await subcategory.update(
           {
             category_id: targetCategoryId,
+            delegation_id: targetDelegationId,
             name: targetName,
             order: temporaryOrder,
           },
@@ -738,7 +771,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
         if (logError) throw logError;
 
-        await this.logsService.create(logDto!, tx);
+        await this.logsService.create(logDto!, tx, subcategory.delegation_id);
       }
 
       await tx.commit();
@@ -755,30 +788,31 @@ export class QuestionsService implements QuestionsServiceInterface {
     }
   }
 
-  async deleteSubcategory(id: string, userId: string): Promise<object> {
+  async deleteSubcategory(actor: AccessContext, id: string, userId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const original = await QuestionSubcategory.findByPk(id, {
+      const original = await QuestionSubcategory.findOne({
         transaction: tx,
-      });
+       where: scope.where("QuestionSubcategory", { id: id }) });
 
       if (!original) {
         throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
       }
 
-      const category = await QuestionCategory.findByPk(original.category_id, {
+      const category = await QuestionCategory.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("QuestionCategory", { id: original.category_id }) });
 
       if (!category) {
         throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
       }
 
-      const subcategories = await this.getOrderedSubcategories(
+      const subcategories = await this.getOrderedSubcategories(actor,
         original.category_id,
         tx,
       );
@@ -790,7 +824,7 @@ export class QuestionsService implements QuestionsServiceInterface {
       }
 
       const questionsCount = await Question.count({
-        where: { subcategory_id: id },
+        where: scope.where("Question", { subcategory_id: id }),
         transaction: tx,
       });
 
@@ -822,7 +856,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, subcategory.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -838,20 +872,22 @@ export class QuestionsService implements QuestionsServiceInterface {
   //* QUESTIONS
 
   async getQuestions(
+    actor: AccessContext,
     paginationDto: PaginationDto,
     categoryId?: string,
     subcategoryId?: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset } = paginationDto;
 
     try {
       const { count, rows: questions } = await Question.findAndCountAll({
-        where: {
+        where: scope.where("Question", {
           ...(categoryId !== undefined ? { category_id: categoryId } : {}),
           ...(subcategoryId !== undefined
             ? { subcategory_id: subcategoryId }
             : {}),
-        },
+        }),
         include: [
           {
             model: QuestionCategory,
@@ -887,9 +923,10 @@ export class QuestionsService implements QuestionsServiceInterface {
     }
   }
 
-  async getQuestion(id: string): Promise<object> {
+  async getQuestion(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
-      const question = await Question.findByPk(id, {
+      const question = await Question.findOne({
         include: [
           {
             model: QuestionCategory,
@@ -904,7 +941,7 @@ export class QuestionsService implements QuestionsServiceInterface {
             required: false,
           },
         ],
-      });
+       where: scope.where("Question", { id: id }) });
 
       if (!question) throw ERROR_CODES.QUESTION_NOT_FOUND;
 
@@ -918,9 +955,11 @@ export class QuestionsService implements QuestionsServiceInterface {
   }
 
   async createQuestion(
+    actor: AccessContext,
     questionDto: QuestionEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { question, categoryId, subcategoryId, typeResponse } = questionDto;
 
     let tx: Transaction | undefined;
@@ -930,18 +969,18 @@ export class QuestionsService implements QuestionsServiceInterface {
       tx = await sequelize.transaction();
 
       //* Bloquear categoría para controlar inserciones
-      const category = await QuestionCategory.findByPk(categoryId!, {
+      const category = await QuestionCategory.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("QuestionCategory", { id: categoryId! }) });
 
       if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
 
       //* Validar relación de subcategoría
       if (subcategoryId) {
-        const subcategory = await QuestionSubcategory.findByPk(subcategoryId, {
+        const subcategory = await QuestionSubcategory.findOne({
           transaction: tx,
-        });
+         where: scope.where("QuestionSubcategory", { id: subcategoryId }) });
 
         if (!subcategory) {
           throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
@@ -952,7 +991,7 @@ export class QuestionsService implements QuestionsServiceInterface {
         }
       }
 
-      const groupQuestions = await this.getGroupQuestions(
+      const groupQuestions = await this.getGroupQuestions(actor,
         categoryId!,
         subcategoryId ?? null,
         tx,
@@ -967,6 +1006,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       const newQuestion = await Question.create(
         {
+          delegation_id: category.delegation_id,
           question: question!,
           category_id: categoryId!,
           subcategory_id: subcategoryId ?? null,
@@ -991,7 +1031,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, newQuestion.delegation_id);
 
       createdId = newQuestion.id;
 
@@ -1009,13 +1049,15 @@ export class QuestionsService implements QuestionsServiceInterface {
       this.handleDatabaseError(error, "question");
     }
 
-    return this.getQuestion(createdId);
+    return this.getQuestion(actor, createdId);
   }
 
   async editQuestion(
+    actor: AccessContext,
     questionDto: QuestionEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, question, categoryId, subcategoryId, typeResponse, order } =
       questionDto;
 
@@ -1024,9 +1066,9 @@ export class QuestionsService implements QuestionsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const original = await Question.findByPk(id!, {
+      const original = await Question.findOne({
         transaction: tx,
-      });
+       where: scope.where("Question", { id: id! }) });
 
       if (!original) throw ERROR_CODES.QUESTION_NOT_FOUND;
 
@@ -1048,18 +1090,18 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       //* Bloquear las categorías involucradas
       for (const currentId of categoryIds) {
-        const category = await QuestionCategory.findByPk(currentId, {
+        const category = await QuestionCategory.findOne({
           transaction: tx,
           lock: tx.LOCK.UPDATE,
-        });
+         where: scope.where("QuestionCategory", { id: currentId }) });
 
         if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
       }
 
-      const current = await Question.findByPk(id!, {
+      const current = await Question.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("Question", { id: id! }) });
 
       if (!current) throw ERROR_CODES.QUESTION_NOT_FOUND;
 
@@ -1089,10 +1131,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       //* Validar relación con la subcategoría
       if (targetSubcategoryId !== null) {
-        const subcategory = await QuestionSubcategory.findByPk(
-          targetSubcategoryId,
-          { transaction: tx },
-        );
+        const subcategory = await QuestionSubcategory.findOne({ transaction: tx, where: scope.where("QuestionSubcategory", { id: targetSubcategoryId }) });
 
         if (!subcategory) {
           throw ERROR_CODES.QUESTION_SUBCATEGORY_NOT_FOUND;
@@ -1103,7 +1142,8 @@ export class QuestionsService implements QuestionsServiceInterface {
         }
       }
 
-      const sourceQuestions = await this.getGroupQuestions(
+      const targetDelegationId = await scope.delegationOf("QuestionCategory", targetCategoryId, tx);
+      const sourceQuestions = await this.getGroupQuestions(actor,
         sourceCategoryId,
         sourceSubcategoryId,
         tx,
@@ -1114,7 +1154,7 @@ export class QuestionsService implements QuestionsServiceInterface {
         sourceSubcategoryId !== targetSubcategoryId;
 
       if (movingGroup) {
-        const targetQuestions = await this.getGroupQuestions(
+        const targetQuestions = await this.getGroupQuestions(actor,
           targetCategoryId,
           targetSubcategoryId,
           tx,
@@ -1136,6 +1176,7 @@ export class QuestionsService implements QuestionsServiceInterface {
         await current.update(
           {
             category_id: targetCategoryId,
+            delegation_id: targetDelegationId,
             subcategory_id: targetSubcategoryId,
             order_question_category: temporaryOrder,
             ...(question !== undefined ? { question } : {}),
@@ -1236,7 +1277,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
         if (logError) throw logError;
 
-        await this.logsService.create(logDto!, tx);
+        await this.logsService.create(logDto!, tx, current.delegation_id);
       }
 
       await tx.commit();
@@ -1253,32 +1294,33 @@ export class QuestionsService implements QuestionsServiceInterface {
       this.handleDatabaseError(error, "question");
     }
 
-    return this.getQuestion(id!);
+    return this.getQuestion(actor, id!);
   }
 
-  async deleteQuestion(id: string, userId: string): Promise<object> {
+  async deleteQuestion(actor: AccessContext, id: string, userId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const original = await Question.findByPk(id, {
+      const original = await Question.findOne({
         transaction: tx,
-      });
+       where: scope.where("Question", { id: id }) });
 
       if (!original) throw ERROR_CODES.QUESTION_NOT_FOUND;
 
-      const category = await QuestionCategory.findByPk(original.category_id, {
+      const category = await QuestionCategory.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("QuestionCategory", { id: original.category_id }) });
 
       if (!category) throw ERROR_CODES.QUESTION_CATEGORY_NOT_FOUND;
 
-      const current = await Question.findByPk(id, {
+      const current = await Question.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("Question", { id: id }) });
 
       if (!current) throw ERROR_CODES.QUESTION_NOT_FOUND;
 
@@ -1298,7 +1340,7 @@ export class QuestionsService implements QuestionsServiceInterface {
         throw ERROR_CODES.QUESTION_HAS_ANSWERS;
       }
 
-      const groupQuestions = await this.getGroupQuestions(
+      const groupQuestions = await this.getGroupQuestions(actor,
         current.category_id,
         current.subcategory_id,
         tx,
@@ -1335,7 +1377,7 @@ export class QuestionsService implements QuestionsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, current.delegation_id);
 
       await tx.commit();
       tx = undefined;

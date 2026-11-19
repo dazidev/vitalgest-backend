@@ -48,7 +48,7 @@ export class UserService {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, user.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -105,7 +105,7 @@ export class UserService {
 
         if (logError) throw logError;
 
-        await this.logsService.create(logDto!, tx);
+        await this.logsService.create(logDto!, tx, user.delegation_id);
       }
 
       const userSafe = await User.findByPk(id, {
@@ -168,7 +168,7 @@ export class UserService {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, user.delegation_id);
 
       await tx.commit();
       tx = undefined;

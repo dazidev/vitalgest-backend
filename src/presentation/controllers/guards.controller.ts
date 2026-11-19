@@ -16,12 +16,12 @@ export class GuardsController implements GuardsControllerInterface {
     }
 
     const [error, guardsEntityDto] = GuardsEntityDto.create(req.body);
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.guardsService
-      .createGuard(guardsEntityDto!, userId)
+      .createGuard(req.user!, guardsEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   editGuard(req: Request, res: Response, next: NextFunction): void {
@@ -39,12 +39,12 @@ export class GuardsController implements GuardsControllerInterface {
       id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.guardsService
-      .editGuard(guardsEntityDto!, userId)
+      .editGuard(req.user!, guardsEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   deleteGuard(
@@ -67,9 +67,9 @@ export class GuardsController implements GuardsControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_GUARD_ID);
 
     this.guardsService
-      .deleteGuard(id, userId)
+      .deleteGuard(req.user!, id, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getGuards(req: Request, res: Response, next: NextFunction): void {
@@ -80,12 +80,12 @@ export class GuardsController implements GuardsControllerInterface {
       offset,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.guardsService
-      .getGuards(paginationDto!)
+      .getGuards(req.user!, paginationDto!)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 
   getOneGuard(
@@ -99,8 +99,8 @@ export class GuardsController implements GuardsControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_GUARD_ID);
 
     this.guardsService
-      .getOneGuard(id)
+      .getOneGuard(req.user!, id)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 }

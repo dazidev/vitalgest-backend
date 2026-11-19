@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import { AdmServiceInterface } from "../../domain/services/adm.service.interface";
 import { Delegation, sequelize, User } from "../../infrastructure";
 import { LogEntityDto, UserEntityDto } from "../../application";
@@ -31,9 +33,11 @@ export class AdmService implements AdmServiceInterface {
   private readonly logsService = new LogsService();
 
   public async createUser(
+    actor: AccessContext,
     userEntityDto: UserEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const {
       name,
       lastname,
@@ -49,15 +53,18 @@ export class AdmService implements AdmServiceInterface {
     try {
       tx = await sequelize.transaction();
 
+      scope.assertDelegation(delegation_id!);
+      if (actor.role !== "general_admin" && ["admin", "general_admin"].includes(role!)) throw "ADMIN_ROLE_RESTRICTED";
+
       const exists = await User.findOne({
-        where: { email },
+        where: scope.where("User", { email }),
         transaction: tx,
       });
 
       if (exists) throw ERROR_CODES.EMAIL_ALREADY_REGISTERED;
 
       const existsDelegation = await Delegation.findOne({
-        where: { id: delegation_id },
+        where: scope.where("Delegation", { id: delegation_id }),
         transaction: tx,
       });
 
@@ -103,12 +110,12 @@ export class AdmService implements AdmServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, user.delegation_id);
 
-      const userSafe = await User.findByPk(user.id, {
+      const userSafe = await User.findOne({
         attributes: { exclude: ["password"] },
         transaction: tx,
-      });
+       where: scope.where("User", { id: user.id }) });
 
       await tx.commit();
       tx = undefined;
@@ -127,9 +134,11 @@ export class AdmService implements AdmServiceInterface {
   }
 
   public async editUser(
+    actor: AccessContext,
     userEntityDto: UserEntityDto,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, name, lastname, email, role, position, delegationId, status } =
       userEntityDto;
 
@@ -138,15 +147,19 @@ export class AdmService implements AdmServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const user = await User.findByPk(id!, {
+      scope.assertDelegation(delegationId!);
+      await scope.assertUserManagement(id!, tx, role);
+      await scope.assertUserMove(id!, delegationId!, tx);
+
+      const user = await User.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("User", { id: id! }) });
 
       if (!user) throw ERROR_CODES.USER_NOT_FOUND;
 
       const existsDelegation = await Delegation.findOne({
-        where: { id: delegationId },
+        where: scope.where("Delegation", { id: delegationId }),
         transaction: tx,
       });
 
@@ -208,13 +221,13 @@ export class AdmService implements AdmServiceInterface {
 
         if (logError) throw logError;
 
-        await this.logsService.create(logDto!, tx);
+        await this.logsService.create(logDto!, tx, user.delegation_id);
       }
 
-      const userSafe = await User.findByPk(user.id, {
+      const userSafe = await User.findOne({
         attributes: { exclude: ["password"] },
         transaction: tx,
-      });
+       where: scope.where("User", { id: user.id }) });
 
       await tx.commit();
       tx = undefined;
@@ -232,16 +245,19 @@ export class AdmService implements AdmServiceInterface {
     }
   }
 
-  async deleteUser(id: string, userId: string): Promise<object> {
+  async deleteUser(actor: AccessContext, id: string, userId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const user = await User.findByPk(id, {
+      await scope.assertUserManagement(id, tx);
+
+      const user = await User.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("User", { id: id }) });
 
       if (!user) throw ERROR_CODES.USER_NOT_FOUND;
 
@@ -267,7 +283,7 @@ export class AdmService implements AdmServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, user.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -282,11 +298,12 @@ export class AdmService implements AdmServiceInterface {
     }
   }
 
-  async getAllUsers(paginationDto: PaginationDto): Promise<object> {
+  async getAllUsers(actor: AccessContext, paginationDto: PaginationDto): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset, role } = paginationDto;
 
     try {
-      const { count, rows: users } = await User.findAndCountAll({
+      const { count, rows: users } = await User.findAndCountAll({ where: scope.where("User", role !== undefined ? { role } : {}),
         order: [
           ["createdAt", "DESC"],
           ["id", "ASC"],
@@ -295,7 +312,6 @@ export class AdmService implements AdmServiceInterface {
 
         ...(limit !== undefined ? { limit } : {}),
         ...(offset !== undefined ? { offset } : {}),
-        ...(role !== undefined ? { where: { role } } : {}),
       });
 
       const data = users.map(mapUserRow);
@@ -312,19 +328,23 @@ export class AdmService implements AdmServiceInterface {
   }
 
   async changePasswordUser(
+    actor: AccessContext,
     id: string,
     password: string,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const user = await User.findByPk(id, {
+      await scope.assertUserManagement(id, tx);
+
+      const user = await User.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("User", { id: id }) });
 
       if (!user) throw ERROR_CODES.USER_NOT_FOUND;
 
@@ -344,7 +364,7 @@ export class AdmService implements AdmServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, user.delegation_id);
 
       await tx.commit();
       tx = undefined;
@@ -359,10 +379,11 @@ export class AdmService implements AdmServiceInterface {
     }
   }
 
-  async getUserById(id: string): Promise<object> {
+  async getUserById(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     try {
       const user = await User.findOne({
-        where: { id },
+        where: scope.where("User", { id }),
         attributes: { exclude: ["password"] },
       });
       if (!user) throw ERROR_CODES.USER_NOT_FOUND;

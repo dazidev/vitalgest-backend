@@ -44,16 +44,16 @@ export class QuestionsController implements QuestionsControllerInterface {
     )
       return CustomError.internalServer(error);
 
-    if (typeof error === "string") return CustomError.badRequest(error);
+    if (typeof error === "string") return CustomError.from(error);
 
     return CustomError.internalServer(ERROR_CODES.UNKNOWN_ERROR);
   };
 
   //* CATEGORIES
 
-  getCategories(_req: Request, res: Response, next: NextFunction): void {
+  getCategories(req: Request, res: Response, next: NextFunction): void {
     this.questionsService
-      .getCategories()
+      .getCategories(req.user!)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -72,7 +72,7 @@ export class QuestionsController implements QuestionsControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_QUESTION_CATEGORY_ID);
 
     this.questionsService
-      .getCategory(id)
+      .getCategory(req.user!, id)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -89,10 +89,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       req.body ?? {},
     );
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .createCategory(categoryDto!, userId)
+      .createCategory(req.user!, categoryDto!, userId)
       .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -116,10 +116,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .editCategory(categoryDto!, userId)
+      .editCategory(req.user!, categoryDto!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -140,10 +140,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       id: req.params.id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .deleteCategory(categoryDto!.id!, userId)
+      .deleteCategory(req.user!, categoryDto!.id!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -161,7 +161,7 @@ export class QuestionsController implements QuestionsControllerInterface {
     }
 
     this.questionsService
-      .getSubcategories(typeof categoryId === "string" ? categoryId : undefined)
+      .getSubcategories(req.user!, typeof categoryId === "string" ? categoryId : undefined)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -180,7 +180,7 @@ export class QuestionsController implements QuestionsControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_QUESTION_SUBCATEGORY_ID);
 
     this.questionsService
-      .getSubcategory(id)
+      .getSubcategory(req.user!, id)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -197,10 +197,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       req.body ?? {},
     );
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .createSubcategory(subcategoryDto!, userId)
+      .createSubcategory(req.user!, subcategoryDto!, userId)
       .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -224,10 +224,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .editSubcategory(subcategoryDto!, userId)
+      .editSubcategory(req.user!, subcategoryDto!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -248,10 +248,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       id: req.params.id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .deleteSubcategory(subcategoryDto!.id!, userId)
+      .deleteSubcategory(req.user!, subcategoryDto!.id!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -279,10 +279,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       offset,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .getQuestions(
+      .getQuestions(req.user!,
         paginationDto!,
         categoryId as string | undefined,
         subcategoryId as string | undefined,
@@ -304,7 +304,7 @@ export class QuestionsController implements QuestionsControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_QUESTION_ID);
 
     this.questionsService
-      .getQuestion(id)
+      .getQuestion(req.user!, id)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -319,10 +319,10 @@ export class QuestionsController implements QuestionsControllerInterface {
 
     const [error, questionDto] = QuestionEntityDto.create(req.body ?? {});
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .createQuestion(questionDto!, userId)
+      .createQuestion(req.user!, questionDto!, userId)
       .then((response) => res.status(201).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -344,10 +344,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       id: req.params.id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .editQuestion(questionDto!, userId)
+      .editQuestion(req.user!, questionDto!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }
@@ -368,10 +368,10 @@ export class QuestionsController implements QuestionsControllerInterface {
       id: req.params.id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.questionsService
-      .deleteQuestion(questionDto!.id!, userId)
+      .deleteQuestion(req.user!, questionDto!.id!, userId)
       .then((response) => res.status(200).json(response))
       .catch((error) => next(this.handleError(error)));
   }

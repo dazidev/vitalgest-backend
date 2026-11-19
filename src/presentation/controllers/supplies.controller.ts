@@ -23,12 +23,12 @@ export class SuppliesController implements SuppliesControllerInterface {
       pharmacyId,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.suppliesService
-      .createSupply(supplyEntityDto!, userId)
+      .createSupply(req.user!, supplyEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   editSupply(req: Request, res: Response, next: NextFunction): void {
@@ -46,12 +46,12 @@ export class SuppliesController implements SuppliesControllerInterface {
       id,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.suppliesService
-      .editSupply(supplyEntityDto!, userId)
+      .editSupply(req.user!, supplyEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   deleteSupply(req: Request, res: Response, next: NextFunction): void {
@@ -66,12 +66,12 @@ export class SuppliesController implements SuppliesControllerInterface {
 
     const [error, supplyEntityDto] = SupplyEntityDto.id({ id });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.suppliesService
-      .deleteSupply(supplyEntityDto!, userId)
+      .deleteSupply(req.user!, supplyEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getSupplies(
@@ -93,25 +93,25 @@ export class SuppliesController implements SuppliesControllerInterface {
       offset,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.suppliesService
-      .getSupplies(id, paginationDto!)
+      .getSupplies(req.user!, id, paginationDto!)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getOneSupply(req: Request, res: Response, next: NextFunction): void {
     const { id } = req.params;
 
     const [error, supplyEntityDto] = SupplyEntityDto.id({ id });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     const { id: supplyId } = supplyEntityDto!;
 
     this.suppliesService
-      .getOneSupply(supplyId!)
+      .getOneSupply(req.user!, supplyId!)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 }

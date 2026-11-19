@@ -19,12 +19,12 @@ export class SupplyReportsController {
       offset,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.supplyReportsService
-      .getReports(paginationDto!)
+      .getReports(req.user!, paginationDto!)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 
   getReport(
@@ -40,9 +40,9 @@ export class SupplyReportsController {
       throw CustomError.badRequest(ERROR_CODES.INVALID_SUPPLY_REPORT_ID);
 
     this.supplyReportsService
-      .getReport(id)
+      .getReport(req.user!, id)
       .then((response) => res.json(response))
-      .catch((error) => next(CustomError.badRequest(error)));
+      .catch((error) => next(CustomError.from(error)));
   }
 
   updateSupplies(req: Request, res: Response, next: NextFunction): void {
@@ -57,14 +57,14 @@ export class SupplyReportsController {
       SupplyReportEntityDto.updateSupplies(req);
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.supplyReportsService
-      .updateSupplies(supplyReportEntityDto!, userId)
+      .updateSupplies(req.user!, supplyReportEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   attendReport(
@@ -92,8 +92,8 @@ export class SupplyReportsController {
     }
 
     this.supplyReportsService
-      .attendReport(id, userId)
+      .attendReport(req.user!, id, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 }

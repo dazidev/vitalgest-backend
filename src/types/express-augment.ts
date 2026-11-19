@@ -7,6 +7,7 @@ export interface UserRepoResponse {
   email: string;
   password?: string;
   role: Role;
+  delegationId: string;
   position?: string;
   state: string;
   createdAt?: string;

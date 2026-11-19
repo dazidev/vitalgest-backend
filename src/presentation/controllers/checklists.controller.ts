@@ -25,14 +25,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
     );
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .createSupChecklist(checkListSupplyEntityDto!, userId)
+      .createSupChecklist(req.user!, checkListSupplyEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   signSupChecklist(req: Request, res: Response, next: NextFunction): void {
@@ -51,14 +51,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
     });
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .signSupChecklist(checkListSupplyEntityDto!, userId)
+      .signSupChecklist(req.user!, checkListSupplyEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   deleteSupChecklist(req: Request, res: Response, next: NextFunction): void {
@@ -76,14 +76,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
     });
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .deleteSupChecklist(checkListSupplyEntityDto!, userId)
+      .deleteSupChecklist(req.user!, checkListSupplyEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getSupChecklist(req: Request, res: Response, next: NextFunction): void {
@@ -92,14 +92,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
     const [error, checkListSupplyEntityDto] = CheckListSupplyEntityDto.delete({
       id,
     });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     const { id: idv } = checkListSupplyEntityDto!;
 
     this.checklistsService
-      .getSupChecklist(idv!)
+      .getSupChecklist(req.user!, idv!)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   putSupAnswers(req: Request, res: Response, next: NextFunction): void {
@@ -113,14 +113,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
     const [error, dto] = SupAnswersDto.fromRequest(req);
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .putSupAnswers(dto!, userId)
+      .putSupAnswers(req.user!, dto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getAmbQuestions(req: Request, res: Response, next: NextFunction): void {
@@ -137,15 +137,15 @@ export class ChecklistsController implements CheckListsControllerInterface {
         return next(CustomError.badRequest(ERROR_CODES.INVALID_CATEGORY));
 
       this.checklistsService
-        .getAmbQuestionPerCategory(category)
+        .getAmbQuestionPerCategory(req.user!, category)
         .then((response) => res.json(response))
-        .catch((err) => next(CustomError.badRequest(err)));
+        .catch((err) => next(CustomError.from(err)));
       return;
     }
     this.checklistsService
-      .getAmbQuestions()
+      .getAmbQuestions(req.user!)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   createAmbChecklist(req: Request, res: Response, next: NextFunction): void {
@@ -160,14 +160,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
       CheckListAmbulanceEntityDto.create(req.body);
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .createAmbChecklist(checkListAmbulanceEntityDto!, userId)
+      .createAmbChecklist(req.user!, checkListAmbulanceEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   signAmbChecklist(req: Request, res: Response, next: NextFunction): void {
@@ -187,14 +187,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
       });
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .signAmbChecklist(checkListAmbulanceEntityDto!, userId)
+      .signAmbChecklist(req.user!, checkListAmbulanceEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   deleteAmbChecklist(req: Request, res: Response, next: NextFunction): void {
@@ -211,14 +211,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
       CheckListAmbulanceEntityDto.delete({ id });
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .deleteAmbChecklist(checkListAmbulanceEntityDto!, userId)
+      .deleteAmbChecklist(req.user!, checkListAmbulanceEntityDto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   getAmbChecklist(req: Request, res: Response, next: NextFunction): void {
@@ -226,14 +226,14 @@ export class ChecklistsController implements CheckListsControllerInterface {
 
     const [error, checkListAmbulanceEntityDto] =
       CheckListAmbulanceEntityDto.delete({ id });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     const { id: idv } = checkListAmbulanceEntityDto!;
 
     this.checklistsService
-      .getAmbChecklist(idv!)
+      .getAmbChecklist(req.user!, idv!)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 
   putAmbAnswers(req: Request, res: Response, next: NextFunction): void {
@@ -247,13 +247,13 @@ export class ChecklistsController implements CheckListsControllerInterface {
     const [error, dto] = AmbAnswersDto.fromRequest(req);
 
     if (error) {
-      next(CustomError.badRequest(error));
+      next(CustomError.from(error));
       return;
     }
 
     this.checklistsService
-      .putAmbAnswers(dto!, userId)
+      .putAmbAnswers(req.user!, dto!, userId)
       .then((response) => res.json(response))
-      .catch((err) => next(CustomError.badRequest(err)));
+      .catch((err) => next(CustomError.from(err)));
   }
 }

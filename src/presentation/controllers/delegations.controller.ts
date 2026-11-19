@@ -19,7 +19,7 @@ export class DelegationsController implements DelegationsControllerInterface {
       return CustomError.internalServer(error);
     if (error === ERROR_CODES.TOO_MANY_REQUESTS)
       return CustomError.tooManyRequests(error);
-    return CustomError.badRequest(error);
+    return CustomError.from(error);
   };
 
   getStates(_req: Request, res: Response, next: NextFunction): void {
@@ -58,10 +58,10 @@ export class DelegationsController implements DelegationsControllerInterface {
       ...req.body,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.delegationsService
-      .createDelegation(delegateEntityDto!, userId)
+      .createDelegation(req.user!, delegateEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }
@@ -79,10 +79,10 @@ export class DelegationsController implements DelegationsControllerInterface {
       ...req.params,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.delegationsService
-      .editDelegation(delegateEntityDto!, userId)
+      .editDelegation(req.user!, delegateEntityDto!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }
@@ -99,12 +99,12 @@ export class DelegationsController implements DelegationsControllerInterface {
       ...req.params,
     });
 
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     const { id } = delegateEntityDto!;
 
     this.delegationsService
-      .deleteDelegation(id!, userId)
+      .deleteDelegation(req.user!, id!, userId)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }
@@ -116,10 +116,10 @@ export class DelegationsController implements DelegationsControllerInterface {
       limit,
       offset,
     });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.delegationsService
-      .getDelegations(paginationDto!)
+      .getDelegations(req.user!, paginationDto!)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }
@@ -135,7 +135,7 @@ export class DelegationsController implements DelegationsControllerInterface {
       throw CustomError.badRequest(ERROR_CODES.INVALID_DELEGATION_ID);
 
     this.delegationsService
-      .getDelegation(id)
+      .getDelegation(req.user!, id)
       .then((response) => res.json(response))
       .catch((err) => next(this.handleError(err)));
   }
@@ -157,10 +157,10 @@ export class DelegationsController implements DelegationsControllerInterface {
       offset,
       role,
     });
-    if (error) throw CustomError.badRequest(error);
+    if (error) throw CustomError.from(error);
 
     this.delegationsService
-      .getMembers(id, paginationDto!)
+      .getMembers(req.user!, id, paginationDto!)
       .then((user) => res.status(200).json(user))
       .catch((error) => next(this.handleError(error)));
   }

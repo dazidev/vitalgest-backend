@@ -15,6 +15,13 @@ class QuestionSubcategory extends Model<
   InferCreationAttributes<QuestionSubcategory>
 > {
   declare id: CreationOptional<string>;
+  declare delegation_id: string;
+
+  toJSON(): any {
+    const values = { ...this.get({ plain: true }) };
+    delete (values as Partial<typeof values>).delegation_id;
+    return values;
+  }
   declare category_id: ForeignKey<QuestionCategory["id"]>;
   declare name: string;
   declare order: number;
@@ -22,6 +29,11 @@ class QuestionSubcategory extends Model<
 
 QuestionSubcategory.init(
   {
+    delegation_id: {
+      type: DataTypes.UUID, allowNull: false,
+      references: { model: "delegations", key: "id" },
+      onUpdate: "CASCADE", onDelete: "CASCADE",
+    },
     id: {
       type: DataTypes.UUID,
       primaryKey: true,

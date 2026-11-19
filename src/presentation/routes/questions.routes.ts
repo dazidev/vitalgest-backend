@@ -1,5 +1,6 @@
+import { PermissionMiddleware } from "../../infrastructure/middlewares/permission.middleware";
 import express from "express";
-import { AuthMiddleware, RankMiddleware } from "../../infrastructure";
+import { AuthMiddleware } from "../../infrastructure";
 
 import { QuestionsService } from "../services/questions.service";
 import { QuestionsController } from "../controllers/questions.controller";
@@ -13,31 +14,36 @@ const controller = new QuestionsController(service);
 
 questionsRoutes.get(
   "/categories",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.getCategories.bind(controller),
 );
 
 questionsRoutes.get(
   "/categories/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.getCategory.bind(controller),
 );
 
 questionsRoutes.post(
   "/categories",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.createCategory.bind(controller),
 );
 
 questionsRoutes.put(
   "/categories/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.editCategory.bind(controller),
 );
 
 questionsRoutes.delete(
   "/categories/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.deleteCategory.bind(controller),
 );
 
@@ -45,31 +51,36 @@ questionsRoutes.delete(
 
 questionsRoutes.get(
   "/subcategories",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.getSubcategories.bind(controller),
 );
 
 questionsRoutes.get(
   "/subcategories/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.getSubcategory.bind(controller),
 );
 
 questionsRoutes.post(
   "/subcategories",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.createSubcategory.bind(controller),
 );
 
 questionsRoutes.put(
   "/subcategories/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.editSubcategory.bind(controller),
 );
 
 questionsRoutes.delete(
   "/subcategories/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.deleteSubcategory.bind(controller),
 );
 
@@ -77,31 +88,36 @@ questionsRoutes.delete(
 
 questionsRoutes.get(
   "/",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.getQuestions.bind(controller),
 );
 
 questionsRoutes.get(
   "/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.getQuestion.bind(controller),
 );
 
 questionsRoutes.post(
   "/",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.createQuestion.bind(controller),
 );
 
 questionsRoutes.put(
   "/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.editQuestion.bind(controller),
 );
 
 questionsRoutes.delete(
   "/:id",
-  [AuthMiddleware.validateJWT, RankMiddleware.validate("admin")],
+  [AuthMiddleware.validateJWT],
+  PermissionMiddleware.allow("general_admin", "admin"),
   controller.deleteQuestion.bind(controller),
 );
 

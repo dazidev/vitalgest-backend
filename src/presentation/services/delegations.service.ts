@@ -1,3 +1,5 @@
+import { AccessContext } from "../../domain/interfaces/access-context.interface";
+import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
 import {
   DelegationsServiceInterface,
   LogActions,
@@ -53,9 +55,11 @@ export class DelegationsService implements DelegationsServiceInterface {
   private readonly logsService = new LogsService();
 
   private async getDelegationName(
+    _actor: AccessContext,
     municipalityId: number,
     transaction?: Transaction,
   ): Promise<string | false> {
+
     const municipality = await Municipality.findOne({
       where: { id: municipalityId },
       attributes: ["name"],
@@ -132,9 +136,11 @@ export class DelegationsService implements DelegationsServiceInterface {
   }
 
   async createDelegation(
+    actor: AccessContext,
     delegationEntity: DelegationEntity,
     userId: string,
   ): Promise<object> {
+
     const { municipalityId } = delegationEntity;
 
     let tx: Transaction | undefined;
@@ -142,7 +148,7 @@ export class DelegationsService implements DelegationsServiceInterface {
     try {
       tx = await sequelize.transaction();
 
-      const name = await this.getDelegationName(Number(municipalityId), tx);
+      const name = await this.getDelegationName(actor, Number(municipalityId), tx);
 
       if (!name) throw ERROR_CODES.MUNICIPALITY_NOT_FOUND;
 
@@ -174,7 +180,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, delegation.id);
 
       await tx.commit();
       tx = undefined;
@@ -195,9 +201,11 @@ export class DelegationsService implements DelegationsServiceInterface {
   }
 
   async editDelegation(
+    actor: AccessContext,
     delegationEntity: DelegationEntity,
     userId: string,
   ): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { id, municipalityId } = delegationEntity;
 
     let tx: Transaction | undefined;
@@ -206,7 +214,7 @@ export class DelegationsService implements DelegationsServiceInterface {
       tx = await sequelize.transaction();
 
       const delegation = await Delegation.findOne({
-        where: { id },
+        where: scope.where("Delegation", { id }),
         transaction: tx,
         lock: tx.LOCK.UPDATE,
       });
@@ -215,7 +223,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
       const newMunicipalityId = Number(municipalityId);
 
-      const name = await this.getDelegationName(newMunicipalityId, tx);
+      const name = await this.getDelegationName(actor, newMunicipalityId, tx);
 
       if (!name) throw ERROR_CODES.MUNICIPALITY_NOT_FOUND;
 
@@ -260,7 +268,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
       if (logError) throw logError;
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, delegation.id);
 
       await tx.commit();
       tx = undefined;
@@ -277,21 +285,22 @@ export class DelegationsService implements DelegationsServiceInterface {
     }
   }
 
-  async deleteDelegation(id: string, userId: string): Promise<object> {
+  async deleteDelegation(actor: AccessContext, id: string, userId: string): Promise<object> {
+    const scope = new DelegationScope(actor);
     let tx: Transaction | undefined;
 
     try {
       tx = await sequelize.transaction();
 
-      const delegation = await Delegation.findByPk(id, {
+      const delegation = await Delegation.findOne({
         transaction: tx,
         lock: tx.LOCK.UPDATE,
-      });
+       where: scope.where("Delegation", { id: id }) });
 
       if (!delegation) throw ERROR_CODES.DELEGATION_NOT_FOUND;
 
       const pharmacy = await Pharmacy.findOne({
-        where: { delegation_id: id },
+        where: scope.where("Pharmacy", { delegation_id: id }),
         attributes: ["id"],
         transaction: tx,
       });
@@ -311,7 +320,7 @@ export class DelegationsService implements DelegationsServiceInterface {
 
       await delegation.destroy({ transaction: tx });
 
-      await this.logsService.create(logDto!, tx);
+      await this.logsService.create(logDto!, tx, delegation.id);
 
       await tx.commit();
       tx = undefined;
@@ -326,10 +335,11 @@ export class DelegationsService implements DelegationsServiceInterface {
     }
   }
 
-  async getDelegations(paginationDto: PaginationDto): Promise<object> {
+  async getDelegations(actor: AccessContext, paginationDto: PaginationDto): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset } = paginationDto;
 
-    const { count, rows: delegations } = await Delegation.findAndCountAll({
+    const { count, rows: delegations } = await Delegation.findAndCountAll({ where: scope.where("Delegation"),
       order: [
         ["createdAt", "DESC"],
         ["id", "ASC"],
@@ -359,8 +369,9 @@ export class DelegationsService implements DelegationsServiceInterface {
     };
   }
 
-  async getDelegation(id: string): Promise<object> {
-    const delegation = await Delegation.findByPk(id, {
+  async getDelegation(actor: AccessContext, id: string): Promise<object> {
+    const scope = new DelegationScope(actor);
+    const delegation = await Delegation.findOne({
       include: [
         {
           model: Municipality,
@@ -373,7 +384,7 @@ export class DelegationsService implements DelegationsServiceInterface {
       attributes: {
         exclude: ["municipality_id", "pharmacy_id"],
       },
-    }).catch((_error) => {
+     where: scope.where("Delegation", { id: id }) }).catch((_error) => {
       throw ERROR_CODES.UNKNOWN_DB_ERROR;
     });
 
@@ -387,7 +398,8 @@ export class DelegationsService implements DelegationsServiceInterface {
     };
   }
 
-  async getMembers(id: string, paginationDto: PaginationDto): Promise<object> {
+  async getMembers(actor: AccessContext, id: string, paginationDto: PaginationDto): Promise<object> {
+    const scope = new DelegationScope(actor);
     const { limit, offset, role } = paginationDto;
 
     try {
@@ -400,10 +412,10 @@ export class DelegationsService implements DelegationsServiceInterface {
 
         ...(limit !== undefined ? { limit } : {}),
         ...(offset !== undefined ? { offset } : {}),
-        where: {
+        where: scope.where("User", {
           delegation_id: id,
           ...(role !== undefined ? { role } : {}),
-        },
+        }),
       });
 
       const data = users.map(mapUserRow);
