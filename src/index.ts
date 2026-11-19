@@ -20,7 +20,6 @@ import {
   admRoutes,
   delegationsRoutes,
   guardsRoutes,
-  devRoutes,
   ambulancesRoutes,
   shiftRoutes,
   checklistsRoutes,
@@ -128,11 +127,6 @@ app.use(
       res.setHeader("Cache-Control", "public, max-age=604800"),
   }),
 );
-
-// rutas que funcionan solo en desarrollo
-if (process.env.NODE_ENV === "development") {
-  app.use("/api/dev", devRoutes);
-}
 
 // middlewares
 app.use(errorHandler);

@@ -44,7 +44,7 @@ interface LegacyQuestionSeed {
   type_response: Question["type_response"];
 }
 
-export const createQuestionsSeed = async () => {
+export const createQuestionsSeed = async (delegationId: string) => {
   let tx: Transaction | undefined;
 
   const legacyQuestions: LegacyQuestionSeed[] = [];
@@ -689,6 +689,7 @@ export const createQuestionsSeed = async () => {
       [...categoryDefinitions.values()]
         .sort((a, b) => a.order - b.order)
         .map((category, index) => ({
+          delegation_id: delegationId,
           name: category.name,
           order: index + 1,
         })),
@@ -746,6 +747,7 @@ export const createQuestionsSeed = async () => {
           subcategoryOrders.set(subcategory.category_id, nextOrder);
 
           return {
+            delegation_id: delegationId,
             category_id: subcategory.category_id,
             name: subcategory.name,
             order: nextOrder,
@@ -784,6 +786,7 @@ export const createQuestionsSeed = async () => {
       questionOrders.set(groupKey, nextOrder);
 
       return {
+        delegation_id: delegationId,
         question: item.question,
         category_id: categoryId,
         subcategory_id: subcategoryId ?? null,

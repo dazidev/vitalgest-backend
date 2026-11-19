@@ -9,7 +9,8 @@
     "start": "node build/index.js",
     "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:sync": "ts-node src/scripts/db-sync.sequelize.ts"
+    "db:sync": "ts-node src/scripts/db-sync.sequelize.ts",
+    "db:seed": "ts-node src/scripts/db-seed.sequelize.ts"
   },
   "keywords": [],
   "author": "",

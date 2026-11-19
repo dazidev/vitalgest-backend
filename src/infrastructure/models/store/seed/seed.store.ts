@@ -108,6 +108,16 @@ export const createSeed = async () => {
       { transaction: tx },
     );
 
+    await User.create(
+      {
+        name: "Admin Delegación", lastname: "Seed",
+        email: "admindelegacionseed@vitalgest.mx", password,
+        status: true, role: "admin", position: "Administrador de delegación",
+        delegation_id: delegation.id,
+      },
+      { transaction: tx },
+    );
+
     const guardChief = await User.create(
       {
         // Jefe de guardia
@@ -334,7 +344,7 @@ export const createSeed = async () => {
 
     await tx.commit();
 
-    return { success: true };
+    return { success: true, delegationId: delegation.id };
   } catch (error) {
     await tx?.rollback();
     console.log(error);
