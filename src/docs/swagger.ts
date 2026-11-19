@@ -1,5 +1,6 @@
 import path from "path";
 import swaggerJSDoc from "swagger-jsdoc";
+import { applyAccessDocumentation } from "./access.docs";
 
 export const swaggerSpec = swaggerJSDoc({
   definition: {
@@ -210,17 +211,19 @@ export const swaggerSpec = swaggerJSDoc({
     },
   },
   apis: [
-    path.resolve("build/docs/adm.docs.js"),
-    path.resolve("build/docs/delegations.docs.js"),
-    path.resolve("build/docs/guards.docs.js"),
-    path.resolve("build/docs/ambulances.docs.js"),
-    path.resolve("build/docs/supplies-ambulance.docs.js"),
-    path.resolve("build/docs/shifts.docs.js"),
-    path.resolve("build/docs/checklists.docs.js"),
-    path.resolve("build/docs/questions.docs.js"),
-    path.resolve("build/docs/supplies.docs.js"),
-    path.resolve("build/docs/users.docs.js"),
-    path.resolve("build/docs/supply-reports.docs.js"),
-    path.resolve("build/docs/logs.docs.js"),
+    path.resolve(__dirname, "adm.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "delegations.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "guards.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "ambulances.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "supplies-ambulance.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "shifts.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "checklists.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "questions.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "supplies.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "users.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "supply-reports.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
+    path.resolve(__dirname, "logs.docs." + (__filename.endsWith(".ts") ? "ts" : "js")),
   ],
 });
+
+applyAccessDocumentation(swaggerSpec);

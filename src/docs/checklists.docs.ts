@@ -381,7 +381,7 @@
  *                     id: 160fc040-1612-438a-975f-ffcfa60614e3
  *                     date: '2026-05-20T00:00:00.000Z'
  *                     state: Cerrada
- *                     guardChief: &id001
+ *                     guardChief:
  *                       id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                       name: Jefe Guardia
  *                       lastname: Seed
@@ -393,8 +393,14 @@
  *                     id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                     name: Chofer
  *                     lastname: Seed
- *                 recipient: *id001
- *                 deliverer: *id001
+ *                 recipient:
+ *                   id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                   name: Jefe Guardia
+ *                   lastname: Seed
+ *                 deliverer:
+ *                   id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                   name: Jefe Guardia
+ *                   lastname: Seed
  *                 answers:
  *                 - id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                   question:
@@ -735,7 +741,7 @@
  *                     id: 160fc040-1612-438a-975f-ffcfa60614e3
  *                     date: '2026-05-20T00:00:00.000Z'
  *                     state: Cerrada
- *                     guardChief: &id001
+ *                     guardChief:
  *                       id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                       name: Jefe Guardia
  *                       lastname: Seed
@@ -750,8 +756,14 @@
  *                 ambulance:
  *                   id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                   number: DF434F7
- *                 recipient: *id001
- *                 deliverer: *id001
+ *                 recipient:
+ *                   id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                   name: Jefe Guardia
+ *                   lastname: Seed
+ *                 deliverer:
+ *                   id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                   name: Jefe Guardia
+ *                   lastname: Seed
  *                 answers:
  *                 - id: 43a06473-2862-4d1a-90af-6051f20d8509
  *                   category: Estetoscopio

@@ -851,3 +851,43 @@
  *       409:
  *         description: La pregunta tiene respuestas asociadas
  */
+
+/**
+ * @openapi
+ * /api/questions:
+ *   post:
+ *     summary: Crear pregunta
+ *     description: La delegación se hereda de la categoría. La subcategoría, si se proporciona, debe pertenecer a esa categoría.
+ *     tags: ['ENDPOINTS Preguntas']
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [question, categoryId, typeResponse]
+ *             properties:
+ *               question: { type: string, maxLength: 255 }
+ *               categoryId: { type: string, format: uuid }
+ *               subcategoryId: { type: string, format: uuid, nullable: true }
+ *               typeResponse:
+ *                 type: string
+ *                 enum: [bool, option, text, bool_option, bool_text, option_text, bool_option_text]
+ *     responses:
+ *       '201':
+ *         description: Pregunta creada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean, example: true }
+ *                 data: { $ref: '#/components/schemas/Question' }
+ *       '400':
+ *         description: Datos inválidos
+ *       '404':
+ *         description: Categoría o subcategoría no encontrada
+ *       '409':
+ *         description: Conflicto al crear la pregunta
+ */
