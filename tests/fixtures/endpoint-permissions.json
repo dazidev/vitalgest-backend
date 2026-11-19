@@ -1,0 +1,385 @@
+{
+  "POST /api/adm/create/user": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/adm/edit/user/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/adm/get/user/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "DELETE /api/adm/delete/user/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/adm/get-all/users": [
+    "general_admin",
+    "admin"
+  ],
+  "PATCH /api/user/change/password/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "PATCH /api/user/change/info/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/user/:id/upload/signature": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "PATCH /api/user/:id/image/attach": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/auth/login/user": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/auth/refresh/token": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/delegations/states": [
+    "general_admin"
+  ],
+  "GET /api/delegations/state/:id/municipalities": [
+    "general_admin"
+  ],
+  "POST /api/delegations/create": [
+    "general_admin"
+  ],
+  "PUT /api/delegations/edit/:id": [
+    "general_admin"
+  ],
+  "DELETE /api/delegations/delete/:id": [
+    "general_admin"
+  ],
+  "GET /api/delegations/many": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/delegations/one/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/delegations/members/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/guards/create": [
+    "general_admin",
+    "admin",
+    "head_guard"
+  ],
+  "PUT /api/guards/edit/:id": [
+    "general_admin",
+    "admin",
+    "head_guard"
+  ],
+  "DELETE /api/guards/delete/:id": [
+    "general_admin",
+    "admin",
+    "head_guard"
+  ],
+  "GET /api/guards/many": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/guards/one/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/ambulances/create": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/ambulances/edit/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "DELETE /api/ambulances/delete/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/ambulances/many": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/ambulances/one/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/ambulances/areas": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/ambulances/supplies/create/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/ambulances/supplies/edit/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "DELETE /api/ambulances/supplies/delete/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/ambulances/supplies/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/ambulances/supplies/one/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/shifts/create": [
+    "general_admin",
+    "admin",
+    "head_guard"
+  ],
+  "PUT /api/shifts/edit/:id": [
+    "general_admin",
+    "admin",
+    "head_guard"
+  ],
+  "DELETE /api/shifts/delete/:id": [
+    "general_admin",
+    "admin",
+    "head_guard"
+  ],
+  "GET /api/shifts/guard/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/shifts/one/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/checklists/ambulance/questions": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator"
+  ],
+  "POST /api/checklists/ambulance/create": [
+    "general_admin",
+    "admin",
+    "vehicle_operator"
+  ],
+  "DELETE /api/checklists/ambulance/delete/:id": [
+    "general_admin",
+    "admin",
+    "vehicle_operator"
+  ],
+  "PUT /api/checklists/ambulance/:id/sign": [
+    "general_admin",
+    "admin",
+    "vehicle_operator"
+  ],
+  "PUT /api/checklists/ambulance/answers/:id": [
+    "general_admin",
+    "admin",
+    "vehicle_operator"
+  ],
+  "POST /api/checklists/supply/create": [
+    "general_admin",
+    "admin",
+    "paramedical"
+  ],
+  "DELETE /api/checklists/supply/delete/:id": [
+    "general_admin",
+    "admin",
+    "paramedical"
+  ],
+  "PUT /api/checklists/supply/:id/sign": [
+    "general_admin",
+    "admin",
+    "paramedical"
+  ],
+  "PUT /api/checklists/supply/answers/:id": [
+    "general_admin",
+    "admin",
+    "paramedical"
+  ],
+  "GET /api/questions/categories": [
+    "general_admin",
+    "admin"
+  ],
+  "POST /api/questions/categories": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/questions/categories/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/questions/categories/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "DELETE /api/questions/categories/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/questions/subcategories": [
+    "general_admin",
+    "admin"
+  ],
+  "POST /api/questions/subcategories": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/questions/subcategories/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/questions/subcategories/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "DELETE /api/questions/subcategories/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/questions": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/questions/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/questions/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "DELETE /api/questions/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "POST /api/supplies/create/pharmacy/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/supplies/edit/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "DELETE /api/supplies/delete/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/supplies/pharmacy/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/supplies/one/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/supply-reports": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/supply-reports/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/supply-reports/:id/supplies": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/supply-reports/:id/attend": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/logs": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/logs/filters": [
+    "general_admin",
+    "admin"
+  ],
+  "PUT /api/adm/change-password/user/:id": [
+    "general_admin",
+    "admin"
+  ],
+  "GET /api/checklists/ambulance/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "GET /api/checklists/supply/:id": [
+    "general_admin",
+    "admin",
+    "head_guard",
+    "vehicle_operator",
+    "paramedical"
+  ],
+  "POST /api/questions": [
+    "general_admin",
+    "admin"
+  ]
+}
