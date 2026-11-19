@@ -209,6 +209,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           await SupplyReportItem.bulkCreate(
             missingSupplies.map((supply) => ({
               report_id: report.id,
+              checklist_answer_id: supply.id,
               category: supply.category,
               specification: supply.specification,
               measurement_unit: supply.measurement_unit,
@@ -406,6 +407,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             as: "answers",
             attributes: [
               "id",
+              "ambulance_supply_id",
               "category",
               "specification",
               "min_quantity",
@@ -416,6 +418,10 @@ export class ChecklistsService implements ChecklistsServiceInterface {
               "updatedAt",
             ],
             include: [
+              {
+                model: SupplyAmbulance, as: "ambulanceSupply",
+                attributes: ["id", "pharmacy_supply_id"], required: false,
+              },
               {
                 model: AreaAmbulance,
                 as: "area",
@@ -437,7 +443,14 @@ export class ChecklistsService implements ChecklistsServiceInterface {
 
       return {
         success: true,
-        data: checklist,
+        data: {
+          ...checklist.toJSON(),
+          answers: ((checklist.get("answers") as AnswerSupply[] | undefined) ?? []).map((answer) => {
+            const values: Record<string, unknown> = answer.toJSON();
+            delete values.ambulanceSupply;
+            return { ...values, pharmacy_supply_id: answer.ambulanceSupply?.pharmacy_supply_id ?? null };
+          }),
+        },
       };
     } catch (error) {
       console.log(error);
@@ -513,6 +526,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         await AnswerSupply.create(
           {
             checklist_id: checklistId,
+            ambulance_supply_id: supply.id,
             category: supply.category,
             specification: supply.specification,
             min_quantity: minQuantity,

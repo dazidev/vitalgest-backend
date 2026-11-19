@@ -296,3 +296,8 @@ export {
   SupplyReportItem,
   Log,
 };
+
+// Origin references preserve each record's own primary key.
+SupplyAmbulance.belongsTo(Supply, { foreignKey: "pharmacy_supply_id", as: "pharmacySupply" });
+AnswerSupply.belongsTo(SupplyAmbulance, { foreignKey: "ambulance_supply_id", as: "ambulanceSupply" });
+SupplyReportItem.belongsTo(AnswerSupply, { foreignKey: "checklist_answer_id", as: "checklistAnswer" });

@@ -11,7 +11,8 @@
     "test": "node -r ts-node/register --test tests/access.test.cjs",
     "db:seed": "ts-node src/scripts/db-seed.sequelize.ts",
     "db:sync": "ts-node src/scripts/db-sync.sequelize.ts",
-    "test:integration": "node -r ts-node/register --test tests/access.integration.cjs"
+    "test:integration": "node -r ts-node/register --test tests/access.integration.cjs",
+    "db:migrate:supply-origins": "ts-node src/scripts/db-migrate-supply-origins.sequelize.ts"
   },
   "keywords": [],
   "author": "",

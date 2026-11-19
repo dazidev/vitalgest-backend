@@ -35,6 +35,7 @@
  *                   success: true
  *                   data:
  *                     id: "1b3adde3-6b30-4e20-9ecd-dcab985201a3"
+ *                     pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
  *                     category: "Bolsa de válvula"
  *                     specification: "niño"
  *                     avialble_quantity: 1
@@ -195,6 +196,7 @@
  *                   success: true
  *                   data:
  *                     - id: "1b3adde3-6b30-4e20-9ecd-dcab985201a3"
+ *                       pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
  *                       category: "Bolsa de válvula"
  *                       specification: "niño"
  *                       avaible_quantity: 1
@@ -259,6 +261,7 @@
  *                   success: true
  *                   data:
  *                     id: "1b3adde3-6b30-4e20-9ecd-dcab985201a3"
+ *                     pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
  *                     category: "Bolsa de válvula"
  *                     specification: "niño"
  *                     avialble_quantity: 1

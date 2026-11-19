@@ -1,3 +1,4 @@
+import type Supply from "./supply-model.store";
 import {
   CreationOptional,
   DataTypes,
@@ -17,6 +18,8 @@ class SupplyAmbulance extends Model<
   InferCreationAttributes<SupplyAmbulance>
 > {
   declare id: CreationOptional<string>;
+  declare pharmacy_supply_id: ForeignKey<Supply["id"]> | null;
+  declare pharmacySupply?: NonAttribute<Supply | null>;
   declare category: string;
   declare specification?: string;
   declare avaible_quantity: number;
@@ -33,6 +36,11 @@ class SupplyAmbulance extends Model<
 
 SupplyAmbulance.init(
   {
+    pharmacy_supply_id: {
+      type: DataTypes.UUID, allowNull: true, defaultValue: null,
+      references: { model: "supplies", key: "id" },
+      onUpdate: "CASCADE", onDelete: "SET NULL",
+    },
     id: {
       type: DataTypes.UUID,
       primaryKey: true,

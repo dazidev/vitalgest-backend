@@ -300,6 +300,7 @@ export const createSeed = async () => {
       [
         {
           ambulance_id: ambulance.id,
+          pharmacy_supply_id: supplies[0].id,
           category: supplies[0].category,
           specification: supplies[0].specification,
           avaible_quantity: 5,
@@ -310,6 +311,7 @@ export const createSeed = async () => {
         },
         {
           ambulance_id: ambulance.id,
+          pharmacy_supply_id: supplies[1].id,
           category: supplies[1].category,
           specification: supplies[1].specification,
           avaible_quantity: 5,
@@ -320,6 +322,7 @@ export const createSeed = async () => {
         },
         {
           ambulance_id: ambulance.id,
+          pharmacy_supply_id: supplies[2].id,
           category: supplies[2].category,
           specification: supplies[2].specification,
           avaible_quantity: 4,
@@ -330,6 +333,7 @@ export const createSeed = async () => {
         },
         {
           ambulance_id: ambulance.id,
+          pharmacy_supply_id: supplies[3].id,
           category: supplies[3].category,
           specification: supplies[3].specification,
           avaible_quantity: 3,

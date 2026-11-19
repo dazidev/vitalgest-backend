@@ -133,10 +133,12 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
     });
 
     const supplyValues = { category: tag, specification: "Test", avaible_quantity: 5, min_quantity: 3, expiration_date: new Date("2027-10-10"), measurement_unit: "unit", area_id: 1 };
-    const ambSupply = await create("SupplyAmbulance", { ...supplyValues, ambulance_id: ambulance.id });
-    const foreignSupply = await create("SupplyAmbulance", { ...supplyValues, ambulance_id: foreignAmbulance.id });
     const pharmacySupply = await create("Supply", { category: tag, avaible_quantity: 10, expiration_date: new Date("2027-10-10"), measurement_unit: "unit", pharmacy_id: pharmacy.id });
     const ownPharmacySupply = await create("Supply", { category: tag, avaible_quantity: 10, expiration_date: new Date("2027-10-10"), measurement_unit: "unit", pharmacy_id: localPharmacy.id });
+    const ambSupply = await result("SupplyAmbulance", ambulances.addSupply(local,
+      validated(dto.SupplyAmbEntityDto, "create", { ambulanceId: ambulance.id, supplyId: ownPharmacySupply.id, avaibleQuantity: 5, minQuantity: 3, areaId: 1 }), local.id));
+    assert.equal(ambSupply.pharmacy_supply_id, ownPharmacySupply.id);
+    const foreignSupply = await create("SupplyAmbulance", { ...supplyValues, pharmacy_supply_id: pharmacySupply.id, ambulance_id: foreignAmbulance.id });
     const checklist = await result("ChecklistAmbulance", checklists.createAmbChecklist(local, validated(dto.CheckListAmbulanceEntityDto, "create", { ambulanceId: ambulance.id, shiftId: shift.id, km: 42 }), local.id));
     const foreignChecklist = await result("ChecklistAmbulance", checklists.createAmbChecklist(foreign, validated(dto.CheckListAmbulanceEntityDto, "create", { ambulanceId: foreignAmbulance.id, shiftId: foreignShift.id, km: 42 }), foreign.id));
     const supChecklist = await result("ChecklistSupply", checklists.createSupChecklist(local, validated(dto.CheckListSupplyEntityDto, "create", { shiftId: shift.id }), local.id));
@@ -181,12 +183,32 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
       await checklists.signSupChecklist(local, validated(dto.CheckListSupplyEntityDto, "sign", { id: supChecklist.id, delivererId: local.id, recipientId: byRole("paramedical").id }), local.id);
       const report = remember("SupplyReport", await db.SupplyReport.findOne({ where: { checklist_id: supChecklist.id } }));
       const item = await db.SupplyReportItem.findOne({ where: { report_id: report.id } });
+      const savedChecklist = await checklists.getSupChecklist(local, supChecklist.id);
+      const answer = savedChecklist.data.answers[0];
+      assert.equal(answer.ambulance_supply_id, ambSupply.id);
+      assert.equal(answer.pharmacy_supply_id, ownPharmacySupply.id);
+      assert.equal(item.checklist_answer_id, answer.id);
+      const expectedOrigins = {
+        pharmacy_supply_id: ownPharmacySupply.id,
+        ambulance_supply_id: ambSupply.id,
+        checklist_answer_id: answer.id,
+      };
+      const assertOrigins = (entry) => {
+        assert.equal(entry.id, item.id);
+        for (const [key, value] of Object.entries(expectedOrigins)) assert.equal(entry[key], value, key);
+      };
+      const pharmacyQuantity = (await db.Supply.findByPk(ownPharmacySupply.id)).avaible_quantity;
+      const ambulanceQuantity = (await db.SupplyAmbulance.findByPk(ambSupply.id)).avaible_quantity;
       assert.equal(item.required_quantity, 2);
       const update = validated(dto.SupplyReportEntityDto, "updateSupplies", { params: { id: report.id }, body: { items: [{ itemId: item.id, addedQuantity: 2 }] } });
-      await reports.updateSupplies(local, update, local.id);
+      const updatedItems = await reports.updateSupplies(local, update, local.id);
+      assertOrigins(updatedItems.data[0]);
       await reports.attendReport(local, report.id, local.id);
       const reportDetail = await reports.getReport(local, report.id);
       assert.equal(reportDetail.data.status, "attended");
+      assertOrigins(reportDetail.data.areas[0].supplies[0]);
+      assert.equal((await db.Supply.findByPk(ownPharmacySupply.id)).avaible_quantity, pharmacyQuantity);
+      assert.equal((await db.SupplyAmbulance.findByPk(ambSupply.id)).avaible_quantity, ambulanceQuantity);
       const expectedDelegation = {
         id: local.delegationId,
         name: (await db.Delegation.findByPk(local.delegationId)).name,
@@ -196,6 +218,7 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
       const reportList = await reports.getReports(local, pagination());
       assert.deepEqual(reportList.data.find((entry) => entry.id === report.id).delegation, expectedDelegation);
       assert.equal(reportList.total, 1);
+      assertOrigins(reportList.data.find((entry) => entry.id === report.id).areas[0].supplies[0]);
       // The report's territory must not be replaced by the requesting administrator's.
       assert.deepEqual((await reports.getReport({ ...general, delegationId: foreign.delegationId }, report.id)).data.delegation, expectedDelegation);
       assert.equal((await reports.getReports(foreign, pagination())).total, 0);
@@ -233,6 +256,21 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
         delegationId: foreign.delegationId, status: true,
       });
       await denied(() => adm.editUser(general, userMove, general.id), "DELEGATION_MISMATCH");
+    });
+
+    await t.test("legacy report items remain visible with null origin references", async () => {
+      const report = await db.SupplyReport.findOne({ where: { checklist_id: supChecklist.id } });
+      const legacy = await create("SupplyReportItem", {
+        report_id: report.id, category: `${tag}-legacy`, measurement_unit: "unit",
+        min_quantity: 3, reported_quantity: 1, required_quantity: 2,
+        area_id: 1, area_name: "Test", section: "Test", area_order: 1,
+      });
+      const response = await reports.getReport(local, report.id);
+      const item = response.data.areas.flatMap((area) => area.supplies).find((entry) => entry.id === legacy.id);
+      assert.ok(item);
+      assert.equal(item.pharmacy_supply_id, null);
+      assert.equal(item.ambulance_supply_id, null);
+      assert.equal(item.checklist_answer_id, null);
     });
 
     await t.test("HTTP authentication reloads role and delegation and preserves response contracts", async () => {
@@ -286,6 +324,9 @@ test("territorial isolation, relationships, logs and seed integrity on TiDB", { 
         const detailExample = documentation.paths["/api/supply-reports/{id}"].get.responses["200"].content["application/json"].example;
         assert.deepEqual(listExample.data[0].delegation, detailExample.data.delegation);
         assert.ok(detailExample.data.delegation.pharmacy.id);
+        assert.ok(detailExample.data.areas[0].supplies[0].pharmacy_supply_id);
+        assert.ok(detailExample.data.areas[0].supplies[0].ambulance_supply_id);
+        assert.ok(detailExample.data.areas[0].supplies[0].checklist_answer_id);
         assert.ok(documentation.paths["/api/questions"].post.responses["403"]);
         for (const path of ["/api/dev/seed", "/api/dev/seed-questions"]) {
           assert.equal((await fetch(url + path, { method: "POST" })).status, 404);

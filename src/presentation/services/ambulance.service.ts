@@ -380,6 +380,7 @@ export class AmbulancesService implements AmbulancesServiceInterface {
 
       const supplyAmb = await SupplyAmbulance.create(
         {
+          pharmacy_supply_id: supplyInfo.id,
           category: supplyInfo.category,
           specification: supplyInfo.specification,
           avaible_quantity: quantity,

@@ -675,7 +675,7 @@
  *                     supplyId:
  *                       type: string
  *                       format: uuid
- *                       description: ID del suministro asignado a la ambulancia
+ *                       description: ID propio del registro en ambulancia, no el ID del suministro de farmacia
  *                     reportedQuantity:
  *                       type: integer
  *                       minimum: 0
@@ -766,6 +766,8 @@
  *                   lastname: Seed
  *                 answers:
  *                 - id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                   ambulance_supply_id: 22222222-2222-4222-8222-222222222222
+ *                   pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
  *                   category: Estetoscopio
  *                   specification: Pediatrico
  *                   min_quantity: 3

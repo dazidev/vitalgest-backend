@@ -1,6 +1,6 @@
 import { AccessContext } from "../../domain/interfaces/access-context.interface";
 import { DelegationScope } from "../../infrastructure/helpers/delegation-scope";
-import { Transaction } from "sequelize";
+import { IncludeOptions, Transaction } from "sequelize";
 import {
   LogEntityDto,
   PaginationDto,
@@ -9,6 +9,8 @@ import {
 import { ERROR_CODES, LogActions, LogEntities } from "../../domain";
 import {
   Ambulance,
+  AnswerSupply,
+  SupplyAmbulance,
   ChecklistSupply,
   Delegation,
   Pharmacy,
@@ -17,6 +19,23 @@ import {
   SupplyReportItem,
 } from "../../infrastructure";
 import { LogsService } from "./logs.service";
+
+const supplyOriginInclude: IncludeOptions = {
+  model: AnswerSupply, as: "checklistAnswer", required: false,
+  attributes: ["id", "ambulance_supply_id"],
+  include: [{
+    model: SupplyAmbulance, as: "ambulanceSupply", required: false,
+    attributes: ["id", "pharmacy_supply_id"],
+  }],
+};
+
+function supplyOrigin(item: SupplyReportItem) {
+  return {
+    checklist_answer_id: item.checklist_answer_id ?? null,
+    ambulance_supply_id: item.checklistAnswer?.ambulance_supply_id ?? null,
+    pharmacy_supply_id: item.checklistAnswer?.ambulanceSupply?.pharmacy_supply_id ?? null,
+  };
+}
 
 export class SupplyReportsService {
   private readonly logsService = new LogsService();
@@ -57,6 +76,7 @@ export class SupplyReportsService {
             model: SupplyReportItem,
             as: "items",
             required: false,
+            include: [supplyOriginInclude],
           },
         ],
         distinct: true,
@@ -82,6 +102,7 @@ export class SupplyReportsService {
 
           return {
             id: item.id,
+            ...supplyOrigin(item),
             category: item.category,
             specification: item.specification,
             measurement_unit: item.measurement_unit,
@@ -199,6 +220,7 @@ export class SupplyReportsService {
 
       for (const answer of items) {
         const item = await SupplyReportItem.findOne({
+          include: [supplyOriginInclude],
           where: scope.where("SupplyReportItem", {
             id: answer.itemId,
             report_id: reportId,
@@ -257,6 +279,7 @@ export class SupplyReportsService {
 
         updatedItems.push({
           id: item.id,
+          ...supplyOrigin(item),
           category: item.category,
           min_quantity: item.min_quantity,
           reported_quantity: item.reported_quantity,
@@ -407,6 +430,7 @@ export class SupplyReportsService {
             model: SupplyReportItem,
             as: "items",
             required: false,
+            include: [supplyOriginInclude],
           },
         ],
        where: scope.where("SupplyReport", { id: id }) });
@@ -426,6 +450,7 @@ export class SupplyReportsService {
 
         return {
           id: item.id,
+          ...supplyOrigin(item),
           category: item.category,
           specification: item.specification,
           measurement_unit: item.measurement_unit,

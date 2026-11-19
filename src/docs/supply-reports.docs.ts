@@ -9,6 +9,12 @@
  *       las fechas y los suministros faltantes agrupados
  *       por área y gabinete.
  *
+ *       Cada suministro conserva su id de renglón del pedido y agrega
+ *       pharmacy_supply_id, ambulance_supply_id y checklist_answer_id
+ *       para identificar su origen. Estas referencias pueden ser null en
+ *       registros anteriores o cuando el origen ya no está disponible.
+ *       Para actualizar el pedido se sigue enviando su id como itemId.
+ *
  *       delegation se obtiene mediante la ambulancia del reporte.
  *       delegation.pharmacy contiene el ID de la farmacia de esa delegación.
  *       Si no existe la relación, delegation o su pharmacy se devuelven como null.
@@ -68,6 +74,9 @@
  *                       order: 1
  *                       supplies:
  *                         - id: 160fc040-1612-438a-975f-ffcfa60614e3
+ *                           pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
+ *                           ambulance_supply_id: 22222222-2222-4222-8222-222222222222
+ *                           checklist_answer_id: 33333333-3333-4333-8333-333333333333
  *                           category: Mascarilla
  *                           specification: Adulto
  *                           measurement_unit: unit
@@ -98,6 +107,12 @@
  *
  *       Incluye la delegación y su farmacia, la ambulancia asociada, estado, fechas
  *       y suministros agrupados por área y gabinete.
+ *
+ *       Cada suministro conserva su id de renglón del pedido y agrega
+ *       pharmacy_supply_id, ambulance_supply_id y checklist_answer_id
+ *       para identificar su origen. Estas referencias pueden ser null en
+ *       registros anteriores o cuando el origen ya no está disponible.
+ *       Para actualizar el pedido se sigue enviando su id como itemId.
  *
  *       delegation se obtiene mediante la ambulancia del reporte.
  *       delegation.pharmacy contiene el ID de la farmacia de esa delegación.
@@ -152,6 +167,9 @@
  *                     order: 1
  *                     supplies:
  *                       - id: 160fc040-1612-438a-975f-ffcfa60614e3
+ *                         pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
+ *                         ambulance_supply_id: 22222222-2222-4222-8222-222222222222
+ *                         checklist_answer_id: 33333333-3333-4333-8333-333333333333
  *                         category: Mascarilla
  *                         specification: Adulto
  *                         measurement_unit: unit
@@ -197,6 +215,9 @@
  *       is_resolved indica si se alcanzó la cantidad mínima.
  *       Los suministros omitidos conservan sus valores anteriores.
  *
+ *       La respuesta incluye pharmacy_supply_id, ambulance_supply_id y
+ *       checklist_answer_id, que pueden ser null. itemId sigue siendo el id
+ *       del renglón del pedido, no el ID del suministro de farmacia.
  *       Esta operación es informativa y no modifica
  *       los inventarios de farmacia ni de ambulancia.
  *     tags:
@@ -253,6 +274,9 @@
  *               success: true
  *               data:
  *                 - id: 43a06473-2862-4d1a-90af-6051f20d8509
+ *                   pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
+ *                   ambulance_supply_id: 22222222-2222-4222-8222-222222222222
+ *                   checklist_answer_id: 33333333-3333-4333-8333-333333333333
  *                   category: Estetoscopio
  *                   min_quantity: 3
  *                   reported_quantity: 2
@@ -262,6 +286,9 @@
  *                   remaining_quantity: 0
  *                   is_resolved: true
  *                 - id: 160fc040-1612-438a-975f-ffcfa60614e3
+ *                   pharmacy_supply_id: 11111111-1111-4111-8111-111111111111
+ *                   ambulance_supply_id: 22222222-2222-4222-8222-222222222222
+ *                   checklist_answer_id: 33333333-3333-4333-8333-333333333333
  *                   category: Mascarilla
  *                   min_quantity: 5
  *                   reported_quantity: 2

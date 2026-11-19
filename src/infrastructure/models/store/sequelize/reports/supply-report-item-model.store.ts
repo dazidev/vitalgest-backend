@@ -1,3 +1,4 @@
+import type AnswerSupply from "../checklist/answer-supply-model.store";
 import {
   CreationOptional,
   DataTypes,
@@ -17,6 +18,8 @@ class SupplyReportItem extends Model<
   InferCreationAttributes<SupplyReportItem>
 > {
   declare id: CreationOptional<string>;
+  declare checklist_answer_id: ForeignKey<AnswerSupply["id"]> | null;
+  declare checklistAnswer?: NonAttribute<AnswerSupply | null>;
 
   declare report_id: ForeignKey<SupplyReport["id"]>;
 
@@ -41,6 +44,11 @@ class SupplyReportItem extends Model<
 
 SupplyReportItem.init(
   {
+    checklist_answer_id: {
+      type: DataTypes.UUID, allowNull: true, defaultValue: null,
+      references: { model: "answers_supplies", key: "id" },
+      onUpdate: "CASCADE", onDelete: "SET NULL",
+    },
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
