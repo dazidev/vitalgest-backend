@@ -55,15 +55,31 @@
  * /api/shifts/edit/{id}:
  *   put:
  *     summary: Editar turno
+ *     description: >
+ *       Requiere el nombre del turno y los cuatro identificadores relacionados.
+ *       Si no se envía name, devuelve HTTP 400 con el error MISSING_NAME.
  *     tags: ['ENDPOINTS Gestión de turnos']
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, ambulanceId, guardId, paramedicalId, driverId]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 1
+ *                 example: "Turno AMB-01"
+ *               ambulanceId: { type: string, format: uuid }
+ *               guardId: { type: string, format: uuid }
+ *               paramedicalId: { type: string, format: uuid }
+ *               driverId: { type: string, format: uuid }
  *           examples:
  *             request:
  *               value:
+ *                 name: "Turno AMB-01"
  *                 ambulanceId: "5474054b-bf01-4db7-b416-4f1d21c8e84c"
  *                 guardId: "fbaa4820-3a9b-4321-a33c-b19feebf8769"
  *                 paramedicalId: "0f30a11e-4f5d-4d0a-a7b1-21083aaa1835"
