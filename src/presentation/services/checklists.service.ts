@@ -178,6 +178,8 @@ export class ChecklistsService implements ChecklistsServiceInterface {
         transaction: tx,
       });
 
+      let reportCreated = false;
+
       if (!existingReport) {
         const missingSupplies = await AnswerSupply.findAll({
           where: {
@@ -197,15 +199,15 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           transaction: tx,
         });
 
-        const report = await SupplyReport.create(
-          {
-            checklist_id: checklist.id,
-            ambulance_id: ambulanceId,
-          },
-          { transaction: tx },
-        );
-
         if (missingSupplies.length > 0) {
+          const report = await SupplyReport.create(
+            {
+              checklist_id: checklist.id,
+              ambulance_id: ambulanceId,
+            },
+            { transaction: tx },
+          );
+
           await SupplyReportItem.bulkCreate(
             missingSupplies.map((supply) => ({
               report_id: report.id,
@@ -225,30 +227,31 @@ export class ChecklistsService implements ChecklistsServiceInterface {
             })),
             { transaction: tx },
           );
+
+          const totalMissing = missingSupplies.reduce(
+            (total, supply) => total + supply.required_quantity,
+            0,
+          );
+
+          const [reportLogError, reportLogDto] = LogEntityDto.create({
+            userId,
+            affected: report.id,
+            entity: LogEntities.supplyReport,
+            action: LogActions.supplyReport.create,
+            description:
+              `Se generó el reporte de reabastecimiento ${report.id} ` +
+              `al firmar el checklist ${checklist.id}. ` +
+              `Ambulancia: ${ambulanceId}. ` +
+              `Suministros faltantes: ${missingSupplies.length}. ` +
+              `Total de unidades faltantes: ${totalMissing}. ` +
+              `Estado inicial: pending.`,
+          });
+
+          if (reportLogError) throw reportLogError;
+
+          await this.logsService.create(reportLogDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
+          reportCreated = true;
         }
-
-        const totalMissing = missingSupplies.reduce(
-          (total, supply) => total + supply.required_quantity,
-          0,
-        );
-
-        const [reportLogError, reportLogDto] = LogEntityDto.create({
-          userId,
-          affected: report.id,
-          entity: LogEntities.supplyReport,
-          action: LogActions.supplyReport.create,
-          description:
-            `Se generó el reporte de reabastecimiento ${report.id} ` +
-            `al firmar el checklist ${checklist.id}. ` +
-            `Ambulancia: ${ambulanceId}. ` +
-            `Suministros faltantes: ${missingSupplies.length}. ` +
-            `Total de unidades faltantes: ${totalMissing}. ` +
-            `Estado inicial: pending.`,
-        });
-
-        if (reportLogError) throw reportLogError;
-
-        await this.logsService.create(reportLogDto!, tx, await scope.delegationOf("Shift", checklist.shift_id, tx));
       }
 
       const [signLogError, signLogDto] = LogEntityDto.create({
@@ -264,7 +267,7 @@ export class ChecklistsService implements ChecklistsServiceInterface {
           `Usuario que recibe: ${recipient.id}. ` +
           `Observaciones proporcionadas: ${notes ? "Sí" : "No"}. ` +
           `Reporte generado en esta operación: ${
-            existingReport ? "No" : "Sí"
+            reportCreated ? "Sí" : "No"
           }.`,
       });
 

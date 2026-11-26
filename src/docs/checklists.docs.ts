@@ -572,6 +572,10 @@
  *       Al firmar, genera automáticamente un reporte
  *       informativo de reabastecimiento con los suministros
  *       que presentan cantidades inferiores al mínimo.
+ *       Solo se crea el reporte si existe al menos un suministro con
+ *       required_quantity mayor que cero. Si no hay faltantes (o no hay
+ *       respuestas), se guardan las firmas y se devuelve success: true
+ *       sin crear reporte ni renglones de pedido.
  *       Si ya existe un reporte asociado al checklist,
  *       no se genera uno nuevo.
  *     tags:
